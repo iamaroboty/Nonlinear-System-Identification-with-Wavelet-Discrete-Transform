@@ -14,11 +14,11 @@ wtype = 'db1';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
-% b = load('h1.dat');              % Unknown system (select h1 or h2)
-% b = b(1:M);                      % Truncate to length M
+b = load('h1.dat');              % Unknown system (select h1 or h2)
+b = b(1:M);                      % Truncate to length M
 
 %TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
-a = 128;     
+a = 127;     
 b =[zeros(a,1); 1; zeros(M-a-1,1)];
 
 tic;
@@ -34,6 +34,32 @@ S.unknownsys = b;
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
+
+[B, L] = wavedec(b, level, wtype);
+cD = detcoef(B, L, 'cell');
+cA = appcoef(B, L, wtype);
+
+% Plot system ID differencies
+subplot(level +1, 1, 1);
+stem([cD{1}, S.coeffs{1}]); legend('Actual','Estimated');
+title('cD1'); grid on;
+subplot(level +1, 1, 2);
+stem([cD{2}, S.coeffs{2}(:,2)]); legend('Actual','Estimated');
+title('cD2'); grid on;
+subplot(level +1, 1, 3);
+stem([cA, S.coeffs{2}(:,1)]); legend('Actual','Estimated');
+title('cA'); grid on;
+ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
+set(get(ax,'Title'),'Visible','on')
+title('System identification. Trasformed domain');
+h=get(ax,'Title');
+
+b_est = waverec([S.coeffs{2}(:,1); S.coeffs{2}(:,2); S.coeffs{1}], L, wtype);
+figure;
+stem([b, b_est]);
+legend('Actual','Estimated');
+title('System identification. Time domain');grid on;
+
 
 figure;                          % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
