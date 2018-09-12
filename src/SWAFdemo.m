@@ -14,10 +14,13 @@ wtype = 'db1';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
-b = load('h1.dat');              % Unknown system (select h1 or h2)
-b = b(1:M);                      % Truncate to length M
-% b =[1; zeros(M-2,1)];
-% b =[zeros(M/2-1,1); 1; zeros(M/2,1)];
+% b = load('h1.dat');              % Unknown system (select h1 or h2)
+% b = b(1:M);                      % Truncate to length M
+
+%TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
+a = 128;     
+b =[zeros(a,1); 1; zeros(M-a-1,1)];
+
 tic;
 
 % Adaptation process
