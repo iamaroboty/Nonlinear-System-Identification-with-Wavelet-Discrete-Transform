@@ -47,42 +47,63 @@ eD1 = zeros(len,1);
 % w{2} = [[1,1]; zeros(63,2)];
 
 
-for n = 1:ITER    
+% for n = 1:ITER    
+%     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
+%     y = [dn(n); y(1:end-1)];        % Desired response vector        
+%     
+%     if mod(n,2) == 0                % 1st level, downsample by 2
+%         U{1} = [u'*H; U{1}(1:end-1,:)];  % 1 level; 1st col = cA, 2nd col = cD
+%         Y1 = [y'*H; Y1(1:end-1,:)];
+%         eD1 =  [Y1(1,2) - U{1}(:,2)'*w{1}; eD1(1:end-1,:)];
+%         
+%         if n >= AdaptStart
+%              w{1} = w{1} + (mu*eD1(1)/(U{1}(:,2)'*U{1}(:,2) + alpha))*U{1}(:,2);
+%              S.iter{1} = S.iter{1} + 1;
+%         end
+%         
+%         if mod(n,4) == 0            % 2nd level, downsample by 2*2
+%             U{2} = [U{1}(1:len)*H; U{2}(1:end-1,:)]; % 2 level; 1st col = cA2, 2nd col = cD2
+%             Y2 = Y1(1:len)*H;
+%             eD2 = Y2 - sum(U{2}.*w{2});
+%             
+%             if n >= AdaptStart
+%                 w{2} = w{2} + U{2}*(eD2./(sum(U{2}.*U{2})+alpha))'*mu; 
+%                 S.iter{2} = S.iter{2} + 1 ;
+%             end
+%             
+%             Z = (eD2*F)' ;              % 2nd level error signal reconstuction     
+%         end
+%         eDr = ([Z(1), eD1(2)]*F)';             %1st level error signal reconstruction
+%         Z = [Z(2:end); 0];                     % Adjust delay line
+%     end
+%     en(n) = eDr(1);                           % Total error
+%     eDr = [eDr(2:end); 0];                    % Adjust delay line
+% end                
+% 
+% en = en(1:ITER);
+% S.coeffs = w;
+% end
+
+% 1 level
+for n = 1:ITER
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
-    y = [dn(n); y(1:end-1)];        % Desired response vector        
-    
-    if mod(n,2) == 0                % 1st level, downsample by 2
-        U{1} = [u'*H; U{1}(1:end-1,:)];  % 1 level; 1st col = cA, 2nd col = cD
-        Y1 = [y'*H; Y1(1:end-1,:)];
-        eD1 =  [Y1(1,2) - U{1}(:,2)'*w{1}; eD1(1:end-1,:)];
+    y = [dn(n); y(1:end-1)];        % Desired response vector 
+    if mod(n,2) == 0
+        U{1} = [u'*H; U{1}(1:end-1,:)];
+        Y = y'*H;
+        eD = Y - sum(U{1}.*w{1});
         
         if n >= AdaptStart
-             w{1} = w{1} + (mu*eD1(1)/(U{1}(:,2)'*U{1}(:,2) + alpha))*U{1}(:,2);
-             S.iter{1} = S.iter{1} + 1;
+            w{1} = w{1} + U{1}*(eD./(sum(U{1}.*U{1})+alpha))'*mu;
+            S.iter{1} = S.iter{1} + 1;
         end
-        
-        if mod(n,4) == 0            % 2nd level, downsample by 2*2
-            U{2} = [U{1}(1:len)*H; U{2}(1:end-1,:)]; % 2 level; 1st col = cA2, 2nd col = cD2
-            Y2 = Y1(1:len)*H;
-            eD2 = Y2 - sum(U{2}.*w{2});
-            
-            if n >= AdaptStart
-                w{2} = w{2} + U{2}*(eD2./(sum(U{2}.*U{2})+alpha))'*mu; 
-                S.iter{2} = S.iter{2} + 1 ;
-            end
-            
-            Z = (eD2*F)' ;              % 2nd level error signal reconstuction     
-        end
-        eDr = ([Z(1), eD1(2)]*F)';             %1st level error signal reconstruction
-        Z = [Z(2:end); 0];                     % Adjust delay line
+        Z = F*eD';
     end
-    en(n) = eDr(1);                           % Total error
-    eDr = [eDr(2:end); 0];                    % Adjust delay line
-end                
+    en(n) = Z(1);
+    Z = [Z(2:end); 0];
+end    
 
 en = en(1:ITER);
 S.coeffs = w;
-end
-
 
     
