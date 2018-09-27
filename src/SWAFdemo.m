@@ -18,7 +18,7 @@ b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 %TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
-a = 3;     
+a = 1;     
 b =[zeros(a,1); 1; zeros(M-a-1,1)];
 
 tic;
@@ -26,7 +26,7 @@ tic;
 % Adaptation process
 
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,60); %iter, b, seed, ARtype, SNR
 S = SWAFinit(M, mu, level, wtype);     % Initialization
 S.unknownsys = b; 
 [en, S] = SWAFadapt(un, dn, S);                 % Perform WSAF Algorithm
@@ -34,12 +34,12 @@ S.unknownsys = b;
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
-dwtmode('per')
-[B, L] = wavedec(b, level, wtype);
+% dwtmode('per')
+% [B, L] = wavedec(b, level, wtype);
 W = WaveletMat_nL(M, level, wtype);
 B = W*b;
-cD = detcoef(B, L, 'cell');
-cA = appcoef(B, L, wtype);
+cD = detcoef(B, S.L, 'cell');
+cA = appcoef(B, S.L, wtype);
 
 % % Plot system ID differencies
 if level == 2
@@ -57,7 +57,7 @@ if level == 2
     title('System identification. Trasformed domain');
     h=get(ax,'Title');
 
-    b_est = waverec([S.coeffs{2}(:,1); S.coeffs{2}(:,2); S.coeffs{1}], L, wtype);
+    b_est = waverec([S.coeffs{2}(:,1); S.coeffs{2}(:,2); S.coeffs{1}], S.L, wtype);
     figure;
     stem([b, b_est]);
     legend('Actual','Estimated');
@@ -75,7 +75,7 @@ elseif level == 1
     title('System identification. Trasformed domain');
     h=get(ax,'Title');
 
-    b_est = waverec([S.coeffs{1}(:,1); S.coeffs{1}(:,2)], L, wtype);
+    b_est = waverec([S.coeffs{1}(:,1); S.coeffs{1}(:,2)], S.L, wtype);
     figure;
     stem([b, b_est]);
     legend('Actual','Estimated');

@@ -46,7 +46,7 @@ eD1 = zeros(len,1);
 % w{1} =  [1; zeros(127,1)];
 % w{2} = [[1,1]; zeros(63,2)];
 
-
+% 
 % for n = 1:ITER    
 %     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
 %     y = [dn(n); y(1:end-1)];        % Desired response vector        
@@ -67,7 +67,7 @@ eD1 = zeros(len,1);
 %             eD2 = Y2 - sum(U{2}.*w{2});
 %             
 %             if n >= AdaptStart
-%                 w{2} = w{2} + U{2}*(eD2./(sum(U{2}.*U{2})+alpha))'*mu; 
+%                 w{2} = w{2} + U{2}.*(eD2./(sum(U{2}.*U{2})+alpha))*mu; 
 %                 S.iter{2} = S.iter{2} + 1 ;
 %             end
 %             
@@ -84,6 +84,10 @@ eD1 = zeros(len,1);
 % S.coeffs = w;
 % end
 
+% %helping
+% w{1} = zeros(128,2);
+% % w{1}(1,:) = 1;
+ 
 % 1 level
 for n = 1:ITER
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
@@ -94,7 +98,7 @@ for n = 1:ITER
         eD = Y - sum(U{1}.*w{1});
         
         if n >= AdaptStart
-            w{1} = w{1} + U{1}*(eD./(sum(U{1}.*U{1})+alpha))'*mu;
+            w{1} = w{1} + U{1}.*(eD./(sum(U{1}.*U{1})+alpha))*mu;
             S.iter{1} = S.iter{1} + 1;
         end
         Z = F*eD';

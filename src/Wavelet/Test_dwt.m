@@ -18,7 +18,7 @@ f = f(1:d)';
 % f = zeros(d, 1);
 % f(129) = 1;
 
-wtype = 'db1';
+wtype = 'db2';
 level = 1;
 
 %% Generazione dei coefficienti del filtro
@@ -29,7 +29,7 @@ F = [low_r', high_r'];  % filter matrix synthesis
 [len, ~] = size(H);     % wavelet filter length
 
 %% Decomposizone con funzione matlab
-dwtmode('zpd')
+dwtmode('per')
 tic
 [C, L] = wavedec(f, level, wtype);
 fr = waverec(C, L, wtype);

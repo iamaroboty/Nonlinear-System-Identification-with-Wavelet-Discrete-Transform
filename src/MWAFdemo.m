@@ -21,7 +21,7 @@ b = b(1:M);                      % Truncate to length M
 % b =[zeros(M/2-1,1); 1; zeros(M/2,1)];
 
 %TEST: unknown system as just delay of "a" samples. Only with a = 0, this works properly.
-a = 128;     
+a = 1;     
 b =[zeros(a,1); 1; zeros(M-a-1,1)];
 
 tic;
