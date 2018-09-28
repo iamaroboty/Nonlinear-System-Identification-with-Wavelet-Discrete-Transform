@@ -7,10 +7,10 @@ clear all; close all;
 
 % Adaptive filter parameters
 
-mu = 0.1;                      % Step size
+mu = 0.001;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db2';                   % Wavelet family
+wtype = 'db1';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -18,7 +18,7 @@ b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 %TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
-a = 1;     
+a = 2;     
 b =[zeros(a,1); 1; zeros(M-a-1,1)];
 
 tic;

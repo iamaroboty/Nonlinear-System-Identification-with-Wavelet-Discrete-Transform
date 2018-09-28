@@ -88,6 +88,7 @@ eD1 = zeros(len,1);
 % w{1} = zeros(128,2);
 % % w{1}(1,:) = 1;
  
+
 % 1 level
 for n = 1:ITER
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
