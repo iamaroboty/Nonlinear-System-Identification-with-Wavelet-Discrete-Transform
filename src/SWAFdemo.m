@@ -9,8 +9,8 @@ clear all; close all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 2;                       % Levels of Wavelet decomposition
-wtype = 'db1';                   % Wavelet family
+level = 1;                       % Levels of Wavelet decomposition
+wtype = 'haar';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -19,7 +19,7 @@ b = b(1:M);                      % Truncate to length M
 
 %TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
 a = 0;     
-b =[zeros(a,1); 1; zeros(M-a-1,1)];
+%b =[zeros(a,1); 1; zeros(M-a-1,1)];
 
 tic;
 
@@ -41,21 +41,56 @@ dwtmode('sym')
 cD = detcoef(B, S.L, 'cell');
 cA = appcoef(B, S.L, wtype);
 
-t = [0:0.01:2*pi];
-input_sine = sin(4*t);
+
+%% test signal 
+
+%t = [0:0.01:2*pi];
+freq = 2000; % frequency 
+fs = 12000; % samples per sec
+dt = 1/fs; 
+
+amplitude = 1; 
+padlength = 100;
+input_sine = amplitude*sin(2*pi*freq*(0:dt:1-padlength*dt));
+input_sine = padarray(input_sine, [0,padlength/2]); 
+input_sine = padarray(input_sine, [0,padlength/2], 'post'); 
+
 figure; 
-subplot(1,2,1)
+subplot(2,2,1)
 plot(input_sine);
 title('Input Signal'); 
 out_sine = SWAtest(input_sine, S); 
-subplot(1,2,2)
+subplot(2,2,2)
 plot(out_sine);
 title('Output Signal-Estimated System vs True');
 hold on; 
 true = conv(input_sine, b);
 plot(true); 
-figure;
 
+%% FFT 
+N = 2*fs;
+
+faxis = linspace(-fs/2,fs/2,N);
+
+
+subplot(2, 2, 3);
+fft_true = abs(fft(input_sine, N)/N);
+plot(faxis, fftshift(fft_true)); 
+xlabel('Frequency');
+
+subplot(2, 2, 4);
+fft_out_est = abs(fft(out_sine, N)/N);
+plot(faxis, fftshift(fft_out_est)); 
+xlabel('Frequency');
+hold on; 
+fft_out_true = abs(fft(true,N)/N);
+plot(faxis, fftshift(fft_out_true));
+
+
+
+
+
+figure;
 % % Plot system ID differencies
 if level == 2
     subplot(level +1, 1, 1);

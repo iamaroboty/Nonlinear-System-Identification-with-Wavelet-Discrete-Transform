@@ -1,6 +1,6 @@
 % WAFdemo          Wavelet-domain Adaptive Filter Demo
 % 
-% by A. Castellani & S. Cornell [Università Politecnica delle Marche]
+% by A. Castellani & S. Cornell [Universitï¿½ Politecnica delle Marche]
 
 addpath 'Common';             % Functions in Common folder
 clear all; close all;
@@ -9,7 +9,7 @@ clear all; close all;
 
 mu = 0.001;                        % Step size (0<mu<2) % mu<0.001
 M = 256;                         % Length of adaptive weight vector
-level = 2;                       % Levels of Wavelet decomposition
+level = 1;                       % Levels of Wavelet decomposition
 wtype = 'db1';                   % Mother Wavelet type
 
 % Run parameters
