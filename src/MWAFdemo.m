@@ -10,19 +10,18 @@ clear all; close all;
 mu = 0.1;                        % Step size (0<mu<2) % mu<0.001
 M = 256;                         % Length of adaptive weight vector
 level = 4;                       % Levels of Wavelet decomposition
-wtype = 'db2';                   % Mother Wavelet type
+wtype = 'db1';                   % Mother Wavelet type
 
 % Run parameters
 
 iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
-% b =[1; zeros(M-2,1)];
-% b =[zeros(M/2-1,1); 1; zeros(M/2,1)];
 
-%TEST: unknown system as just delay of "a" samples. Only with a = 0, this works properly.
-a = 1;     
-b =[zeros(a,1); 1; zeros(M-a-1,1)];
+% TESTING, a = delay.
+a = 0;
+b = zeros(M,1);
+b(a) = 1;
 
 tic;
 

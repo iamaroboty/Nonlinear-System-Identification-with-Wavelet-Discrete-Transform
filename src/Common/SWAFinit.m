@@ -24,19 +24,20 @@ S.analysis = [low_d', high_d'];     % Analysis filters
 S.synthesis = [low_r', high_r'];    % Synthesis filters
 
 % Subbands filter lenghts
-% L = zeros(level,1);
-% for i= 1:level
-%     L = [M/(2^i); L(1:end-1)];
-%     S.iter{i} = 0;
-% end
-% S.L = [L(1); L; M]';            % Wavelet decomposition lenghts [cAn cDn cDn-1 ... cD1]
-
 lf = length(low_d);
 L = [M; zeros(level,1)];
 for i= 1:level
     L = [floor((L(1)+lf-1)/2); L(1:end-1)];
 end
 S.L = [L(1); L]';
+
+% Oldshit
+% L = zeros(level,1);
+% for i= 1:level
+%     L = [M/(2^i); L(1:end-1)];
+%     S.iter{i} = 0;
+% end
+% S.L = [L(1); L; M]';            % Wavelet decomposition lenghts [cAn cDn cDn-1 ... cD1]
 
 
 

@@ -18,8 +18,8 @@ f = f(1:d)';
 % f = zeros(d, 1);
 % f(129) = 1;
 
-wtype = 'db2';
-level = 2;
+wtype = 'db1';
+level = 3;
 wdt_mod = 'zpd';
 
 %% Generazione dei coefficienti del filtro
