@@ -18,8 +18,8 @@ f = f(1:d)';
 % f = zeros(d, 1);
 % f(129) = 1;
 
-wtype = 'db2';
-level = 2;
+wtype = 'db4';
+level = 4;
 wdt_mod = 'zpd';
 
 %% Generazione dei coefficienti del filtro
@@ -126,7 +126,8 @@ errC = max(abs(f-fr))
 % % Check perfect reconstruction.
 % err1 = max(abs(f'-xr))
 
-%% Real time DWT 1 level
+%% Real time DWT 1 level (PERFETCT as mode zpd)
+% if level == 1
 % tic
 % delay = length(H)-1;            %total delay (analysis + synthesis)
 % x = zeros(length(H),1);
@@ -149,16 +150,18 @@ errC = max(abs(f-fr))
 % for n = 1:d+delay
 %     x = [fpad(n); x(1:end-1)];
 %     if mod(n,2) == 0
-%         xD = H'*x;
+%         xD = x'*H;
 %         cD = [cD(2:end); xD(2)];
 %         cA = [cA(2:end); xD(1)];
-%         b = F*xD + b;
+%         b = F*xD' + b;
 %     end
 %     yn(n) = b(1);
 %     b = [b(2:end); 0];
 % end
 % toc
 % err2 = max(abs(f-yn(1+delay:end)))
+% errC = max(abs(C-[cA; cD]))
+% end
 
 %% Plotting Stuff
 % figure; 
@@ -171,93 +174,125 @@ errC = max(abs(f-fr))
 % plot([zA{1}, A, cA]); axis([1 d/2 -inf inf]);
 % title('cA'); legend('Matrix W', 'MATLAB', 'Real-Time'); grid on;
 
-%% Real time DWT
-% PROBLEMS: with delay!!!
+%% Real time DWT 2level
+% % PROBLEMS: with delay!!!
+% if level == 2
+% tic
+% delay = level*length(H)-1;            %total delay (analysis + synthesis)
+% lf = length(H)-1;
+% x = zeros(length(H),1);
+% b = zeros(length(F),1);
+% bb = zeros(length(F),1);
+% yn = zeros(d+delay, 1);
+% fpad = [f; zeros(delay, 1)];
+% 
+% % Decompose approximation and detail coefficient
+% ld = length(low_d);
+% LL = [d; zeros(level,1)];  %ERROR, cumsum LL instead d. Must be the proper dimension of Z
+% for i= 1:level
+%     LL = [floor((LL(1)+ld-1)/2); LL(1:end-1)];
+% end
+% LL = [LL(1); LL]';
+% 
+% cD = zeros(LL(3), 1);
+% cA = zeros(LL(3), 1);
+% cD2 = zeros(LL(2), 1);
+% cA2 = zeros(LL(1), 1);
+% 
+% for n = 1:d+delay
+%     x = [fpad(n); x(1:end-1)];
+%     if mod(n,2) == 0
+%         xD = x'*H;
+%         cD = [cD(2:end); xD(2)]; %problem here, last shift not needeed
+%         cA = [cA(2:end); xD(1)];
+%         if mod(n,4) == 0
+%             xDD = [cA(end:-1:end-lf)]'*H;
+%             cD2 = [cD2(2:end); xDD(2)];
+%             cA2 = [cA2(2:end); xDD(1)];
+%             bb = F*xDD' + bb;
+%         end
+%     b = F*[bb(1), cD(end-lf)]' + b;
+%     bb = [bb(2:end); 0];
+%     end
+%     yn(n) = b(1);
+%     b = [b(2:end); 0];
+% end
+% toc
+% err2lv = max(abs(f-yn(1+delay:end)))
+% end
+
+%% Real time DWT, generic YEEEE
 tic
 delay = level*length(H)-1;            %total delay (analysis + synthesis)
 lf = length(H)-1;
 x = zeros(length(H),1);
-b = zeros(length(F),1);
-bb = zeros(length(F),1);
+xDD = x;
 yn = zeros(d+delay, 1);
 fpad = [f; zeros(delay, 1)];
 
 % Decompose approximation and detail coefficient
 ld = length(low_d);
-LL = [d; zeros(level,1)];  %ERROR, cumsum LL instead d. Must be the proper dimension of Z
+LL = [d; zeros(level,1)]; 
 for i= 1:level
     LL = [floor((LL(1)+ld-1)/2); LL(1:end-1)];
 end
 LL = [LL(1); LL]';
 
-cD = zeros(LL(3), 1);
-cA = zeros(LL(3), 1);
-cD2 = zeros(LL(2), 1);
-cA2 = zeros(LL(1), 1);
 
-for n = 1:d+delay
-    x = [fpad(n); x(1:end-1)];
-    if mod(n,2) == 0
-        xD = H'*x;
-        cD = [cD(2:end); xD(2)]; %problem here, last shift not needeed
-        cA = [cA(2:end); xD(1)];
-        if mod(n,4) == 0
-            xDD = H'*[cA(end:-1:end-lf)];
-            cD2 = [cD2(2:end); xDD(2)];
-            cA2 = [cA2(2:end); xDD(1)];
-            bb = F*xDD + bb;
-        end
-    b = F*[bb(1); cD(end-lf)] + b;
-    bb = [bb(2:end); 0];
-    end
-    yn(n) = b(1);
-    b = [b(2:end); 0];
-end
-toc
-err2lv = max(abs(f-yn(1+delay:end)))
+for i = 1:level
+    cD{i} = zeros(LL(end-i),1);
+    cA{i} = zeros(LL(end-i),1);
+    bb{i} = zeros(length(F),1);
+    xD{i} = zeros(2,1);
+    delays(i) = 2^i-1; 
+end    
 
-%% Real time DWT, generic
-tic
-delay = level*length(H)-1;            %total delay (analysis + synthesis)
-lf = length(H)-1;
-x = zeros(length(H),1);
-b = zeros(length(F),1);
-bb = zeros(length(F),1);
-yn = zeros(d+delay, 1);
-fpad = [f; zeros(delay, 1)];
-
-% Decompose approximation and detail coefficient
-ld = length(low_d);
-LL = [d; zeros(level,1)];  %ERROR, cumsum LL instead d. Must be the proper dimension of Z
-for i= 1:level
-    LL = [floor((LL(1)+ld-1)/2); LL(1:end-1)];
-end
-LL = [LL(1); LL]';
-
-cD = zeros(LL(3), 1);
-cA = zeros(LL(3), 1);
-cD2 = zeros(LL(2), 1);
-cA2 = zeros(LL(1), 1);
 
 for n = 1:d+delay
     x = [fpad(n); x(1:end-1)];
     
-    if mod(n,2) == 0
-        xD = H'*x;
-        cD = [cD(2:end); xD(2)]; %problem here, last shift not needeed
-        cA = [cA(2:end); xD(1)];
-        if mod(n,4) == 0
-            xDD = H'*[cA(end:-1:end-lf)];
-            cD2 = [cD2(2:end); xDD(2)];
-            cA2 = [cA2(2:end); xDD(1)];
-            bb = F*xDD + bb;
+    % Analysis
+    for i=1:level
+        if i == 1 %init
+            if mod(n,2) == 0
+                xD{i} = H'*x;
+                cD{i} = [cD{i}(2:end); xD{i}(2)]; 
+                cA{i} = [cA{i}(2:end); xD{i}(1)];
+            end
+        elseif i == level %last level, compute both cD and cA
+            if mod(n,2^i) == 0
+                xD{i} = H'*[cA{i-1}(end:-1:end-lf)];
+                cD{i} = [cD{i}(2:end); xD{i}(2)]; 
+                cA{i} = [cA{i}(2:end); xD{i}(1)];
+            end
+        else % do middle levels
+            if mod(n,2^i) == 0
+                xD{i} = H'*[cA{i-1}(end:-1:end-lf)];
+                cD{i} = [cD{i}(2:end); xD{i}(2)]; 
+                cA{i} = [cA{i}(2:end); xD{i}(1)];
+            end
         end
-    b = F*[bb(1); cD(end-lf)] + b;
-    bb = [bb(2:end); 0];
     end
-    yn(n) = b(1);
-    b = [b(2:end); 0];
+    
+
+    %Synthesis
+    for i = level:-1:1
+        if i == level
+            if mod(n,2^i) == 0
+                bb{i} = F*xD{i} + bb{i};
+            end
+        else
+            if mod(n,2^i) == 0                
+                bb{i} = F*[bb{i+1}(1); cD{i}(end-lf*delays(end-i))] + bb{i};
+                bb{i+1} = [bb{i+1}(2:end); 0];
+            end            
+        end
+    end   
+    yn(n) = bb{i}(1);
+    bb{i} = [bb{i}(2:end); 0];               
+    
 end
 toc
-err2lv = max(abs(f-yn(1+delay:end)))
+err2lv = max(abs(f-yn(1+delay:end)))    %problem with delays. This works fine 
+                                        %but reconstructed signal is shifted for some reason
 
