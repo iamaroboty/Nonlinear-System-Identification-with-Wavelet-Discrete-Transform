@@ -18,7 +18,7 @@ f = f(1:d)';
 % f = zeros(d, 1);
 % f(129) = 1;
 
-wtype = 'db2';
+wtype = 'db1';
 level = 2;
 wdt_mod = 'zpd';
 
@@ -242,53 +242,45 @@ LL = [LL(1); LL]';
 for i = 1:level
     cD{i} = zeros(LL(end-i),1);
     cA{i} = zeros(LL(end-i),1);
-    bb{i} = zeros(length(F),1);    
+    bb{i} = zeros(length(F),1);
+    xD{i} = zeros(2,1);
     delays(i) = 2^i-1; 
 end    
-xD = zeros(2,1);
 
 
 for n = 1:d+delay
     x = [fpad(n); x(1:end-1)];
     
     tmp = x;
-    for i = 1:level
-        if mod(n,2^i) == 0
-            xD = H'*tmp;
-            cD{i} = [cD{i}(2:end); xD(2)]; 
-            cA{i} = [cA{i}(2:end); xD(1)];
-            tmp = cA{i}(end:-1:end-lf);
+    % Analysis
+    for i=1:level
+        if i == 1 %init
+            if mod(n,2) == 0
+                xD{i} = H'*x;
+                cD{i} = [cD{i}(2:end); xD{i}(2)]; 
+                cA{i} = [cA{i}(2:end); xD{i}(1)];
+            end
+        elseif i == level %last level, compute both cD and cA
+            if mod(n,2^i) == 0
+                xD{i} = H'*[cA{i-1}(end:-1:end-lf)];
+                cD{i} = [cD{i}(2:end); xD{i}(2)]; 
+                cA{i} = [cA{i}(2:end); xD{i}(1)];
+            end
+        else % do middle levels
+            if mod(n,2^i) == 0
+                xD{i} = H'*[cA{i-1}(end:-1:end-lf)];
+                cD{i} = [cD{i}(2:end); xD{i}(2)]; 
+                cA{i} = [cA{i}(2:end); xD{i}(1)];
+            end
         end
     end
-%     % Analysis
-%     for i=1:level
-%         if i == 1 %init
-%             if mod(n,2) == 0
-%                 xD{i} = H'*x;
-%                 cD{i} = [cD{i}(2:end); xD{i}(2)]; 
-%                 cA{i} = [cA{i}(2:end); xD{i}(1)];
-%             end
-%         elseif i == level %last level, compute both cD and cA
-%             if mod(n,2^i) == 0
-%                 xD{i} = H'*[cA{i-1}(end:-1:end-lf)];
-%                 cD{i} = [cD{i}(2:end); xD{i}(2)]; 
-%                 cA{i} = [cA{i}(2:end); xD{i}(1)];
-%             end
-%         else % do middle levels
-%             if mod(n,2^i) == 0
-%                 xD{i} = H'*[cA{i-1}(end:-1:end-lf)];
-%                 cD{i} = [cD{i}(2:end); xD{i}(2)]; 
-%                 cA{i} = [cA{i}(2:end); xD{i}(1)];
-%             end
-%         end
-%     end
     
 
     %Synthesis
     for i = level:-1:1
         if i == level
             if mod(n,2^i) == 0
-                bb{i} = F*xD + bb{i};
+                bb{i} = F*xD{i} + bb{i};
             end
         else
             if mod(n,2^i) == 0                

@@ -160,10 +160,10 @@ for n = 1:ITER
                     w{i} = w{i} + [U.cA{i},U.cD{i}].*(eD{i}./(sum([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}])+alpha))*mu; 
                 end 
             else
-                eD{i} = [Y.cD{i}(1) - U.cD{i}'*w{i}; eD{i}(1:end-1)]; 
+                eD{i} = [Y.cD{i}(end) - flip(U.cD{i})'*w{i}; eD{i}(1:end-1)]; 
 
                 if n >= AdaptStart
-                    w{i} = w{i} + (mu*eD{i}(1)/(U.cD{i}'*U.cD{i} + alpha))*U.cD{i};
+                    w{i} = w{i} + (mu*eD{i}(end)/(U.cD{i}'*U.cD{i} + alpha))*flip(U.cD{i});
                 end
             end
                 
@@ -175,11 +175,11 @@ for n = 1:ITER
     for i = level:-1:1
         if i == level
             if mod(n,2^i) == 0
-                eDr{i} = F*eD{i}' + eDr{i};
+                eDr{i} = F*eD{i}(end,:)' + eDr{i};
             end
         else
             if mod(n,2^i) == 0                
-                eDr{i} = F*[eDr{i+1}(1); eD{i}((len)*delays(end-i))] + eDr{i};
+                eDr{i} = F*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i))] + eDr{i};
                 eDr{i+1} = [eDr{i+1}(2:end); 0];
             end            
         end
