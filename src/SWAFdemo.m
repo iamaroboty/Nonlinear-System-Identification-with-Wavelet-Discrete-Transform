@@ -10,7 +10,7 @@ clear all; close all;
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'haar';                   % Wavelet family
+wtype = 'db1';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -19,7 +19,7 @@ b = b(1:M);                      % Truncate to length M
 
 %TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
 a = 0;     
-%b =[zeros(a,1); 1; zeros(M-a-1,1)];
+b =[zeros(a,1); 1;1;1; zeros(M-a-4,1); 1];
 
 tic;
 
@@ -42,17 +42,35 @@ cD = detcoef(B, S.L, 'cell');
 cA = appcoef(B, S.L, wtype);
 
 
-%% test signal 
-
-%t = [0:0.01:2*pi];
-freq = 2000; % frequency 
-fs = 12000; % samples per sec
+%% time domain parameters
+fs = length(un)/2; % samples per sec
+freq = fs/1000; % frequency
 dt = 1/fs; 
 
+%% impulse response
+delta = [0; 1; zeros(fs-2,1)];
+figure; 
+subplot(1,2,1)
+stem(delta);
+title('Input Signal'); 
+axis([0 10 -1.5 1.5])
+out_resp = SWAtest(delta, S); 
+subplot(1,2,2)
+stem(out_resp);
+title('Output Signal-Estimated System vs True');
+hold on; 
+true = conv(delta, b);
+stem(true); 
+axis([0 512 -1.5 1.5])
+
+
+
+%% sine test signal 
+
 amplitude = 1; 
-padlength = 100;
+padlength = 10;
 input_sine = amplitude*sin(2*pi*freq*(0:dt:1-padlength*dt));
-input_sine = padarray(input_sine, [0,padlength/2]); 
+input_sine = padarray(input_sine, [0,padlength/2], 'pre'); 
 input_sine = padarray(input_sine, [0,padlength/2], 'post'); 
 
 figure; 
