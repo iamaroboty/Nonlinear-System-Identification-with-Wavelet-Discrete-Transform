@@ -54,6 +54,7 @@ title('Output Signal-Estimated System vs True');
 hold on; 
 true = conv(input_sine, b);
 plot(true); 
+figure;
 
 % % Plot system ID differencies
 if level == 2
