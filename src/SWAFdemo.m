@@ -10,11 +10,7 @@ clear all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-<<<<<<< HEAD
 level = 8;                       % Levels of Wavelet decomposition
-=======
-level = 1;                       % Levels of Wavelet decomposition
->>>>>>> 336af558b6adeae35bcd029df61ef6e6d9ac60db
 wtype = 'db1';                   % Wavelet family
 
 % Run parameters
@@ -23,13 +19,10 @@ b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 %TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
-<<<<<<< HEAD
 a = 1;     
 b =[zeros(a,1); 1; zeros(M-a-1,1)];
-=======
 a = 0;     
 b =[zeros(a,1); 1;1;1; zeros(M-a-4,1); 1];
->>>>>>> 336af558b6adeae35bcd029df61ef6e6d9ac60db
 
 tic;
 
@@ -44,7 +37,7 @@ S.unknownsys = b;
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
-<<<<<<< HEAD
+
 % dwtmode('zpd')
 % [B, L] = wavedec(b, level, wtype);
 % % W = WaveletMat_nL(M, level, wtype);
@@ -94,7 +87,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % else
 %     fprint('Set Level either 1 or 2\n');
 % end
-=======
+
 dwtmode('sym')
 [B, L] = wavedec(b, level, wtype);
 % W = WaveletMat_nL(M, level, wtype);
@@ -212,7 +205,6 @@ elseif level == 1
 else
     fprint('Set Level either 1 or 2\n');
 end
->>>>>>> 336af558b6adeae35bcd029df61ef6e6d9ac60db
 
 
 figure;                          % Plot MSE
