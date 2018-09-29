@@ -1,6 +1,6 @@
 % SWAFdemo          Subband Wavelet-domain Adaptive Filter Demo
 % 
-% by A. Castellani & S. Cornell [Università Politecnica delle Marche]
+% by A. Castellani & S. Cornell [Universitï¿½ Politecnica delle Marche]
 
 addpath 'Common';             % Functions in Common folder
 clear all; close all;
@@ -40,6 +40,20 @@ dwtmode('sym')
 % B = W*b;
 cD = detcoef(B, S.L, 'cell');
 cA = appcoef(B, S.L, wtype);
+
+t = [0:0.01:2*pi];
+input_sine = sin(4*t);
+figure; 
+subplot(1,2,1)
+plot(input_sine);
+title('Input Signal'); 
+out_sine = SWAtest(input_sine, S); 
+subplot(1,2,2)
+plot(out_sine);
+title('Output Signal-Estimated System vs True');
+hold on; 
+true = conv(input_sine, b);
+plot(true); 
 
 % % Plot system ID differencies
 if level == 2
