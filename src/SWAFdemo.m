@@ -9,8 +9,8 @@ clear all; close all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db2';                   % Wavelet family
+level = 2;                       % Levels of Wavelet decomposition
+wtype = 'db1';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -18,7 +18,7 @@ b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 %TEST: unknown system as just delay of "a" samples. Only with a integer multipler of 4, this works properly.
-a = 1;     
+a = 0;     
 b =[zeros(a,1); 1; zeros(M-a-1,1)];
 
 tic;
@@ -26,7 +26,7 @@ tic;
 % Adaptation process
 
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,60); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 S = SWAFinit(M, mu, level, wtype);     % Initialization
 S.unknownsys = b; 
 [en, S] = SWAFadapt(un, dn, S);                 % Perform WSAF Algorithm
@@ -34,10 +34,10 @@ S.unknownsys = b;
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
-% dwtmode('per')
-% [B, L] = wavedec(b, level, wtype);
-W = WaveletMat_nL(M, level, wtype);
-B = W*b;
+dwtmode('sym')
+[B, L] = wavedec(b, level, wtype);
+% W = WaveletMat_nL(M, level, wtype);
+% B = W*b;
 cD = detcoef(B, S.L, 'cell');
 cA = appcoef(B, S.L, wtype);
 
