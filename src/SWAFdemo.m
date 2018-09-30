@@ -9,18 +9,18 @@ clear all;  close all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 5;                       % Levels of Wavelet decomposition
-wtype = 'db3';                   % Wavelet family
+level = 3;                       % Levels of Wavelet decomposition
+wtype = 'db16';                   % Wavelet family
 
 % Run parameters
-iter = 1.0*80000;                % Number of iterations
+iter = 8.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 % TESTING, a = delay.
-a = 2;
+a = 8;
 b = zeros(M,1);
-b(a) = 1;
+b(a+1) = 1;
 
 tic;
 
