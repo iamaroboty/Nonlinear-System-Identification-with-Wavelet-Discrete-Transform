@@ -10,23 +10,22 @@ clear all;  close all;
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 2;                       % Levels of Wavelet decomposition
-wtype = 'haar';                   % Wavelet family
+wtype = 'db16';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
-
 % TESTING, a = delay.
-<<<<<<< HEAD
+
 a = 2;
-b = zeros(M,1);
-b(a+1) = 1;
-=======
+%b = zeros(M,1);
+%b(a+1) = 1;
+
 a = 8;
 %b = zeros(M,1);
 %b(a-1) = 1;
->>>>>>> 5b434c20f03af0c5656ac863b5ae671bfe99735b
+
 
 tic;
 
@@ -34,7 +33,8 @@ tic;
 
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-S = SWAFinit(M, mu, level, wtype);     % Initialization
+%S = SWAFinit(M, mu, level, wtype);   % Initialization
+S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
 [en, S] = SWAFadapt(un, dn, S);                 % Perform WSAF Algorithm
 

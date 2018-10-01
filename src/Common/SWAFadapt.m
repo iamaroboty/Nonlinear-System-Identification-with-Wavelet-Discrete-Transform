@@ -42,6 +42,7 @@ ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
 
+
 % % ONLY FOR TESTING PURPOSE
 % t=0:0.001:1;
 % un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
@@ -74,6 +75,7 @@ for n = 1:ITER
 
                 if n >= AdaptStart
                     w{i} = w{i} + [U.cA{i},U.cD{i}].*(eD{i}./(sum([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}])+alpha))*mu; 
+                    
                 end 
             else
                 eD{i} = [eD{i}(2:end); Y.cD{i}(1) - U.cD{i}'*w{i}]; 
