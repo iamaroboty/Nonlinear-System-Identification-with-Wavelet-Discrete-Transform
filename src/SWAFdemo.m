@@ -9,14 +9,27 @@ clear all;  close all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 2;                       % Levels of Wavelet decomposition
-wtype = 'db16';                   % Wavelet family
+level = 1;                       % Levels of Wavelet decomposition
+wtype = 'db45';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 % TESTING, a = delay.
+
+%% low pass filter system 
+norm_freq = 0.39;
+samples = M/2-1;
+
+b = norm_freq*sinc(norm_freq*(-samples:samples+1));
+%b = b + upsample(b(1:2:M).^4,2) + upsample(downsample(b,2).^6,2);
+%b = horzcat(b, zeros(M-length(b)-1,1)');
+
+%% distort the low pass simple
+% a = 0.2;
+% k = 2*a/(1-a);
+% b = (1+k)*(b)./(1+k*abs(b));
 
 a = 2;
 %b = zeros(M,1);
@@ -50,8 +63,8 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % 
 % 
 %% time domain parameters
-fs = length(un)/2; % samples per sec
-freq = fs/1000; % frequency
+fs = ceil(length(un)/2); % samples per sec
+freq = ceil(fs/10); % frequency
 dt = 1/fs; 
 
 %% impulse response
