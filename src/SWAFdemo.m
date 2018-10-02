@@ -9,7 +9,7 @@ clear all;  close all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 2;                       % Levels of Wavelet decomposition
+level = 6;                       % Levels of Wavelet decomposition
 wtype = 'haar';                   % Wavelet family
 
 % Run parameters
@@ -18,15 +18,9 @@ b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 % TESTING, a = delay.
-<<<<<<< HEAD
-a = 2;
-b = zeros(M,1);
-b(a+1) = 1;
-=======
-a = 8;
-%b = zeros(M,1);
-%b(a-1) = 1;
->>>>>>> 5b434c20f03af0c5656ac863b5ae671bfe99735b
+% a = 2;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 tic;
 
@@ -49,113 +43,113 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % cA = appcoef(B, S.L, wtype);
 % 
 % 
-%% time domain parameters
-fs = length(un)/2; % samples per sec
-freq = fs/1000; % frequency
-dt = 1/fs; 
-
-%% impulse response
-delta = [0; 1; zeros(fs-2,1)];
-figure; 
-subplot(1,2,1)
-stem(delta);
-title('Input Signal'); 
-axis([0 10 -1.5 1.5])
-out_resp = SWAtest(delta, S); 
-subplot(1,2,2)
-stem(out_resp);
-title('Output Signal-Estimated System vs True');
-hold on; 
-true = conv(delta, b);
-stem(true); 
-axis([0 512 -1.5 1.5])
-
-
-
-%% sine test signal 
-
-amplitude = 1; 
-padlength = 10;
-input_sine = amplitude*sin(2*pi*freq*(0:dt:1-padlength*dt));
-input_sine = padarray(input_sine, [0,padlength/2], 'pre'); 
-input_sine = padarray(input_sine, [0,padlength/2], 'post'); 
-
-figure; 
-subplot(2,2,1)
-plot(input_sine);
-title('Input Signal'); 
-out_sine = SWAtest(input_sine, S); 
-subplot(2,2,2)
-plot(out_sine);
-title('Output Signal-Estimated System vs True');
-hold on; 
-true = conv(input_sine, b);
-plot(true); 
-
-%% FFT 
-N = 2*fs;
-
-faxis = linspace(-fs/2,fs/2,N);
-
-
-subplot(2, 2, 3);
-fft_true = abs(fft(input_sine, N)/N);
-plot(faxis, fftshift(fft_true)); 
-xlabel('Frequency');
-
-subplot(2, 2, 4);
-fft_out_est = abs(fft(out_sine, N)/N);
-plot(faxis, fftshift(fft_out_est)); 
-xlabel('Frequency');
-hold on; 
-fft_out_true = abs(fft(true,N)/N);
-plot(faxis, fftshift(fft_out_true));
-
+% %% time domain parameters
+% fs = length(un)/2; % samples per sec
+% freq = fs/1000; % frequency
+% dt = 1/fs; 
 % 
-% %%
-% figure;
-% % % Plot system ID differencies
-% if level == 2
-%     subplot(level +1, 1, 1);
-%     stem([cD{1}, S.coeffs{1}]); legend('Actual','Estimated');
-%     title('cD1'); grid on;
-%     subplot(level +1, 1, 2);
-%     stem([cD{2}, S.coeffs{2}(:,2)]); legend('Actual','Estimated');
-%     title('cD2'); grid on;
-%     subplot(level +1, 1, 3);
-%     stem([cA, S.coeffs{2}(:,1)]); legend('Actual','Estimated');
-%     title('cA'); grid on;
-%     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
-%     set(get(ax,'Title'),'Visible','on')
-%     title('System identification. Trasformed domain');
-%     h=get(ax,'Title');
+% %% impulse response
+% delta = [0; 1; zeros(fs-2,1)];
+% figure; 
+% subplot(1,2,1)
+% stem(delta);
+% title('Input Signal'); 
+% axis([0 10 -1.5 1.5])
+% out_resp = SWAtest(delta, S); 
+% subplot(1,2,2)
+% stem(out_resp);
+% title('Output Signal-Estimated System vs True');
+% hold on; 
+% true = conv(delta, b);
+% stem(true); 
+% axis([0 512 -1.5 1.5])
 % 
-%     b_est = waverec([S.coeffs{2}(:,1); S.coeffs{2}(:,2); S.coeffs{1}], S.L, wtype);
-%     figure;
-%     stem([b, b_est]);
-%     legend('Actual','Estimated');
-%     title('System identification. Time domain');grid on;
 % 
-% elseif level == 1
-%     subplot(2, 1, 1);
-%     stem([cD{1}, S.coeffs{1}(:,2)]); legend('Actual','Estimated');
-%     title('cD'); grid on;
-%     subplot(2, 1, 2);
-%     stem([cA, S.coeffs{1}(:,1)]); legend('Actual','Estimated');
-%     title('cA'); grid on;
-%     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
-%     set(get(ax,'Title'),'Visible','on')
-%     title('System identification. Trasformed domain');
-%     h=get(ax,'Title');
 % 
-%     b_est = waverec([S.coeffs{1}(:,1); S.coeffs{1}(:,2)], S.L, wtype);
-%     figure;
-%     stem([b, b_est]);
-%     legend('Actual','Estimated');
-%     title('System identification. Time domain');grid on;
-% else
-%     fprintf('Set Level either 1 or 2\n');
-% end
+% %% sine test signal 
+% 
+% amplitude = 1; 
+% padlength = 10;
+% input_sine = amplitude*sin(2*pi*freq*(0:dt:1-padlength*dt));
+% input_sine = padarray(input_sine, [0,padlength/2], 'pre'); 
+% input_sine = padarray(input_sine, [0,padlength/2], 'post'); 
+% 
+% figure; 
+% subplot(2,2,1)
+% plot(input_sine);
+% title('Input Signal'); 
+% out_sine = SWAtest(input_sine, S); 
+% subplot(2,2,2)
+% plot(out_sine);
+% title('Output Signal-Estimated System vs True');
+% hold on; 
+% true = conv(input_sine, b);
+% plot(true); 
+% 
+% %% FFT 
+% N = 2*fs;
+% 
+% faxis = linspace(-fs/2,fs/2,N);
+% 
+% 
+% subplot(2, 2, 3);
+% fft_true = abs(fft(input_sine, N)/N);
+% plot(faxis, fftshift(fft_true)); 
+% xlabel('Frequency');
+% 
+% subplot(2, 2, 4);
+% fft_out_est = abs(fft(out_sine, N)/N);
+% plot(faxis, fftshift(fft_out_est)); 
+% xlabel('Frequency');
+% hold on; 
+% fft_out_true = abs(fft(true,N)/N);
+% plot(faxis, fftshift(fft_out_true));
+% 
+% % 
+% % %%
+% % figure;
+% % % % Plot system ID differencies
+% % if level == 2
+% %     subplot(level +1, 1, 1);
+% %     stem([cD{1}, S.coeffs{1}]); legend('Actual','Estimated');
+% %     title('cD1'); grid on;
+% %     subplot(level +1, 1, 2);
+% %     stem([cD{2}, S.coeffs{2}(:,2)]); legend('Actual','Estimated');
+% %     title('cD2'); grid on;
+% %     subplot(level +1, 1, 3);
+% %     stem([cA, S.coeffs{2}(:,1)]); legend('Actual','Estimated');
+% %     title('cA'); grid on;
+% %     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
+% %     set(get(ax,'Title'),'Visible','on')
+% %     title('System identification. Trasformed domain');
+% %     h=get(ax,'Title');
+% % 
+% %     b_est = waverec([S.coeffs{2}(:,1); S.coeffs{2}(:,2); S.coeffs{1}], S.L, wtype);
+% %     figure;
+% %     stem([b, b_est]);
+% %     legend('Actual','Estimated');
+% %     title('System identification. Time domain');grid on;
+% % 
+% % elseif level == 1
+% %     subplot(2, 1, 1);
+% %     stem([cD{1}, S.coeffs{1}(:,2)]); legend('Actual','Estimated');
+% %     title('cD'); grid on;
+% %     subplot(2, 1, 2);
+% %     stem([cA, S.coeffs{1}(:,1)]); legend('Actual','Estimated');
+% %     title('cA'); grid on;
+% %     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
+% %     set(get(ax,'Title'),'Visible','on')
+% %     title('System identification. Trasformed domain');
+% %     h=get(ax,'Title');
+% % 
+% %     b_est = waverec([S.coeffs{1}(:,1); S.coeffs{1}(:,2)], S.L, wtype);
+% %     figure;
+% %     stem([b, b_est]);
+% %     legend('Actual','Estimated');
+% %     title('System identification. Time domain');grid on;
+% % else
+% %     fprintf('Set Level either 1 or 2\n');
+% % end
 
 
 figure;                          % Plot MSE
