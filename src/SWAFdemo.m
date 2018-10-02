@@ -9,24 +9,18 @@ clear all;  close all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-<<<<<<< HEAD
 level = 6;                       % Levels of Wavelet decomposition
 wtype = 'haar';                   % Wavelet family
-=======
-level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db45';                   % Wavelet family
->>>>>>> a504b831d16ba8d3704244303f3af62d8ac996d8
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
+
 % TESTING, a = delay.
-<<<<<<< HEAD
 % a = 2;
 % b = zeros(M,1);
 % b(a+1) = 1;
-=======
 
 %% low pass filter system 
 norm_freq = 0.39;
@@ -40,16 +34,6 @@ b = norm_freq*sinc(norm_freq*(-samples:samples+1));
 % a = 0.2;
 % k = 2*a/(1-a);
 % b = (1+k)*(b)./(1+k*abs(b));
-
-a = 2;
-%b = zeros(M,1);
-%b(a+1) = 1;
-
-a = 8;
-%b = zeros(M,1);
-%b(a-1) = 1;
-
->>>>>>> a504b831d16ba8d3704244303f3af62d8ac996d8
 
 tic;
 
@@ -73,7 +57,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % cA = appcoef(B, S.L, wtype);
 % 
 % 
-<<<<<<< HEAD
+
 % %% time domain parameters
 % fs = length(un)/2; % samples per sec
 % freq = fs/1000; % frequency
@@ -121,7 +105,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % N = 2*fs;
 % 
 % faxis = linspace(-fs/2,fs/2,N);
-=======
+
 %% time domain parameters
 fs = ceil(length(un)/2); % samples per sec
 freq = ceil(fs/10); % frequency
