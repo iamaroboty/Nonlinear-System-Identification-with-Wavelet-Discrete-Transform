@@ -168,7 +168,7 @@ hold on;
 fft_out_true = abs(fft(true,N)/N);
 plot(faxis, fftshift(fft_out_true));
 
->>>>>>> a504b831d16ba8d3704244303f3af62d8ac996d8
+
 % 
 % 
 % subplot(2, 2, 3);
