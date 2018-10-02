@@ -19,7 +19,7 @@ f = f(1:d)';
 % f(129) = 1;
 
 wtype = 'db10';
-level = 3;
+level = 2;
 wdt_mod = 'zpd';
 
 %% Generazione dei coefficienti del filtro

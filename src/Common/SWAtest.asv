@@ -45,8 +45,9 @@ ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
 tot_delay = (2^level - 1)*(len-1) +1 ;
+u = 
 
-for n = 1:ITER    
+for n = 1:ITER+tot_delay    
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'     
 
     % Analysis Bank

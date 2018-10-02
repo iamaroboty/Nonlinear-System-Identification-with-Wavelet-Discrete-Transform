@@ -19,13 +19,18 @@ S.levels        = level;          % DWT levels
 S.wtype         = wtype;          % Filter type
 S.alpha         = 1e-6;           % Small positive constant
 
-dwtmode('zpd')
-[low_d,high_d,low_r,high_r] = wfilters(wtype);
-S.analysis = [qmf(low_d'), qmf(high_d')];     % Analysis filters
-S.synthesis = [qmf(low_r'), qmf(high_r')];    % Synthesis filters
+% [low_d,high_d,low_r,high_r] = wfilters(wtype);
+% S.analysis = [qmf(low_d'), qmf(high_d')];     % Analysis filters
+% S.synthesis = [qmf(low_r'), qmf(high_r')];    % Synthesis filters
+
+% Create filter from QMF banks
+db = dbwavf(wtype);
+qmfdb = qmf(db); 
+S.analysis = [qmfdb; db]'*sqrt(2); 
+S.synthesis = flip(S.analysis);
 
 % Subbands filter lenghts
-lf = length(low_d);
+lf = length(S.analysis);
 L = [M; zeros(level,1)];
 for i= 1:level
     L = [floor((L(1)+lf-1)/2); L(1:end-1)];

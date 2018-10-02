@@ -6,10 +6,10 @@ addpath 'Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-mu = 0.1;                      % Step size
+mu = 0.5;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 2;                       % Levels of Wavelet decomposition
-wtype = 'db4';                   % Wavelet family
+wtype = 'db10';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -17,7 +17,7 @@ iter = 1.0*80000;                % Number of iterations
 % b = b(1:M);                      % Truncate to length M
 
 % TESTING, a = delay.
-a = 1;
+a = 0;
 b = zeros(M,1);
 b(a+1) = 1;
 
@@ -53,38 +53,33 @@ err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
 
-figure;         % Plot MSE
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
-axis([0 iter/1024 -60 10]);
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Mean-square error (with delay)'); grid on;
-
 %% time domain parameters
-fs = 256; % samples per sec
-freq = 20; % frequency
+fs = 1000; % samples per sec
+freq = 100; % frequency
 dt = 1/fs; 
 
 %% impulse response
 delta = [1; zeros(fs-2-1,1)];
 figure; 
-subplot(2,1,1)
+subplot(1,2,1)
 stem(delta);
 title('Input Signal'); 
 axis([0 10 -1.5 1.5])
 out_resp = SWAtest(delta, S); 
-subplot(2,1,2)
+subplot(1,2,2)
 stem(out_resp);
 title('Output Signal-Estimated System vs True');
 hold on; 
-real_sys = filter(b, 1, delta);
-stem(real_sys); 
+true = conv(delta, b);
+stem(true); 
 axis([0 2*M -1.5 1.5])
+
+
 
 %% sine test signal 
 amplitude = 1; 
 leng = 1;
-input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
+input_sine = amplitude*sin(2*pi*freq*(0:dt:1-leng*dt));
 
 figure; 
 subplot(2,2,1)
@@ -93,14 +88,16 @@ title('Input Signal');
 out_sine = SWAtest(input_sine, S); 
 subplot(2,2,2)
 plot(out_sine);
-title('Output Signal - Estimated System vs True');
+title('Output Signal-Estimated System vs True');
 hold on; 
-real_sys = filter(b,1,input_sine);
-plot(real_sys); legend('Estim', 'True');
+true = conv(input_sine, b);
+plot(true); 
 
 %% FFT 
 N = 2*fs;
+
 faxis = linspace(-fs/2,fs/2,N);
+
 
 subplot(2, 2, 3);
 fft_true = abs(fft(input_sine, N)/N);
@@ -112,9 +109,27 @@ fft_out_est = abs(fft(out_sine, N)/N);
 plot(faxis, fftshift(fft_out_est)); 
 xlabel('Frequency');
 hold on; 
-fft_out_true = abs(fft(real_sys,N)/N);
+fft_out_true = abs(fft(true,N)/N);
 plot(faxis, fftshift(fft_out_true));
 
+
+% 
+% 
+% subplot(2, 2, 3);
+% fft_true = abs(fft(input_sine, N)/N);
+% plot(faxis, fftshift(fft_true)); 
+% xlabel('Frequency');
+% 
+% subplot(2, 2, 4);
+% fft_out_est = abs(fft(out_sine, N)/N);
+% plot(faxis, fftshift(fft_out_est)); 
+% xlabel('Frequency');
+% hold on; 
+% fft_out_true = abs(fft(true,N)/N);
+% plot(faxis, fftshift(fft_out_true));
+% 
+% % 
+% % %%
 % % figure;
 % % % % Plot system ID differencies
 % % if level == 2
@@ -158,3 +173,11 @@ plot(faxis, fftshift(fft_out_true));
 % % else
 % %     fprintf('Set Level either 1 or 2\n');
 % % end
+
+
+figure;                          % Plot MSE
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
+axis([0 iter/1024 -60 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Mean-square error (with delay)'); grid on;
