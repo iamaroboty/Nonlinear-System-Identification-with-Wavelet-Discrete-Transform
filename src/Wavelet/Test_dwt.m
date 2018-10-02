@@ -19,7 +19,7 @@ f = f(1:d)';
 % f(129) = 1;
 
 wtype = 'db10';
-level = 3;
+level = 8;
 wdt_mod = 'zpd';
 
 %% Generazione dei coefficienti del filtro
@@ -222,13 +222,13 @@ errC = max(abs(f-fr))
 % end
 
 %% Create filter from QMF
-db = dbwavf(wtype);
-qmfdb = qmf(db); 
-H = [qmfdb; db]'*sqrt(2); 
-F = flip(H);
+% db = dbwavf(wtype);
+% qmfdb = qmf(db); 
+% H = [qmfdb; db]'*sqrt(2); 
+% F = flip(H);
 %% Real time DWT, generic YEEEE
 tic
-delay = level*length(H)-1;            %total delay (analysis + synthesis)
+delay = (2^level-1)*(length(H)-1);            %total delay (analysis + synthesis)
 lf = length(H)-1;
 x = zeros(length(H),1);
 xDD = x;
@@ -243,12 +243,14 @@ for i= 1:level
 end
 LL = [LL(1); LL]';
 
+for i = 1:level
+    delays(i) = 2^i-1; 
+end
 
 for i = 1:level
-    cD{i} = zeros(LL(end-i),1);
-    cA{i} = zeros(LL(end-i),1);
-    bb{i} = zeros(length(F),1);    
-    delays(i) = 2^i-1; 
+    cD{i} = zeros(LL(end-i)+lf*delays(end-i+1),1);
+    cA{i} = zeros(LL(end-i)+lf*delays(end-i+1),1);
+    bb{i} = zeros(length(F),1);        
 end    
 xD = zeros(2,1);
 

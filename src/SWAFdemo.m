@@ -8,8 +8,8 @@ clear all;  close all;
 % Adaptive filter parameters
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 2;                       % Levels of Wavelet decomposition
-wtype = 'db4';                   % Wavelet family
+level = 7;                       % Levels of Wavelet decomposition
+wtype = 'db1';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -17,7 +17,7 @@ iter = 1.0*80000;                % Number of iterations
 % b = b(1:M);                      % Truncate to length M
 
 % TESTING, a = delay.
-a = 1;
+a = 128;
 b = zeros(M,1);
 b(a+1) = 1;
 
@@ -61,7 +61,7 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)'); grid on;
 
 %% time domain parameters
-fs = 256; % samples per sec
+fs = 512; % samples per sec
 freq = 20; % frequency
 dt = 1/fs; 
 
