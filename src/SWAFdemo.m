@@ -9,18 +9,47 @@ clear all;  close all;
 
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
+<<<<<<< HEAD
 level = 6;                       % Levels of Wavelet decomposition
 wtype = 'haar';                   % Wavelet family
+=======
+level = 1;                       % Levels of Wavelet decomposition
+wtype = 'db45';                   % Wavelet family
+>>>>>>> a504b831d16ba8d3704244303f3af62d8ac996d8
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
-
 % TESTING, a = delay.
+<<<<<<< HEAD
 % a = 2;
 % b = zeros(M,1);
 % b(a+1) = 1;
+=======
+
+%% low pass filter system 
+norm_freq = 0.39;
+samples = M/2-1;
+
+b = norm_freq*sinc(norm_freq*(-samples:samples+1));
+%b = b + upsample(b(1:2:M).^4,2) + upsample(downsample(b,2).^6,2);
+%b = horzcat(b, zeros(M-length(b)-1,1)');
+
+%% distort the low pass simple
+% a = 0.2;
+% k = 2*a/(1-a);
+% b = (1+k)*(b)./(1+k*abs(b));
+
+a = 2;
+%b = zeros(M,1);
+%b(a+1) = 1;
+
+a = 8;
+%b = zeros(M,1);
+%b(a-1) = 1;
+
+>>>>>>> a504b831d16ba8d3704244303f3af62d8ac996d8
 
 tic;
 
@@ -28,7 +57,8 @@ tic;
 
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-S = SWAFinit(M, mu, level, wtype);     % Initialization
+%S = SWAFinit(M, mu, level, wtype);   % Initialization
+S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
 [en, S] = SWAFadapt(un, dn, S);                 % Perform WSAF Algorithm
 
@@ -43,6 +73,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % cA = appcoef(B, S.L, wtype);
 % 
 % 
+<<<<<<< HEAD
 % %% time domain parameters
 % fs = length(un)/2; % samples per sec
 % freq = fs/1000; % frequency
@@ -90,6 +121,70 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % N = 2*fs;
 % 
 % faxis = linspace(-fs/2,fs/2,N);
+=======
+%% time domain parameters
+fs = ceil(length(un)/2); % samples per sec
+freq = ceil(fs/10); % frequency
+dt = 1/fs; 
+
+%% impulse response
+delta = [0; 1; zeros(fs-2,1)];
+figure; 
+subplot(1,2,1)
+stem(delta);
+title('Input Signal'); 
+axis([0 10 -1.5 1.5])
+out_resp = SWAtest(delta, S); 
+subplot(1,2,2)
+stem(out_resp);
+title('Output Signal-Estimated System vs True');
+hold on; 
+true = conv(delta, b);
+stem(true); 
+axis([0 512 -1.5 1.5])
+
+
+
+%% sine test signal 
+
+amplitude = 1; 
+padlength = 10;
+input_sine = amplitude*sin(2*pi*freq*(0:dt:1-padlength*dt));
+input_sine = padarray(input_sine, [0,padlength/2], 'pre'); 
+input_sine = padarray(input_sine, [0,padlength/2], 'post'); 
+
+figure; 
+subplot(2,2,1)
+plot(input_sine);
+title('Input Signal'); 
+out_sine = SWAtest(input_sine, S); 
+subplot(2,2,2)
+plot(out_sine);
+title('Output Signal-Estimated System vs True');
+hold on; 
+true = conv(input_sine, b);
+plot(true); 
+
+%% FFT 
+N = 2*fs;
+
+faxis = linspace(-fs/2,fs/2,N);
+
+
+subplot(2, 2, 3);
+fft_true = abs(fft(input_sine, N)/N);
+plot(faxis, fftshift(fft_true)); 
+xlabel('Frequency');
+
+subplot(2, 2, 4);
+fft_out_est = abs(fft(out_sine, N)/N);
+plot(faxis, fftshift(fft_out_est)); 
+xlabel('Frequency');
+hold on; 
+fft_out_true = abs(fft(true,N)/N);
+plot(faxis, fftshift(fft_out_true));
+
+>>>>>>> a504b831d16ba8d3704244303f3af62d8ac996d8
 % 
 % 
 % subplot(2, 2, 3);
