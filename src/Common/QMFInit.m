@@ -1,4 +1,4 @@
-function S = SWAFinit(M, mu, level, wtype)
+function S = QMFInit(M, mu, level, wtype)
 
 % SWAFinit          Initialize Parameter Structure for Wavelet Transform
 %                   Adaptive Filter
@@ -18,8 +18,8 @@ S.iter          = cell(1,level);  % Iteration count per level
 S.levels        = level;          % DWT levels 
 S.wtype         = wtype;          % Filter type
 S.alpha         = 1e-6;           % Small positive constant
-dwtmode('per')
 
+dwtmode('zpd')
 [low_d,high_d,low_r,high_r] = wfilters(wtype);
 S.analysis = [qmf(low_d'), qmf(high_d')];     % Analysis filters
 S.synthesis = [qmf(low_r'), qmf(high_r')];    % Synthesis filters
