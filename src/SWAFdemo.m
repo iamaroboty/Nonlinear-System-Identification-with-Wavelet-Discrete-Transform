@@ -7,15 +7,15 @@ clear all;  close all;
 
 % Adaptive filter parameters
 
-mu = 0.1;                      % Step size
-M = 256;                         % Length of unknown system response
-level = 1;                       % Levels of Wavelet decomposition
+mu = 0.2;                      % Step size
+M = 2048;                         % Length of unknown system response
+level = 2;                       % Levels of Wavelet decomposition
 wtype = 'db45';                   % Wavelet family
 
 % Run parameters
-iter = 1.0*80000;                % Number of iterations
-b = load('h1.dat');              % Unknown system (select h1 or h2)
-b = b(1:M);                      % Truncate to length M
+iter = 1.0*400000;                % Number of iterations
+%b = load('h1.dat');              % Unknown system (select h1 or h2)
+%b = b(1:M);                      % Truncate to length M
 % TESTING, a = delay.
 
 %% low pass filter system 
@@ -27,9 +27,14 @@ b = norm_freq*sinc(norm_freq*(-samples:samples+1));
 %b = horzcat(b, zeros(M-length(b)-1,1)');
 
 %% distort the low pass simple
-% a = 0.2;
-% k = 2*a/(1-a);
-% b = (1+k)*(b)./(1+k*abs(b));
+a = 0.5;
+k = 2*a/(1-a);
+b = (1+k)*(b)./(1+k*abs(b));
+
+%% load reverb 
+[y,Fs] = audioread('reverb_shimmer.wav');
+b = y(1:M);
+
 
 a = 2;
 %b = zeros(M,1);
@@ -45,12 +50,11 @@ tic;
 % Adaptation process
 
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-%S = SWAFinit(M, mu, level, wtype);   % Initialization
-S = QMFInit(M, mu, level, wtype); 
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+S = SWAFinit(M, mu, level, wtype);   % Initialization
+%S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
-[en, S] = SWAFadapt(un, dn, S);                 % Perform WSAF Algorithm
-
+[en, S] = SWAFadapt(un, dn, S);                 % Perform WSAF Algorithm 
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
@@ -81,7 +85,7 @@ title('Output Signal-Estimated System vs True');
 hold on; 
 true = conv(delta, b);
 stem(true); 
-axis([0 512 -1.5 1.5])
+axis([0 2*M -1.5 1.5])
 
 
 

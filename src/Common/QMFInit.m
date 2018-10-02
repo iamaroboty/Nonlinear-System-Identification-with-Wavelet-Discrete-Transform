@@ -18,7 +18,7 @@ S.iter          = cell(1,level);  % Iteration count per level
 S.levels        = level;          % DWT levels 
 S.wtype         = wtype;          % Filter type
 S.alpha         = 1e-6;           % Small positive constant
-dwtmode('per')
+dwtmode('ppd')
 
 [low_d,high_d,low_r,high_r] = wfilters(wtype);
 S.analysis = [qmf(low_d'), qmf(high_d')];     % Analysis filters
