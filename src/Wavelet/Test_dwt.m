@@ -3,10 +3,10 @@
 % Testing Signal
 clear all; close all
 
-d = 256;        %Total signal length
-t=0:0.001:10;
-f=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-f = f(1:d)';
+d = 1024;        %Total signal length
+% t=0:0.001:10;
+% f=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+% f = f(1:d)';
 % f=f(1:256);
 %f = [1; -10; 324; 48; -483; 4; 7; -5532; 34; 8889; -57; 54];
 %d=length(f);
@@ -15,9 +15,11 @@ f = f(1:d)';
 % f = load('h1.dat');         % Unknown system (select h1 or h2)
 % f = f(1:d);                 % Truncate to length M
 
-% f = zeros(d, 1);
-% f(129) = 1;
+% f = zeros(d,1);
+% f(3) = 1;
 
+f = chirp((0:0.001:2),0,1,250);
+f = f(1:d);
 wtype = 'db10';
 level = 8;
 wdt_mod = 'zpd';

@@ -72,13 +72,13 @@ for n = 1:ITER
             if i == level
                 eD{i} = Y.Z' - sum(([U.cA{i}, U.cD{i}]).*w{i});
 
-                if n >= AdaptStart
+                if n >= AdaptStart(i)
                     w{i} = w{i} + [U.cA{i},U.cD{i}].*(eD{i}./(sum([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}])+alpha))*mu; 
                 end 
             else
                 eD{i} = [eD{i}(2:end); Y.cD{i}(1) - U.cD{i}'*w{i}]; 
 
-                if n >= AdaptStart
+                if n >= AdaptStart(i)
                     w{i} = w{i} + (mu*eD{i}(end)/(U.cD{i}'*U.cD{i} + alpha))*U.cD{i};
                 end
             end           

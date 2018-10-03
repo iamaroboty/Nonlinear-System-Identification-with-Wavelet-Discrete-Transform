@@ -8,18 +8,18 @@ clear all;  close all;
 % Adaptive filter parameters
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 7;                       % Levels of Wavelet decomposition
-wtype = 'db1';                   % Wavelet family
+level = 1;                       % Levels of Wavelet decomposition
+wtype = 'db4';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
-% b = load('h1.dat');              % Unknown system (select h1 or h2)
-% b = b(1:M);                      % Truncate to length M
+b = load('h1.dat');              % Unknown system (select h1 or h2)
+b = b(1:M);                      % Truncate to length M
 
 % TESTING, a = delay.
-a = 128;
-b = zeros(M,1);
-b(a+1) = 1;
+% a = 1;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 %% low pass filter system 
 % norm_freq = 0.39;
@@ -45,8 +45,8 @@ tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-% S = SWAFinit(M, mu, level, wtype);   % Initialization
-S = QMFInit(M, mu, level, wtype); 
+S = SWAFinit(M, mu, level, wtype);   % Initialization
+% S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
 [en, S] = SWAFadapt(un, dn, S);                 % Perform WSAF Algorithm 
 err_sqr = en.^2;
@@ -59,6 +59,7 @@ hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
+fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 %% time domain parameters
 fs = 512; % samples per sec

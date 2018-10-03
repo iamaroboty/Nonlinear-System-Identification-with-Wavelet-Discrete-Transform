@@ -12,7 +12,7 @@ function S = QMFInit(M, mu, level, wtype)
 
 % Assign structure fields
 S.length        = M;              % Unknown system length (Equivalent adpative filter length)
-S.AdaptStart    = M;              % Transient
+% S.AdaptStart    = M;              % Transient
 S.step          = mu;             % Step size 
 S.iter          = cell(1,level);  % Iteration count per level
 S.levels        = level;          % DWT levels 
@@ -36,6 +36,10 @@ for i= 1:level
     L = [floor((L(1)+lf-1)/2); L(1:end-1)];
 end
 S.L = [L(1); L]';
+
+for i=1:level
+    S.AdaptStart(i) = 2^i*L(end-i);
+end
 
 % Oldshit
 % L = zeros(level,1);
