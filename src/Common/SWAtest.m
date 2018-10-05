@@ -1,4 +1,4 @@
-function [y_out] = SWAtest(un,S)
+function [y_out] = SWAtest(un,S, Ovr)
 % TESTING FOR 2 LEVELS, EASY EXTENSION TO GENERAL LEVEL AND WAVELET
 % FUNCTIONS
 % SWAFadapt         Wavelet-transformed Subband Adaptive Filter (WAF)                 
@@ -18,7 +18,7 @@ H = S.analysis;                   % Analysis filter bank
 F = S.synthesis;                  % Synthesis filter bank
 [len, ~] = size(H);               % Wavelet filter length
 level = S.levels;                 % Wavelet Levels
-L = S.L;                          % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
+L = S.L.*Ovr;                          % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 % Init Arrays
 for i= 1:level
@@ -52,8 +52,13 @@ for n = 1:ITER
     % Analysis Bank
     U.tmp = u;
     for i = 1:level
-        if mod(n,2^i) == 0
-            U.Z = H'*U.tmp;
+        if mod(n,2^i/Ovr) == 0
+            if (i==1 && Ovr == 2)
+                HH = H./sqrt(2);
+            else
+                HH = H;
+            end
+            U.Z = HH'*U.tmp;
             U.cD{i} = [U.Z(2); U.cD{i}(1:end-1)]; 
             U.cA{i} = [U.Z(1); U.cA{i}(1:end-1)];
             U.tmp = U.cA{i}(1:len);
@@ -75,13 +80,18 @@ for n = 1:ITER
 
     % Synthesis Bank
     for i = level:-1:1
+            if (i==1 && Ovr == 2)
+                FF = F./sqrt(2);
+            else
+                FF = F;
+            end
         if i == level
-            if mod(n,2^i) == 0
-                eDr{i} = F*eD{i}' + eDr{i};
+            if mod(n,2^i/Ovr) == 0
+                eDr{i} = FF*eD{i}' + eDr{i};
             end
         else
-            if mod(n,2^i) == 0                
-                eDr{i} = F*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i))] + eDr{i};
+            if mod(n,2^i/Ovr) == 0                
+                eDr{i} = FF*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i))] + eDr{i};
                 eDr{i+1} = [eDr{i+1}(2:end); 0];
             end            
         end

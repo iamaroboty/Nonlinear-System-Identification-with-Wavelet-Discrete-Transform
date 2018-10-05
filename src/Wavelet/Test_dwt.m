@@ -3,10 +3,10 @@
 % Testing Signal
 clear all; close all
 
-d = 1024;        %Total signal length
-% t=0:0.001:10;
-% f=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-% f = f(1:d)';
+d = 256;        %Total signal length
+t=0:0.001:10;
+f=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+f = f(1:d)';
 % f=f(1:256);
 %f = [1; -10; 324; 48; -483; 4; 7; -5532; 34; 8889; -57; 54];
 %d=length(f);
@@ -18,11 +18,12 @@ d = 1024;        %Total signal length
 % f = zeros(d,1);
 % f(3) = 1;
 
-f = chirp((0:0.001:2),0,1,250);
-f = f(1:d);
-wtype = 'db10';
-level = 8;
+% f = chirp((0:0.001:2),0,1,250);
+% f = f(1:d);
+wtype = 'db1';
+level = 4;
 wdt_mod = 'zpd';
+U = 2;
 
 %% Generazione dei coefficienti del filtro
 [low_d,high_d,low_r,high_r] = wfilters(wtype);
@@ -243,7 +244,7 @@ LL = [d; zeros(level,1)];
 for i= 1:level
     LL = [floor((LL(1)+ld-1)/2); LL(1:end-1)];
 end
-LL = [LL(1); LL]';
+LL = U.*[LL(1); LL]';
 
 for i = 1:level
     delays(i) = 2^i-1; 
@@ -262,8 +263,13 @@ for n = 1:d+delay
     
     tmp = x;
     for i = 1:level
-        if mod(n,2^i) == 0
-            xD = H'*tmp;
+        if mod(n,2^i/U) == 0
+            if (i==1 && U == 2)
+                HH = H./sqrt(2);
+            else 
+                HH = H;
+            end
+            xD = HH'*tmp;
             cD{i} = [cD{i}(2:end); xD(2)]; 
             cA{i} = [cA{i}(2:end); xD(1)];
             tmp = cA{i}(end:-1:end-lf);
@@ -272,13 +278,18 @@ for n = 1:d+delay
 
     %Synthesis
     for i = level:-1:1
+            if (i==1 && U == 2)
+                FF = F./sqrt(2);
+            else
+                FF = F;
+            end
         if i == level
-            if mod(n,2^i) == 0
-                bb{i} = F*xD + bb{i};
+            if mod(n,2^i/U) == 0
+                bb{i} = FF*xD + bb{i};
             end
         else
-            if mod(n,2^i) == 0                
-                bb{i} = F*[bb{i+1}(1); cD{i}(end-lf*delays(end-i))] + bb{i};
+            if mod(n,2^i/U) == 0                
+                bb{i} = FF*[bb{i+1}(1); cD{i}(end-lf*delays(end-i))] + bb{i};
                 bb{i+1} = [bb{i+1}(2:end); 0];
             end            
         end
@@ -293,7 +304,7 @@ err2lv = max(abs(f-yn(1+delay:end)))    %problem with delays. This works fine
 
 %% WAVELET FULL PACKET DECOMPOSITION
 % tic
-% delay = level*length(H)-1;            %total delay (analysis + synthesis)
+% delay = (2^level-1)*(length(H)-1);            %total delay (analysis + synthesis)
 % lf = length(H)-1;
 % x = zeros(length(H),1);
 % xDD = x;
