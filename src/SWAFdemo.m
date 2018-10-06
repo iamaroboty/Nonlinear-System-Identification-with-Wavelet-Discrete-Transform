@@ -8,9 +8,9 @@ clear all;  close all;
 % Adaptive filter parameters
 mu = 0.2;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db4';                   % Wavelet family
-Ovr = 1;
+level = 2;                       % Levels of Wavelet decomposition
+wtype = 'db1';                   % Wavelet family
+Ovr = 2;
 
 
 % Run parameters
@@ -18,13 +18,13 @@ iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
-b = sign(b);
+% b = sign(b);
 
 
 % TESTING, a = delay.
-%  a = 2;
-%  b = zeros(M,1);
-%  b(a+1) = 1;
+% a = 1;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 %% low pass filter system 
 % norm_freq = 0.39;
@@ -50,10 +50,11 @@ tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-%S = SWAFinit(M, mu, level, wtype);   % Initialization
-S = QMFInit(M, mu, level, wtype); 
+S = SWAFinit(M, mu, level, wtype);   % Initialization
+% S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
-[en, S] = SWAFadapt_crossfilt(un, dn, S, Ovr);                 % Perform WSAF Algorithm 
+% [en, S] = SWAFadapt_crossfilt(un, dn, S, Ovr);                 % Perform WSAF Algorithm 
+[en, S] = SWAFadapt(un, dn, S, Ovr); 
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
@@ -67,8 +68,8 @@ ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 %% time domain parameters
-fs = 1000; % samples per sec
-freq = 10; % frequency
+fs = 512; % samples per sec
+freq = 20; % frequency
 dt = 1/fs; 
 
 %% impulse response
@@ -78,7 +79,7 @@ subplot(2,1,1)
 stem(delta);
 title('Input Signal'); 
 % axis([0 10 -1.5 1.5])
-out_resp = SWAtest_crossfilt(delta, S, Ovr); 
+out_resp = SWAtest(delta, S, Ovr); 
 subplot(2,1,2)
 stem(out_resp);
 title('Output Signal-Estimated System vs True');
@@ -88,7 +89,7 @@ stem(real_resp);
 % axis([0 2*M -1.5 1.5])
 
 %% sine test signal 
-amplitude = 1.2; 
+amplitude = 1; 
 leng = 1;
 input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
 
@@ -121,48 +122,55 @@ hold on;
 fft_out_true = abs(fft(real_sys,N)/N);
 plot(faxis, fftshift(fft_out_true));
 
-% % % figure;
-% % % % % Plot system ID differencies
-% % % if level == 2
-% % %     subplot(level +1, 1, 1);
-% % %     stem([cD{1}, S.coeffs{1}]); legend('Actual','Estimated');
-% % %     title('cD1'); grid on;
-% % %     subplot(level +1, 1, 2);
-% % %     stem([cD{2}, S.coeffs{2}(:,2)]); legend('Actual','Estimated');
-% % %     title('cD2'); grid on;
-% % %     subplot(level +1, 1, 3);
-% % %     stem([cA, S.coeffs{2}(:,1)]); legend('Actual','Estimated');
-% % %     title('cA'); grid on;
-% % %     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
-% % %     set(get(ax,'Title'),'Visible','on')
-% % %     title('System identification. Trasformed domain');
-% % %     h=get(ax,'Title');
-% % % 
-% % %     b_est = waverec([S.coeffs{2}(:,1); S.coeffs{2}(:,2); S.coeffs{1}], S.L, wtype);
-% % %     figure;
-% % %     stem([b, b_est]);
-% % %     legend('Actual','Estimated');
-% % %     title('System identification. Time domain');grid on;
-% % % 
-% % % elseif level == 1
-% % %     subplot(2, 1, 1);
-% % %     stem([cD{1}, S.coeffs{1}(:,2)]); legend('Actual','Estimated');
-% % %     title('cD'); grid on;
-% % %     subplot(2, 1, 2);
-% % %     stem([cA, S.coeffs{1}(:,1)]); legend('Actual','Estimated');
-% % %     title('cA'); grid on;
-% % %     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
-% % %     set(get(ax,'Title'),'Visible','on')
-% % %     title('System identification. Trasformed domain');
-% % %     h=get(ax,'Title');
-% % % 
-% % %     b_est = waverec([S.coeffs{1}(:,1); S.coeffs{1}(:,2)], S.L, wtype);
-% % %     figure;
-% % %     stem([b, b_est]);
-% % %     legend('Actual','Estimated');
-% % %     title('System identification. Time domain');grid on;
-% % % else
-% % %     fprintf('Set Level either 1 or 2\n');
-% % % end
 
-
+% %%
+% [C, L] = wavedec(b,level,wtype);
+% cD = detcoef(C,L,level,'cell');
+% cA = appcoef(C,L,wtype);
+% 
+% figure;
+% % % Plot system ID differencies
+% if level == 2
+%     subplot(level +1, 1, 1);
+%     stem([cD{1}, S.coeffs{1}]); legend('Actual','Estimated');
+%     title('cD1'); grid on;
+%     subplot(level +1, 1, 2);
+%     stem([cD{2}, S.coeffs{2}(:,2)]); legend('Actual','Estimated');
+%     title('cD2'); grid on;
+%     subplot(level +1, 1, 3);
+%     stem([cA, S.coeffs{2}(:,1)]); legend('Actual','Estimated');
+%     title('cA'); grid on;
+%     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
+%     set(get(ax,'Title'),'Visible','on')
+%     title('System identification. Trasformed domain');
+%     h=get(ax,'Title');
+% 
+%     b_est = waverec([S.coeffs{2}(:,1); S.coeffs{2}(:,2); S.coeffs{1}], S.L, wtype);
+%     figure;
+%     stem([b, b_est]);
+%     legend('Actual','Estimated');
+%     title('System identification. Time domain');grid on;
+% 
+% elseif level == 1
+%     subplot(2, 1, 1);
+%     stem([cD{1}, S.coeffs{1}(:,2)]); legend('Actual','Estimated');
+%     title('cD'); grid on;
+%     subplot(2, 1, 2);
+%     stem([cA, S.coeffs{1}(:,1)]); legend('Actual','Estimated');
+%     title('cA'); grid on;
+%     ax=axes('Units','Normal','Position',[.1 .1 .85 .85],'Visible','off');
+%     set(get(ax,'Title'),'Visible','on')
+%     title('System identification. Trasformed domain');
+%     h=get(ax,'Title');
+% 
+%     b_est = waverec([S.coeffs{1}(:,1); S.coeffs{1}(:,2)], S.L, wtype);
+%     figure;
+%     stem([b, b_est]);
+%     legend('Actual','Estimated');
+%     title('System identification. Time domain');grid on;
+% else
+%     fprintf('Set Level either 1 or 2\n');
+% end
+% 
+% 
+% 

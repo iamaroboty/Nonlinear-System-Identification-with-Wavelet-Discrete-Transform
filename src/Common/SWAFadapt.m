@@ -60,7 +60,7 @@ for n = 1:ITER
     U.tmp = u;
     Y.tmp = y;
     for i = 1:level
-        if mod(n,2^i/Ovr) == 0
+        if mod(n,2^i/(Ovr)) == 0
             if (i==1 && Ovr == 2)
                 HH = H./sqrt(2);
             else
@@ -106,11 +106,11 @@ for n = 1:ITER
                 FF = F;
             end
         if i == level
-            if mod(n,2^i/Ovr) == 0
+            if mod(n,2^i/(Ovr)) == 0
                 eDr{i} = FF*eD{i}' + eDr{i};
             end
         else
-            if mod(n,2^i/Ovr) == 0                
+            if mod(n,2^i/(Ovr)) == 0                
                 eDr{i} = FF*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i))] + eDr{i};
                 eDr{i+1} = [eDr{i+1}(2:end); 0];
             end            
