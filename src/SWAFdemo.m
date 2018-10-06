@@ -9,7 +9,7 @@ clear all;  close all;
 mu = 0.2;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db6';                   % Wavelet family
+wtype = 'db4';                   % Wavelet family
 Ovr = 1;
 
 
@@ -18,7 +18,7 @@ iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
-%b = sign(b);
+b = sign(b);
 
 
 % TESTING, a = delay.
@@ -49,7 +49,7 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 %S = SWAFinit(M, mu, level, wtype);   % Initialization
 S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
@@ -88,7 +88,7 @@ stem(real_resp);
 % axis([0 2*M -1.5 1.5])
 
 %% sine test signal 
-amplitude = 1; 
+amplitude = 1.2; 
 leng = 1;
 input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
 
@@ -164,3 +164,5 @@ plot(faxis, fftshift(fft_out_true));
 % % % else
 % % %     fprintf('Set Level either 1 or 2\n');
 % % % end
+
+

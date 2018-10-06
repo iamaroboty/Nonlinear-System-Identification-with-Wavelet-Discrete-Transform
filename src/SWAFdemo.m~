@@ -6,10 +6,10 @@ addpath 'Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-mu = 0.1;                      % Step size
+mu = 0.2;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db2';                   % Wavelet family
+wtype = 'db1';                   % Wavelet family
 Ovr = 1;
 
 
@@ -18,7 +18,7 @@ iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
-%b = sign(b)
+%b = sign(b);
 
 
 % TESTING, a = delay.
@@ -67,7 +67,7 @@ ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 %% time domain parameters
-fs = 100; % samples per sec
+fs = 1000; % samples per sec
 freq = 10; % frequency
 dt = 1/fs; 
 
@@ -78,7 +78,7 @@ subplot(2,1,1)
 stem(delta);
 title('Input Signal'); 
 % axis([0 10 -1.5 1.5])
-out_resp = SWAtest(delta, S, Ovr); 
+out_resp = SWAtest_crossfilt(delta, S, Ovr); 
 subplot(2,1,2)
 stem(out_resp);
 title('Output Signal-Estimated System vs True');

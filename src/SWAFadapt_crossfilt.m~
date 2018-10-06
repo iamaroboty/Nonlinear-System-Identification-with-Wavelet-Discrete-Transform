@@ -100,13 +100,15 @@ for n = 1:ITER
                     
                 end 
             else
-                eD{i} = [eD{i}(2:end); Y.cD{i}(1) - U.cD{i}'*w{i}];
+                eD{i} = [eD{i}(2:end); Y.cD{i}(1) - U.cD{i}'*w{i} + sum(U.cA{i}.*w_cross{i})];
                 
                 
                 if n >= AdaptStart(i)
 %                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*(U.cD{i}.*U.cD{i});
 %                     w{i} = w{i} + (mu*eD{i}(end)/((sum(pwr{i}) + alpha)))*U.cD{i};
                     w{i} = w{i} + (mu*eD{i}(end)/(U.cD{i}'*U.cD{i} + alpha))*U.cD{i};
+                    
+                    w_cross{i} = w_cross{i} + (mu*eD{i}(end)/(U.cA{i}'*U.cA{i} + alpha))*U.cA{i};
                 end
             end           
             S.iter{i} = S.iter{i} + 1;                
@@ -137,7 +139,7 @@ for n = 1:ITER
 end
 
 en = en(1:ITER);
-S.coeffs = èw;
+S.coeffs = [w, w_cross];
 end
 
 %% Full packet 2 layer : TESTING
