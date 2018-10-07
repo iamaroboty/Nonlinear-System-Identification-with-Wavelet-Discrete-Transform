@@ -9,21 +9,22 @@ clear all;  close all;
 mu = 0.01;                        % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db1';                   % Wavelet family
-J = 2;
+wtype = 'db8';                   % Wavelet family
+J = 1;
+Q = 1;                           % Flag for QMF filter bank
 dwtmode('zpd')
 
 % Run parameters
-iter = 2.0*80000;                % Number of iterations
+iter = 4.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 % b = sign(b);
 
 % TESTING, a = delay.
- a = 0;
- b = zeros(M,1);
- b(a+1) = 1;
+% a = 0;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 %% low pass filter system 
 % norm_freq = 0.39;
@@ -49,10 +50,9 @@ tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-S = SWAFinit(M, mu, level, wtype);   % Initialization
-% S = QMFInit(M, mu, level, wtype); 
+S = DSWAFinit(M, mu, level, wtype, J, Q);   % Initialization
 S.unknownsys = b; 
-[en, S] = DSWAFadapt(un, dn, S, J); 
+[en, S] = DSWAFadapt(un, dn, S); 
 err_sqr = en.^2;
 % EML = S.eml.^2;                     % System error norm (normalized)
     
