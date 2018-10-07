@@ -15,25 +15,14 @@ alpha = S.alpha;                  % Small constant (1e-6)
 %F = S.synthesis;                  % Synthesis filter bank
 
 level = S.levels;                 % Wavelet Levels
-                    
+L = S.L;                          % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 
-H = dtfilters('filters2');
+H = S.analysis;
 
 len = size(H,1);
 
 F = flipud(H);  
-S.analysis = H;
-S.synthesis = F; 
-
-
-L = [M; zeros(level,1)];
-for i= 1:level
-    L = [floor((L(1)+len-1)/2); L(1:end-1)];
-end
-S.L = [L(1); L]';
-L = S.L;
-
 
 % Init Arrays
 for i= 1:level
@@ -43,31 +32,18 @@ for i= 1:level
     U.cD1{i} = zeros(L(end-i),1);  
     U.cD2{i} = zeros(L(end-i),1);  
 
-    
-    Y.cA{i} = zeros(L(end-i),1);
-    Y.cD1{i} = zeros(L(end-i),1);
-    Y.cD2{i} = zeros(L(end-i),1);
-    
 
     eD{i} = zeros(L(end-i),2);      % Error signa, transformed domain
     eDr{i} = zeros(len,1);          % Error signal, time domain
     delays(i) = 2^i-1;              % Level delay for synthesis   
     w{i} = zeros(L(end-i),2);       % Subband adaptive filter coefficient, initialize to zeros    
-    w{i}(1,1) = 1;
-    w{i}(1,2) = 1;
 
     
 end 
-w{i} = zeros(L(end-i),3);           % Last level has 2 columns, cD and cA
-
-w{i}(1,1) = 1;
-w{i}(1,2) = 1;
-w{i}(1,3) = 1;
-
-
+w{i} = S.coeffs{i};          % Last level has 2 columns, cD and cA
 eD{i} = zeros(1,3);                 % Last level has 2 columns, cD and cA
 U.tmp = zeros(len,1);
-Y.tmp = zeros(len,1);
+
 
 
 %pwr = w;
@@ -103,13 +79,13 @@ for n = 1:ITER
             U.Z = H'*U.tmp;
             U.cA{i} = [U.Z(1); U.cA{i}(1:end-1)];
             U.cD1{i} = [U.Z(2); U.cD1{i}(1:end-1)]; 
-            U.cD2{i} = [U.Z(3); U.cD2{i}(1:end-1)]; 
+            U.cD2{i} = [U.Z(2); U.cD2{i}(1:end-1)]; 
             U.tmp = U.cA{i}(1:len);
                     
             Y.Z = H'*Y.tmp;
             Y.cA{i} = [Y.Z(1); Y.cA{i}(1:end-1)];
             Y.cD1{i} = [Y.Z(2); Y.cD1{i}(1:end-1)]; 
-            Y.cD2{i} = [Y.Z(3); Y.cD2{i}(1:end-1)]; 
+            Y.cD2{i} = [Y.Z(2); Y.cD2{i}(1:end-1)]; 
             Y.tmp = Y.cA{i}(1:len);
              
             if i == level
@@ -155,7 +131,7 @@ for n = 1:ITER
             end
         else
             if mod(n,2^i) == 0                
-                eDr{i} = F*[eDr{i+1}(1); eD{i}((end-(len-1)*delays(end-i)):end,:)' ] + eDr{i}; %% problema qui cambiare
+                eDr{i} = F*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i),:)' ] + eDr{i};
                 eDr{i+1} = [eDr{i+1}(2:end); 0];
                 
               

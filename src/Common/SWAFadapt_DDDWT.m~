@@ -15,62 +15,60 @@ alpha = S.alpha;                  % Small constant (1e-6)
 %F = S.synthesis;                  % Synthesis filter bank
 
 level = S.levels;                 % Wavelet Levels
-L = S.L;                          % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
+                    
 
 
-df = dtfilters('dtf2');
+H = dtfilters('filters2');
 
-fdf = df{1}; 
-df = df{2}; 
+len = size(H,1);
 
-[len, ~] = size(fdf{1});
+F = flipud(H);  
+S.analysis = H;
+S.synthesis = F; 
 
+
+L = [M; zeros(level,1)];
+for i= 1:level
+    L = [floor((L(1)+len-1)/2); L(1:end-1)];
+end
+S.L = [L(1); L]';
+L = S.L;
 
 
 % Init Arrays
 for i= 1:level
           
-    U1.cD{i} = zeros(L(end-i),1);    
-    U1.cA{i} = zeros(L(end-i),1); 
+     
+    U.cA{i} = zeros(L(end-i),1); 
+    U.cD1{i} = zeros(L(end-i),1);  
+    U.cD2{i} = zeros(L(end-i),1);  
+
     
-    U2.cD{i} = zeros(L(end-i),1);    
-    U2.cA{i} = zeros(L(end-i),1); 
+    Y.cA{i} = zeros(L(end-i),1);
+    Y.cD1{i} = zeros(L(end-i),1);
+    Y.cD2{i} = zeros(L(end-i),1);
     
-    U3.cD{i} = zeros(L(end-i),1);    
-    U3.cA{i} = zeros(L(end-i),1); 
-    
-    Y1.cD{i} = zeros(L(end-i),1);
-    Y1.cA{i} = zeros(L(end-i),1);
-    
-    Y2.cD{i} = zeros(L(end-i),1);
-    Y2.cA{i} = zeros(L(end-i),1);
-    
-    Y3.cD{i} = zeros(L(end-i),1);
-    Y3.cA{i} = zeros(L(end-i),1);
-   
-    
-    eD{i} = zeros(L(end-i),1);      % Error signa, transformed domain
+
+    eD{i} = zeros(L(end-i),2);      % Error signa, transformed domain
     eDr{i} = zeros(len,1);          % Error signal, time domain
-    
-    delays(i) = 2^i-1;              % Level delay for synthesis
-    w1{i} = zeros(L(end-i),1);       % Subband adaptive filter coefficient, initialize to zeros    
-    
-    w2{i} = zeros(L(end-i),1);
+    delays(i) = 2^i-1;              % Level delay for synthesis   
+    w{i} = zeros(L(end-i),2);       % Subband adaptive filter coefficient, initialize to zeros    
+    w{i}(1,1) = 1;
+    w{i}(1,2) = 1;
+
     
 end 
-w1{i} = zeros(L(end-i),2);           % Last level has 2 columns, cD and cA
-eD1{i} = zeros(1,2);                 % Last level has 2 columns, cD and cA
-U1.tmp = zeros(len,1);
-Y1.tmp = zeros(len,1);
-U1.Z = zeros(2,1);
-Y1.Z = zeros(2,1);
+w{i} = zeros(L(end-i),3);           % Last level has 2 columns, cD and cA
 
-w2{i} = zeros(L(end-i),2);           % Last level has 2 columns, cD and cA
-eD2{i} = zeros(1,2);                 % Last level has 2 columns, cD and cA
-U2.tmp = zeros(len,1);
-Y2.tmp = zeros(len,1);
-U2.Z = zeros(2,1);
-Y2.Z = zeros(2,1);
+w{i}(1,1) = 1;
+w{i}(1,2) = 1;
+w{i}(1,3) = 1;
+
+
+eD{i} = zeros(1,3);                 % Last level has 2 columns, cD and cA
+U.tmp = zeros(len,1);
+Y.tmp = zeros(len,1);
+
 
 %pwr = w;
 %beta = 1./L(2:end-1);
@@ -95,62 +93,51 @@ for n = 1:ITER
     y = [dn(n); y(1:end-1)];        % Desired response vector        
 
     % Analysis Bank
-    U1.tmp = u;
-    Y1.tmp = y;
-    
-    U2.tmp = u;
-    Y2.tmp = y;
+    U.tmp = u;
+    Y.tmp = y;
+   
     
     for i = 1:level
         if mod(n,2^i) == 0
     
-            U1.Z = H1{i}'*U1.tmp;
-            U1.cD{i} = [U1.Z(2); U1.cD{i}(1:end-1)]; 
-            U1.cA{i} = [U1.Z(1); U1.cA{i}(1:end-1)];
-            U1.tmp = U1.cA{i}(1:len);
-            
-            U2.Z = H2{i}'*U2.tmp;
-            U2.cD{i} = [U2.Z(2); U2.cD{i}(1:end-1)]; 
-            U2.cA{i} = [U2.Z(1); U2.cA{i}(1:end-1)];
-            U2.tmp = U2.cA{i}(1:len);
-            
-            
-            Y1.Z = H1{i}'*Y1.tmp;
-            Y1.cD{i} = [Y1.Z(2); Y1.cD{i}(1:end-1)]; 
-            Y1.cA{i} = [Y1.Z(1); Y1.cA{i}(1:end-1)];
-            Y1.tmp = Y1.cA{i}(1:len);
-            
-            Y2.Z = H2{i}'*Y2.tmp;
-            Y2.cD{i} = [Y2.Z(2); Y2.cD{i}(1:end-1)]; 
-            Y2.cA{i} = [Y2.Z(1); Y2.cA{i}(1:end-1)];
-            Y2.tmp = Y2.cA{i}(1:len);
-            
-            
+            U.Z = H'*U.tmp;
+            U.cA{i} = [U.Z(1); U.cA{i}(1:end-1)];
+            U.cD1{i} = [U.Z(2); U.cD1{i}(1:end-1)]; 
+            U.cD2{i} = [U.Z(3); U.cD2{i}(1:end-1)]; 
+            U.tmp = U.cA{i}(1:len);
+                    
+            Y.Z = H'*Y.tmp;
+            Y.cA{i} = [Y.Z(1); Y.cA{i}(1:end-1)];
+            Y.cD1{i} = [Y.Z(2); Y.cD1{i}(1:end-1)]; 
+            Y.cD2{i} = [Y.Z(3); Y.cD2{i}(1:end-1)]; 
+            Y.tmp = Y.cA{i}(1:len);
+             
             if i == level
-                eD1{i} = Y1.Z' - sum(([U1.cA{i}, U1.cD{i}]).*w1{i});
+               
+                filt_input =  [U.cA{i}, U.cD1{i},U.cD2{i} ];
                 
-                eD2{i} = Y2.Z' - sum(([U2.cA{i}, U2.cD{i}]).*w2{i});
+                eD{i} = Y.Z' - sum((filt_input).*w{i});
+                    
                 
                 if n >= AdaptStart(i)
 %                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}]);
 %                     w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./((sum(pwr{i})+alpha)); 
-                    w1{i} = w1{i} + mu*[U1.cA{i},U1.cD{i}].*eD1{i}./(sum([U1.cA{i},U1.cD{i}].*[U1.cA{i},U1.cD{i}])+alpha); 
+                    w{i} = w{i} + mu*filt_input.*eD{i}./(sum(filt_input.*filt_input)+alpha); 
                     
-                    w2{i} = w2{i} + mu*[U2.cA{i},U2.cD{i}].*eD2{i}./(sum([U2.cA{i},U2.cD{i}].*[U2.cA{i},U2.cD{i}])+alpha); 
+                  
                     
                 end 
             else
-                eD1{i} = [eD1{i}(2:end); Y1.cD{i}(1) - U1.cD{i}'*w1{i}]; 
                 
                 
-                eD2{i} = [eD2{i}(2:end); Y2.cD{i}(1) - U2.cD{i}'*w2{i}]; 
+                eD{i} = [eD{i}(2:end,:); [Y.cD1{i}(1), Y.cD2{i}(1)]  - sum([U.cD1{i}(1), U.cD2{i}(1)].*w{i})]; 
                 
                 
                 if n >= AdaptStart(i)
 %                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*(U.cD{i}.*U.cD{i});
 %                     w{i} = w{i} + (mu*eD{i}(end)/((sum(pwr{i}) + alpha)))*U.cD{i};
-                    w1{i} = w1{i} + (mu*eD1{i}(end)/(U1.cD{i}'*U1.cD{i} + alpha))*U1.cD{i};
-                    w2{i} = w2{i} + (mu*eD2{i}(end)/(U2.cD{i}'*U2.cD{i} + alpha))*U2.cD{i};
+                    w{i} = w{i} + (mu*eD{i}(end)/(sum([U.cD1{i}(1), U.cD2{i}(1)].*[U.cD1{i}(1), U.cD2{i}(1)])+ alpha))*[U.cD1{i}(1), U.cD2{i}(1)];
+                    
                     
                 end
             end           
@@ -162,27 +149,25 @@ for n = 1:ITER
     for i = level:-1:1     
         if i == level
             if mod(n,2^i) == 0
-                eDr1{i} = F1{i}*eD1{i}' + eDr1{i};
-                eDr2{i} = F2{i}*eD2{i}' + eDr2{i};
+                eDr{i} = F*eD{i}' + eDr{i};
+               
                 
             end
         else
             if mod(n,2^i) == 0                
-                eDr1{i} = F1{i}*[eDr1{i+1}(1); eD1{i}(end-(len-1)*delays(end-i))] + eDr1{i};
-                eDr1{i+1} = [eDr1{i+1}(2:end); 0];
+                eDr{i} = F*[eDr{i+1}(1); eD{i}((end-(len-1)*delays(end-i)):end,:)' ] + eDr{i}; %% problema qui cambiare
+                eDr{i+1} = [eDr{i+1}(2:end); 0];
                 
-                eDr2{i} = F2{i}*[eDr2{i+1}(1); eD2{i}(end-(len-1)*delays(end-i))] + eDr2{i};
-                eDr2{i+1} = [eDr2{i+1}(2:end); 0];
+              
             end            
         end
     end   
-    en(n) = 0.5*(eDr1{i}(1)+ eDr2{i}(1));
-    eDr1{i} = [eDr1{i}(2:end); 0];       
-    eDr2{i} = [eDr2{i}(2:end); 0];  
+    en(n) = eDr{i}(1);
+    eDr{i} = [eDr{i}(2:end); 0];        
 end
 
 en = en(1:ITER);
-S.coeffs = [w1, w2];
+S.coeffs = w;
 end
 
 %% Full packet 2 layer : TESTING

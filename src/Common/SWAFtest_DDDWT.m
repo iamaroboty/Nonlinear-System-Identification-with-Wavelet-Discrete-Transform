@@ -1,4 +1,4 @@
-function [en,S] = SWAFadapt_DDDWT(un,dn,S)
+function [en,S] = SWAFtest_DDDWT(un,S)
 % SWAFadapt         Wavelet-transformed Subband Adaptive Filter (WAF)                 
 %
 % Arguments:
@@ -7,33 +7,18 @@ function [en,S] = SWAFadapt_DDDWT(un,dn,S)
 % S                 Adptive filter parameters as defined in WSAFinit.m
 % en                History of error signal
 
-M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
-mu = S.step;                      % Step Size
-AdaptStart = S.AdaptStart;        % Transient
-alpha = S.alpha;                  % Small constant (1e-6)
 %H = S.analysis;                   % Analysis filter bank
 %F = S.synthesis;                  % Synthesis filter bank
 
 level = S.levels;                 % Wavelet Levels
-                    
+L = S.L;                          % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 
-H = dtfilters('filters2');
+H = S.analysis;
 
 len = size(H,1);
 
-F = flipud(H);  
-S.analysis = H;
-S.synthesis = F; 
-
-
-L = [M; zeros(level,1)];
-for i= 1:level
-    L = [floor((L(1)+len-1)/2); L(1:end-1)];
-end
-S.L = [L(1); L]';
-L = S.L;
-
+F = S.synthesis; 
 
 % Init Arrays
 for i= 1:level
@@ -43,38 +28,25 @@ for i= 1:level
     U.cD1{i} = zeros(L(end-i),1);  
     U.cD2{i} = zeros(L(end-i),1);  
 
-    
-    Y.cA{i} = zeros(L(end-i),1);
-    Y.cD1{i} = zeros(L(end-i),1);
-    Y.cD2{i} = zeros(L(end-i),1);
-    
 
     eD{i} = zeros(L(end-i),2);      % Error signa, transformed domain
     eDr{i} = zeros(len,1);          % Error signal, time domain
     delays(i) = 2^i-1;              % Level delay for synthesis   
-    w{i} = zeros(L(end-i),2);       % Subband adaptive filter coefficient, initialize to zeros    
-    w{i}(1,1) = 1;
-    w{i}(1,2) = 1;
+    w{i} = S.coeffs{i} ;      % Subband adaptive filter coefficient, initialize to zeros    
 
     
 end 
-w{i} = zeros(L(end-i),3);           % Last level has 2 columns, cD and cA
-
-w{i}(1,1) = 1;
-w{i}(1,2) = 1;
-w{i}(1,3) = 1;
-
-
+w{i} = S.coeffs{i};          % Last level has 2 columns, cD and cA
 eD{i} = zeros(1,3);                 % Last level has 2 columns, cD and cA
 U.tmp = zeros(len,1);
-Y.tmp = zeros(len,1);
+
 
 
 %pwr = w;
 %beta = 1./L(2:end-1);
 
 u = zeros(len,1);                 % Tapped-delay line of input signal (Analysis FB)  
-y = zeros(len,1);                 % Tapped-delay line of desired response (Analysis FB)
+
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
@@ -90,11 +62,11 @@ en = zeros(1,ITER);               % Initialize error sequence to zero
 
 for n = 1:ITER    
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
-    y = [dn(n); y(1:end-1)];        % Desired response vector        
+       
 
     % Analysis Bank
     U.tmp = u;
-    Y.tmp = y;
+
    
     
     for i = 1:level
@@ -106,40 +78,22 @@ for n = 1:ITER
             U.cD2{i} = [U.Z(3); U.cD2{i}(1:end-1)]; 
             U.tmp = U.cA{i}(1:len);
                     
-            Y.Z = H'*Y.tmp;
-            Y.cA{i} = [Y.Z(1); Y.cA{i}(1:end-1)];
-            Y.cD1{i} = [Y.Z(2); Y.cD1{i}(1:end-1)]; 
-            Y.cD2{i} = [Y.Z(3); Y.cD2{i}(1:end-1)]; 
-            Y.tmp = Y.cA{i}(1:len);
+           
              
             if i == level
                
-                filt_input =  [U.cA{i}, U.cD1{i},U.cD2{i} ];
+                filt_input =  [U.cA{i}, U.cD1{i},U.cD2{i}];
                 
-                eD{i} = Y.Z' - sum((filt_input).*w{i});
+                eD{i} =  sum((filt_input).*w{i});
                     
-                
-                if n >= AdaptStart(i)
-%                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}]);
-%                     w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./((sum(pwr{i})+alpha)); 
-                    w{i} = w{i} + mu*filt_input.*eD{i}./(sum(filt_input.*filt_input)+alpha); 
-                    
-                  
-                    
-                end 
+
+               
             else
                 
                 
-                eD{i} = [eD{i}(2:end,:); [Y.cD1{i}(1), Y.cD2{i}(1)]  - sum([U.cD1{i}(1), U.cD2{i}(1)].*w{i})]; 
-                
-                
-                if n >= AdaptStart(i)
-%                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*(U.cD{i}.*U.cD{i});
-%                     w{i} = w{i} + (mu*eD{i}(end)/((sum(pwr{i}) + alpha)))*U.cD{i};
-                    w{i} = w{i} + (mu*eD{i}(end)/(sum([U.cD1{i}(1), U.cD2{i}(1)].*[U.cD1{i}(1), U.cD2{i}(1)])+ alpha))*[U.cD1{i}(1), U.cD2{i}(1)];
-                    
-                    
-                end
+                eD{i} = [eD{i}(2:end,:);  sum([U.cD1{i}(1), U.cD2{i}(1)].*w{i})]; 
+                   
+              
             end           
             S.iter{i} = S.iter{i} + 1;                
         end
@@ -155,7 +109,7 @@ for n = 1:ITER
             end
         else
             if mod(n,2^i) == 0                
-                eDr{i} = F*[eDr{i+1}(1); eD{i}((end-(len-1)*delays(end-i)):end,:)' ] + eDr{i}; %% problema qui cambiare
+                eDr{i} = F*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i),:)' ] + eDr{i};
                 eDr{i+1} = [eDr{i+1}(2:end); 0];
                 
               
