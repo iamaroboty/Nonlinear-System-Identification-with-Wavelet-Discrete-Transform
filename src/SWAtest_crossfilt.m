@@ -30,9 +30,11 @@ for i= 1:level
     eDr{i} = zeros(len,1);          % Error signal, time domain
     delays(i) = 2^i-1;              % Level delay for synthesis
     w{i} = S.coeffs{i};             % Subband adaptive filter coefficient, initialize to zeros
+    w_cross{i} = S.coeffs{level+i};
+    
 end 
-w{i} = S.coeffs{1};               % Last level has 2 columns, cD and cA
-w_cross{i} = S.coeffs{2};
+w{i} = S.coeffs{i};               % Last level has 2 columns, cD and cA
+w_cross{i} = S.coeffs{end};
 
 eD{i} = zeros(1,2);                 % Last level has 2 columns, cD and cA
 U.tmp = zeros(len,1);
@@ -76,7 +78,7 @@ for n = 1:ITER
 
                 
             else
-                eD{i} = [eD{i}(2:end); U.cD{i}'*w{i}]; 
+                eD{i} = [eD{i}(2:end); U.cD{i}'*w{i} + sum(U.cA{i}.*w_cross{i})]; 
 
             end
            
