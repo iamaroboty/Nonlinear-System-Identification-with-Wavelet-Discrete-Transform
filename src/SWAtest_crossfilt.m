@@ -1,4 +1,4 @@
-function [y_out] = SWAtest(un,S, Ovr)
+function [y_out] = SWAtest_crossfilt(un,S, Ovr)
 % TESTING FOR 2 LEVELS, EASY EXTENSION TO GENERAL LEVEL AND WAVELET
 % FUNCTIONS
 % SWAFadapt         Wavelet-transformed Subband Adaptive Filter (WAF)                 

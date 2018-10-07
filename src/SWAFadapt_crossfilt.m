@@ -89,7 +89,7 @@ for n = 1:ITER
                 cross_x1 = sum(U.cD{i}.*w_cross{i}(:,1));
                 cross_x2 = sum(U.cA{i}.*w_cross{i}(:,2));
                 
-                eD{i} = Y.Z' - [x1+cross_x1, x2+cross_x2]; %[E0, E1]; 
+                eD{i} = Y.Z' - [x1+cross_x1, x2+cross_x2]; %[E0, E1]; %Z = cA || cD;
                 
                 if n >= AdaptStart(i)
 %                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}]);
@@ -100,6 +100,7 @@ for n = 1:ITER
                     
                 end 
             else
+                U.cA{i}(1) = U.cA{i}(1)+ U.cD{i}'*(-0.985.*w_cross{i});
                 eD{i} = [eD{i}(2:end); Y.cD{i}(1) - (U.cD{i}'*w{i} + sum(U.cA{i}.*w_cross{i}))];
                 %U.cA{i} = [U.cA{i}(2:end); U.cA{i}(1) + sum(U.cD{i}.*(-1.*w_cross{i}))] ;
                 
