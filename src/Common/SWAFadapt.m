@@ -7,6 +7,10 @@ function [en,S] = SWAFadapt(un,dn,S, Ovr)
 % S                 Adptive filter parameters as defined in WSAFinit.m
 % en                History of error signal
 
+if nargin < 4
+    Ovr = 1;
+end
+
 M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
 mu = S.step;                      % Step Size
 AdaptStart = S.AdaptStart;        % Transient

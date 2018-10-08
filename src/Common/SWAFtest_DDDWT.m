@@ -1,5 +1,5 @@
 function [en,S] = SWAFtest_DDDWT(un,S)
-% SWAFadapt         Wavelet-transformed Subband Adaptive Filter (WAF)                 
+% DDDWTAFtest       Wavelet-transformed Subband Adaptive Filter (WAF)                 
 %
 % Arguments:
 % un                Input signal
@@ -7,27 +7,18 @@ function [en,S] = SWAFtest_DDDWT(un,S)
 % S                 Adptive filter parameters as defined in WSAFinit.m
 % en                History of error signal
 
-%H = S.analysis;                   % Analysis filter bank
-%F = S.synthesis;                  % Synthesis filter bank
-
 level = S.levels;                 % Wavelet Levels
 L = S.L;                          % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
-
-
 H = S.analysis;
-
 len = size(H,1);
-
 F = S.synthesis; 
 
 % Init Arrays
-for i= 1:level
-          
+for i= 1:level          
      
     U.cA{i} = zeros(L(end-i),1); 
     U.cD1{i} = zeros(L(end-i),1);  
     U.cD2{i} = zeros(L(end-i),1);  
-
 
     eD{i} = zeros(L(end-i),2);      % Error signa, transformed domain
     eDr{i} = zeros(len,1);          % Error signal, time domain
@@ -40,60 +31,34 @@ w{i} = S.coeffs{i};          % Last level has 2 columns, cD and cA
 eD{i} = zeros(1,3);                 % Last level has 2 columns, cD and cA
 U.tmp = zeros(len,1);
 
-
-
 %pwr = w;
 %beta = 1./L(2:end-1);
 
 u = zeros(len,1);                 % Tapped-delay line of input signal (Analysis FB)  
 
-
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
 
-% % ONLY FOR TESTING PURPOSE
-% t=0:0.001:1;
-% un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
-
-% Testing freezed filters
-% w{1} = zeros(L(end-1),2);
-% w{1}(1,:) = 1;
-
 for n = 1:ITER    
-    u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
-       
+    u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'       
 
     % Analysis Bank
-    U.tmp = u;
-
-   
+    U.tmp = u;   
     
     for i = 1:level
-        if mod(n,2^i) == 0
-    
+        if mod(n,2^i) == 0  
             U.Z = H'*U.tmp;
             U.cA{i} = [U.Z(1); U.cA{i}(1:end-1)];
             U.cD1{i} = [U.Z(2); U.cD1{i}(1:end-1)]; 
             U.cD2{i} = [U.Z(3); U.cD2{i}(1:end-1)]; 
             U.tmp = U.cA{i}(1:len);
-                    
-           
-             
-            if i == level
-               
-                filt_input =  [U.cA{i}, U.cD1{i},U.cD2{i}];
-                
-                eD{i} =  sum((filt_input).*w{i});
-                    
-
-               
-            else
-                
-                
-                eD{i} = [eD{i}(2:end,:);  sum([U.cD1{i}(1), U.cD2{i}(1)].*w{i})]; 
-                   
-              
+                                            
+            if i == level               
+                filt_input =  [U.cA{i}, U.cD1{i},U.cD2{i}];                
+                eD{i} =  sum((filt_input).*w{i});                                   
+            else                                
+                eD{i} = [eD{i}(2:end,:);  sum([U.cD1{i}, U.cD2{i}].*w{i})];                                  
             end           
             S.iter{i} = S.iter{i} + 1;                
         end
@@ -103,25 +68,18 @@ for n = 1:ITER
     for i = level:-1:1     
         if i == level
             if mod(n,2^i) == 0
-                eDr{i} = F*eD{i}' + eDr{i};
-               
-                
+                eDr{i} = F*eD{i}' + eDr{i};                               
             end
         else
             if mod(n,2^i) == 0                
                 eDr{i} = F*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i),:)' ] + eDr{i};
-                eDr{i+1} = [eDr{i+1}(2:end); 0];
-                
-              
+                eDr{i+1} = [eDr{i+1}(2:end); 0];                              
             end            
         end
     end   
     en(n) = eDr{i}(1);
     eDr{i} = [eDr{i}(2:end); 0];        
 end
-
-en = en(1:ITER);
-S.coeffs = w;
 end
 
 %% Full packet 2 layer : TESTING

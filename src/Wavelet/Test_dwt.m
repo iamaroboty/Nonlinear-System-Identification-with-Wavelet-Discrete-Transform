@@ -6,7 +6,7 @@ clear all; close all
 d = 256;        %Total signal length
 t=0:0.001:10;
 f=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-f = f(1:d)';
+f = f(1:d)'+0.632;
 % f=f(1:256);
 %f = [1; -10; 324; 48; -483; 4; 7; -5532; 34; 8889; -57; 54];
 %d=length(f);
@@ -20,10 +20,10 @@ f = f(1:d)';
 
 % f = chirp((0:0.001:2),0,1,250);
 % f = f(1:d);
-wtype = 'db1';
-level = 4;
+wtype = 'db2';
+level = 2;
 wdt_mod = 'zpd';
-U = 2;
+U = 1;
 
 %% Generazione dei coefficienti del filtro
 [low_d,high_d,low_r,high_r] = wfilters(wtype);
@@ -41,6 +41,11 @@ toc
 D = detcoef(C,L,'cells');
 A = appcoef(C, L, wtype);
 errC = max(abs(f-fr))
+
+%% MATLAB FUNCTION (this is like "pre" dwt mode)
+wt = dddtree('dwt',f,level,H);
+xrec = idddtree(wt);
+err = max(abs(f-xrec))
 
 %% Decomposizione con Matrice W
 % tic
@@ -231,24 +236,31 @@ errC = max(abs(f-fr))
 % F = flip(H);
 %% Real time DWT, generic YEEEE
 tic
-delay = (2^level-1)*(length(H)-1);            %total delay (analysis + synthesis)
+delay = (2^level-1)*(length(H)-1)+1;            %total delay (analysis + synthesis)
 lf = length(H)-1;
 x = zeros(length(H),1);
 xDD = x;
 yn = zeros(d+delay, 1);
-fpad = [f; zeros(delay, 1)];
+fpad = [f; zeros(delay,1)];
 
 % Decompose approximation and detail coefficient
-ld = length(low_d);
-LL = [d; zeros(level,1)]; 
-for i= 1:level
-    LL = [floor((LL(1)+ld-1)/2); LL(1:end-1)];
-end
-LL = U.*[LL(1); LL]';
+%mode = zpd
+% ld = length(low_d);
+% LL = [d; zeros(level,1)]; 
+% for i= 1:level
+%     LL = [floor((LL(1)+ld-1)/2); LL(1:end-1)];
+%     delays(i) = 2^i-1; 
+% end
+% LL = U.*[LL(1); LL]';
 
-for i = 1:level
-    delays(i) = 2^i-1; 
+%mode = per [correct dimension: (lf:end-1)]
+LL = [d; zeros(level,1)];
+for i= 1:level
+    LL = [d/(2^i); LL(1:end-1)];
+    delays(i) = 2^i-1;
 end
+LL = [LL(1); LL]'; 
+
 
 for i = 1:level
     cD{i} = zeros(LL(end-i)+lf*delays(end-i+1),1);
@@ -257,9 +269,16 @@ for i = 1:level
 end    
 xD = zeros(2,1);
 
+% rst = [0.93907 0.29767 -0.17186]; efg = [0.40345 0.69879 0.59069];
+% uvw = [-0.34372 0.81326 -0.46954]; xyz = [0.25535 0.51155 -0.80690];
+% H = [rst, [0 0 0]; uvw, [0 0 0]; 0, H(:,1)', 0; 0, H(:,2)', 0; [ 0 0 0], efg; [ 0 0 0], xyz];
 
 for n = 1:d+delay
-    x = [fpad(n); x(1:end-1)];
+    if n == 1
+        x = [zeros(len,1)];
+    else
+        x = [fpad(n-1); x(1:end-1)];
+    end
     
     tmp = x;
     for i = 1:level

@@ -6,39 +6,23 @@ addpath 'Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-<<<<<<< HEAD
-mu = 0.1;                      % Step size
+mu = 0.3;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
 wtype = 'db8';                   % Wavelet family
-Ovr = 1;
-=======
-mu = 0.4;                      % Step size
-M = 256;                         % Length of unknown system response
-
-
-level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db16';                   % Wavelet family
-Ovr = 4;
-
->>>>>>> 8e2ba6c0f0787d92e029ee8d162f41f8943cd409
-
+Ovr = 2;                        % Oversample factor
 
 % Run parameters
-iter = 8.0*80000;                % Number of iterations
+iter = 2.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
-
 %b = sign(b);
-% b = sign(b);
-
-
 
 % TESTING, a = delay.
- %a = 2;
- %b = zeros(M,1);
- %b(a+1) = 1;
+% a = 1;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 %% low pass filter system 
 % norm_freq = 0.39;
@@ -62,17 +46,11 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-<<<<<<< HEAD
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-% S = SWAFinit(M, mu, level, wtype);   % Initialization
-=======
-
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
-%S = SWAFinit(M, mu, level, wtype);   % Initialization
->>>>>>> 8e2ba6c0f0787d92e029ee8d162f41f8943cd409
-S = QMFInit(M, mu, level, wtype); 
+S = SWAFinit(M, mu, level, wtype);   % Initialization
+% S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
-[en, S] = SWAFadapt_DDDWT(un, dn, S);                 % Perform WSAF Algorithm 
+[en, S] = SWAFadapt(un, dn, S, Ovr);                 % Perform WSAF Algorithm 
 
 err_sqr = en.^2;
     
@@ -98,13 +76,13 @@ subplot(2,1,1)
 stem(delta);
 title('Input Signal'); 
 % axis([0 10 -1.5 1.5])
-out_resp = SWAFtest_DDDWT(delta, S); 
+out_resp = SWAtest(delta, S, Ovr); 
 subplot(2,1,2)
 stem(out_resp);
 title('Output Signal-Estimated System vs True');
 hold on; 
 real_resp = filter(b, 1, delta);
-stem(real_resp); 
+stem(real_resp); legend('Estim', 'True'); legend('show')
 % axis([0 2*M -1.5 1.5])
 
 %% sine test signal 
@@ -116,13 +94,13 @@ figure;
 subplot(2,2,1)
 plot(input_sine);
 title('Input Signal'); 
-out_sine = SWAFtest_DDDWT(input_sine, S); 
+out_sine = SWAtest(input_sine, S, Ovr); 
 subplot(2,2,2)
 plot(out_sine);
 title('Output Signal - Estimated System vs True');
 hold on; 
 real_sys = filter(b,1,input_sine);
-plot(real_sys); legend('Estim', 'True');
+plot(real_sys); legend('Estim', 'True'); legend('show')
 
 %% FFT 
 N = 2*fs;
