@@ -64,16 +64,11 @@ for n = 1:ITER
                 cross_x1 = sum(U.cD{i}.*w_cross{i}(:,1));
                 cross_x2 = sum(U.cA{i}.*w_cross{i}(:,2));
                 
-                eD{i} = [x1+cross_x1, x2+cross_x2];
-
-                
+                eD{i} = [x1+cross_x1, x2+cross_x2];                
             else
                 eD{i} = [eD{i}(2:end); U.cD{i}'*w{i} + sum(U.cA{i}.*w_cross{i})]; 
-
-            end
-           
-            S.iter{i} = S.iter{i} + 1;
-                
+            end           
+            S.iter{i} = S.iter{i} + 1;                
         end
     end    
 
@@ -85,7 +80,7 @@ for n = 1:ITER
                 eDr{i} = F*eD{i}' + eDr{i};
             end
         else
-            if mod(n,2^i/Ovr) == 0                
+            if mod(n,2^i) == 0                
                 eDr{i} = F*[eDr{i+1}(1); eD{i}(end-(len-1)*delays(end-i))] + eDr{i};
                 eDr{i+1} = [eDr{i+1}(2:end); 0];
             end            

@@ -1,4 +1,5 @@
 % MWSAFdemo          Multiband Wavelet-domain Adaptive Filter Demo
+% ONLY WORKS WITH HAAR WAVELET FAMILY
 % 
 % by A. Castellani & S. Cornell [Università Politecnica delle Marche]
 
@@ -9,8 +10,9 @@ clear all; close all;
 
 mu = 0.1;                        % Step size (0<mu<2) % mu<0.001
 M = 256;                         % Length of adaptive weight vector
-level = 4;                       % Levels of Wavelet decomposition
+level = 3;                       % Levels of Wavelet decomposition
 wtype = 'db1';                   % Mother Wavelet type
+dwt_mode = 'zpd';
 
 % Run parameters
 
@@ -18,10 +20,10 @@ iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
-% TESTING, a = delay.
-a = 0;
-b = zeros(M,1);
-b(a) = 1;
+% % TESTING, a = delay.
+% a = 0;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 tic;
 
@@ -31,7 +33,7 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 S = WAFinit(zeros(M,1), mu, level, wtype);     % Initialization
 S.unknownsys = b; 
-[en, S] = MWAFadapt(un, dn, S);                 % Perform WSAF Algorithm
+[en, S] = MWAFadapt(un, dn, S, dwt_mode);                 % Perform WSAF Algorithm
 
 err_sqr = en.^2;
     

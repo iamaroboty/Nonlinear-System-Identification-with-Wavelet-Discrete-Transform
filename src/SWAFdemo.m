@@ -10,10 +10,10 @@ mu = 0.3;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
 wtype = 'db8';                   % Wavelet family
-Ovr = 2;                        % Oversample factor
+Ovr = 1;                        % Oversample factor
 
 % Run parameters
-iter = 2.0*80000;                % Number of iterations
+iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
@@ -45,7 +45,7 @@ b = b(1:M);                      % Truncate to length M
 %%
 tic;
 % Adaptation process
-fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
+fprintf('Wavelet type: %s, levels: %d, step size = %f, Sample = %dx \n', wtype, level, mu, Ovr);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
 S = SWAFinit(M, mu, level, wtype);   % Initialization
 % S = QMFInit(M, mu, level, wtype); 
