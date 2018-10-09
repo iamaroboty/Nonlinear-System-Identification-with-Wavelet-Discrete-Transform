@@ -3,13 +3,14 @@
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
 addpath 'Common';             % Functions in Common folder
-clear all;  close all;
+clear all;  
+% close all;
 
 % Adaptive filter parameters
 mu = 0.3;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db8';                   % Wavelet family
+level = 2;                       % Levels of Wavelet decomposition
+wtype = 'db1';                   % Wavelet family
 Ovr = 1;                        % Oversample factor
 
 % Run parameters

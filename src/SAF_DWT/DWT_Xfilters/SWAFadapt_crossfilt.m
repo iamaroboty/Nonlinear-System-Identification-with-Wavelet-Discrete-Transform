@@ -82,23 +82,19 @@ for n = 1:ITER
                 if n >= AdaptStart(i)
 %                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}]);
 %                     w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./((sum(pwr{i})+alpha)); 
-                    w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./(sum([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}])+alpha); 
-                    
-                    w_cross{i} = w_cross{i} + mu*[U.cD{i},U.cA{i}].*eD{i}./(sum([U.cD{i},U.cA{i}].*[U.cD{i},U.cA{i}])+alpha); 
-                    
+                    w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./(sum([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}])+alpha);                     
+                    w_cross{i} = w_cross{i} + mu*[U.cD{i},U.cA{i}].*eD{i}./(sum([U.cD{i},U.cA{i}].*[U.cD{i},U.cA{i}])+alpha);                   
                 end 
             else
-                U.cA{i}(1) = U.cA{i}(1)+ U.cD{i}'*(-0.985.*w_cross{i});
-                eD{i} = [eD{i}(2:end); Y.cD{i}(1) - (U.cD{i}'*w{i} + sum(U.cA{i}.*w_cross{i}))];
-                %U.cA{i} = [U.cA{i}(2:end); U.cA{i}(1) + sum(U.cD{i}.*(-1.*w_cross{i}))] ;
-                
+                eD{i} = [eD{i}(2:end); Y.cD{i}(1) - (U.cD{i}'*w{i} + sum(U.cA{i}.*w_cross{i}))];    
+%                 U.tmp(1) = U.tmp(1) + sum(U.cD{i}.*(-1*w_cross{i}));
+                U.tmp(1) = U.tmp(1) + sum(U.cD{i}.*-w_cross{i});
                 
                 if n >= AdaptStart(i)
 %                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*(U.cD{i}.*U.cD{i});
 %                     w{i} = w{i} + (mu*eD{i}(end)/((sum(pwr{i}) + alpha)))*U.cD{i};
-                    w{i} = w{i} + (mu*eD{i}(end)/(U.cD{i}'*U.cD{i} + alpha))*U.cD{i};
-                    
-                    w_cross{i} = w_cross{i} + (mu*eD{i}(end)/(U.cA{i}'*U.cA{i} + alpha))*U.cA{i};
+                    w{i} = w{i} + (mu*eD{i}(end)/(U.cD{i}'*U.cD{i} + alpha))*U.cD{i};  
+                    w_cross{i} = w_cross{i} + (mu*eD{i}(end)/(U.cA{i}'*U.cA{i} + alpha))*U.cA{i};  
                 end
             end           
             S.iter{i} = S.iter{i} + 1;                

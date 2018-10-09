@@ -9,10 +9,10 @@ clear all;  close all;
 mu = 0.3;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db8';                   % Wavelet family
+wtype = 'db1';                   % Wavelet family
 
 % Run parameters
-iter = 2.0*80000;                % Number of iterations
+iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
