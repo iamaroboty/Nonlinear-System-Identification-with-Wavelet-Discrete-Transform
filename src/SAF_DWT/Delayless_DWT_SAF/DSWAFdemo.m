@@ -15,7 +15,7 @@ Q = 1;                           % Flag for QMF filter bank
 dwtmode('zpd')
 
 % Run parameters
-iter = 4.0*80000;                % Number of iterations
+iter = 16.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
