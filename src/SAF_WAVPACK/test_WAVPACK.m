@@ -3,8 +3,6 @@
 addpath 'Common';             % Functions in Common folder
 clear all; close all
 
-
-
 % Testing Signal
 
 d = 256;        %Total signal length
@@ -16,12 +14,13 @@ un = un(1:d)';
 %% wavpack parameters
 
 mu = 0.3;                      % ignored here 
-M = 32;                        % Length of unknown system response also ignored here
+M = 256;                        % Length of unknown system response also ignored here
 level = 3;                     % Levels of Wavelet decomposition
 filters = 'db1';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
-S = QMFInit(M,mu,level,filters);
+% S = QMFInit(M,mu,level,filters);
+S = SWAFinit(M, mu, level, filters); 
 
 M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
 
@@ -32,11 +31,8 @@ level = S.levels;                 % Wavelet Levels
 L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 % Init Arrays
-for i= 1:level
-     
-       U.c{i} = zeros(L(end-i),2^(i));    
-    
-    
+for i= 1:level     
+       U.c{i} = zeros(L(end-i),2^(i));            
        eD{i} = zeros(L(end-i),2^(i-1));      % Error signa, transformed domain
        eDr{i} = zeros(len,2^(i-1));          % Error signal, time domain
        delays(i) = 2^i-1;                    % Level delay for synthesis

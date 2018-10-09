@@ -10,7 +10,7 @@ clear all; close all;
 
 mu = 0.1;                        % Step size (0<mu<2) % mu<0.001
 M = 256;                         % Length of adaptive weight vector
-level = 3;                       % Levels of Wavelet decomposition
+level = 1;                       % Levels of Wavelet decomposition
 wtype = 'db1';                   % Mother Wavelet type
 dwt_mode = 'zpd';
 
@@ -45,3 +45,4 @@ hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
+fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))

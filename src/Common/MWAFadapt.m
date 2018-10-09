@@ -93,17 +93,17 @@ for n = 1:ITER
                 eD{i} = [YcD{i}(1) - sum(UcD{i}.*w{i}); eD{i}(1:end-1)];
                 
                 if n >= AdaptStart
-                    w{i} = w{i}+(mu*eD{i}(1)/(UcD{i}.*UcD{i} + 0.00001)*UcD{i});
+                    w{i} = w{i}+(mu*eD{i}(1)/(UcD{i}'*UcD{i} + 0.00001)*UcD{i});
                 end
             end
         end
     end
     
-    if mod(n,5000)== 0
-        plot(10*log10(en(1:n).^2));
-        xlabel('Number of iteration'); 
-        ylabel('Live MSE error (dB)');linkdata on    %Live plotting      
-    end
+%     if mod(n,5000)== 0
+%         plot(10*log10(en(1:n).^2));
+%         xlabel('Number of iteration'); 
+%         ylabel('Live MSE error (dB)');linkdata on    %Live plotting      
+%     end
     
 end
 
