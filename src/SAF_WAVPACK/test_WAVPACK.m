@@ -1,15 +1,30 @@
-% SWAFadapt         Wavelet-transformed Subband Adaptive Filter (WAF)                 
-%
-% Arguments:
-% un                Input signal
-% dn                Desired signal
-% S                 Adptive filter parameters as defined in WSAFinit.m
-% en                History of error signal
+%% WAVELET PACKET DECOMPOSITION TEST FOR PERFECT RECONSTRUTION
+
+addpath 'Common';             % Functions in Common folder
+clear all; close all
+
+
+
+% Testing Signal
+
+d = 256;        %Total signal length
+t=0:0.001:10;
+un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+un = un(1:d)';
+
+
+%% wavpack parameters
+
+mu = 0.3;                      % ignored here 
+M = 32;                        % Length of unknown system response also ignored here
+level = 3;                     % Levels of Wavelet decomposition
+filters = 'db1';               % Set wavelet type
+Ovr = 1;                       % Oversampling factor
+
+S = QMFInit(M,mu,level,filters);
 
 M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
-mu = S.step;                      % Step Size
-AdaptStart = S.AdaptStart;        % Transient
-alpha = S.alpha;                  % Small constant (1e-6)
+
 H = S.analysis;                   % Analysis filter bank
 F = S.synthesis;                  % Synthesis filter bank
 [len, ~] = size(H);               % Wavelet filter length
@@ -21,44 +36,33 @@ for i= 1:level
      
        U.c{i} = zeros(L(end-i),2^(i));    
     
-       Y.c{i} = zeros(L(end-i),2^(i));
-    
     
        eD{i} = zeros(L(end-i),2^(i-1));      % Error signa, transformed domain
        eDr{i} = zeros(len,2^(i-1));          % Error signal, time domain
        delays(i) = 2^i-1;                    % Level delay for synthesis
     
-       %w{i} = zeros(L(end-i),1);       % Subband adaptive filter coefficient, initialize to zeros    
+          
 end 
 w = zeros(L(end-i),2^i);           % Last level has 2 columns, cD and cA
+
+w(1,1:end) = 1;                    % set filters to kronecker delta
+
 eD{i} = zeros(1,2^i);              % Last level has 2 columns, cD and cA
 
 pwr = w;
 beta = 1./L(2:end-1);
 
 u = zeros(len,1);                 % Tapped-delay line of input signal (Analysis FB)  
-y = zeros(len,1);                 % Tapped-delay line of desired response (Analysis FB)
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
 
-% % ONLY FOR TESTING PURPOSE
-%  t=0:0.001:1;
-%  un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
-%  ITER = length(un);
-% Testing freezed filters
-% w{1} = zeros(L(end-1),2);
-% 
-%  w(1,1:end) = 1;
-
 for n = 1:ITER    
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
-    y = [dn(n); y(1:end-1)];        % Desired response vector        
 
     % Analysis Bank
     U.tmp = u;
-    Y.tmp= y;
     
     for i = 1:level
         if mod(n,2^i/(Ovr)) == 0
@@ -69,8 +73,7 @@ for n = 1:ITER
             end
             
             U.Z = HH'*U.tmp;
-            Y.Z = HH'*Y.tmp; 
-            
+         
             [rows, cols] = size(U.Z);
             
             indx = 1;
@@ -78,45 +81,21 @@ for n = 1:ITER
             for col=1:cols
                 for row=1:rows 
                     
-                U.c{i}(:,indx) = cat(1,U.Z(row,col), U.c{i}(1:end-1, indx));
-                Y.c{i}(:,indx) = cat(1,Y.Z(row,col), Y.c{i}(1:end-1, indx));
-              
+                    U.c{i}(:,indx) = cat(1,U.Z(row,col), U.c{i}(1:end-1, indx));
+        
                 indx=indx+1;
                 end  
             end
             
             U.tmp = U.c{i}(1:len,:);    
-            Y.tmp = Y.c{i}(1:len,:);  
+             
             
             if i == level
                 
-                filtered = sum((U.c{i}).*w);
-                
-                indx=1;
-                
-                 for col=1:cols
-                   for row=1:rows
-                      eD{i}(indx) = Y.Z(row,col) - filtered(indx);
-                       
-               
-                      indx=indx+1;
-                   end  
-                 end
-                
-                
-                if n >= AdaptStart(i)
-%                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}]);
-%                     w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./((sum(pwr{i})+alpha)); 
-                    
-                    w = w + mu*U.c{i}.*eD{i}./(sum(U.c{i}.*U.c{i})+alpha); 
-                            
-                    
-                end 
-            
-                
-                % do nothing 
+                eD{i} = sum((U.c{i}).*w);
+ 
         
-            end           
+            end   
             S.iter{i} = S.iter{i} + 1;                
         end
     end    
@@ -160,8 +139,15 @@ for n = 1:ITER
 end
 
 en = en(1:ITER);
-S.coeffs = w;
-end
+
+
+%% check for perfect reconstruction
+
+tot_delay = (2^level - 1)*(len-1) +1 ;
+
+stem(en(tot_delay:end));
+hold on;
+stem(un); 
 
 %% Full packet 2 layer : TESTING
 % % Init Arrays
