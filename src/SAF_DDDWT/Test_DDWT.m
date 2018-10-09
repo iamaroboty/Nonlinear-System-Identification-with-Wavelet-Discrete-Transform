@@ -1,4 +1,4 @@
-%% DISCRETE WAVELET DECOMPOSITION TESTING
+%% DOUBLE DENSITY DWT TESTING
 
 % Testing Signal
 clear all; close all
