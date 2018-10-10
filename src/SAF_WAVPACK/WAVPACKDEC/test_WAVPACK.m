@@ -1,7 +1,7 @@
 %% WAVELET PACKET DECOMPOSITION TEST FOR PERFECT RECONSTRUTION
 
 addpath 'Common';             % Functions in Common folder
-clear all; close all
+% clear all; close all
 
 % Testing Signal
 
@@ -15,8 +15,8 @@ un = un(1:d)';
 
 mu = 0.3;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
-level = 3;                     % Levels of Wavelet decomposition
-filters = 'db1';               % Set wavelet type
+level = 2;                     % Levels of Wavelet decomposition
+filters = 'db2';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % S = QMFInit(M,mu,level,filters);
@@ -77,7 +77,7 @@ for n = 1:ITER
             for col=1:cols
                 for row=1:rows 
                     
-                    U.c{i}(:,indx) = cat(1,U.Z(row,col), U.c{i}(1:end-1, indx));
+                    U.c{i}(:,indx) = cat(1,U.Z(row,col), U.c{i}(1:end-1, indx)); %CA||CD
         
                 indx=indx+1;
                 end  

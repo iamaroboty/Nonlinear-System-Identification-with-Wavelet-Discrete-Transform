@@ -9,7 +9,7 @@ clear all;  close all;
 mu = 0.3;                      % Step size
 M = 256;                       % Length of unknown system response
 level = 2;                     % Levels of Wavelet decomposition
-filters = 'db4';               % Set wavelet type
+filters = 'db2';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % Run parameters

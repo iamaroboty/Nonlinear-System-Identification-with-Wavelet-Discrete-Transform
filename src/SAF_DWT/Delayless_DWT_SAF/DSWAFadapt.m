@@ -19,10 +19,7 @@ L = S.L;                          % Wavelet decomposition Length, subfilter leng
 UpdateRate = S.UpdateRate;
 Hadam = hadamard(2^level);
 
-dif = L(1) - M/2;
-
 % E = S.Polyphase;
-
 
 % Init Arrays
 for i= 1:level
@@ -43,11 +40,25 @@ e = zeros(len,1);                 % Tapped-delay line of error
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
+if isfield(S,'unknownsys')
+    b = S.unknownsys;
+    norm_b = norm(b);
+    eml = zeros(1,ITER);
+    ComputeEML = 1;
+else
+    ComputeEML = 0;
+end
+
+% un = [0, un];
+% dn = [0, dn];
 
 for n = 1:ITER    
-    x = [un(n); x(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
-    
+    x = [un(n); x(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'    
     u = [un(n); u(1:end-1)];
+    
+    if ComputeEML == 1
+        eml(n) = norm(b-W')/norm_b; % System error norm (normalized)
+    end
     
     en(n) = dn(n) - W*x;         % Error signal
     e = [en(n); e(1:end-1)];
@@ -81,15 +92,16 @@ for n = 1:ITER
     end    
     
     if (n >= AdaptStart+M) && (mod(n,UpdateRate)==0)          
-%         W = (waverec([w{i}(:,1); w{i}(:,2)], L, F(:,1), F(:,2)))';
-        W = 1/2.* Hadam * [w{i}(1:M/2,2), w{i}(1:M/2,1)]';
-        W = W(:)';
-        
+%         W = (waverec([w{i}(:,1); w{i}(:,2)], L, F(:,2), F(:,1)))';
+        W = 1/2.* Hadam * [w{i}(:,2), w{i}(:,1)]';
+        W = W(:)';       
     end
    
 end
 
 S.FULLcoeffs = W;
 S.SUBcoeffs = w;
+if ComputeEML == 1
+    S.eml = eml;
 end
 
