@@ -16,7 +16,14 @@ F = S.synthesis;                  % Synthesis filter bank
 [len, ~] = size(H);               % Wavelet filter length
 level = S.levels;                 % Wavelet Levels
 L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
-n_Xfilters = nchoosek(2^level,2); % number of cross filters
+
+if level == 1
+    n_Xfilters =2;
+else
+    
+n_Xfilters = 2^(level+1)-2; % number of cross filters
+
+end
 
 % Init Arrays
 for i= 1:level
@@ -35,7 +42,9 @@ end
 w = zeros(L(end-i),2^i);           % Last level has 2 columns, cD and cA
 w_cross = zeros(L(end-i),n_Xfilters); 
 eD{i} = zeros(1,2^i);              % Last level has 2 columns, cD and cA
-
+eDcross = zeros(1,n_Xfilters);
+cross_Uc = zeros(1,n_Xfilters);
+cross_filtered = zeros(1,2^i);
 pwr = w;
 beta = 1./L(2:end-1);
 
@@ -94,25 +103,45 @@ for n = 1:ITER
             if i == level
                 
                 filtered = sum((U.c{i}).*w);
+                %eD{i} = [1,2];
+                % extend Uc and Ed 
                 
-                indx=1;
-               
-                % extend Uc 
-                for col = 1:2^i   
+                indx = 2; 
+                
+                cross_Uc = zeros(size(U.c{i},1),1);
+                
+                for col= 2:2^i-1
+                   
+                    cross_Uc(:,indx) = U.c{i}(:,col);
+                    cross_Uc(:,indx+1) = U.c{i}(:,col);
                     
-                    cross_Uc(:,indx) =  filtered(:,col);
-                    indx = indx +1;
-                
-                if mod(col,2) == 0
+                    indx = indx +2 ;
+                                     
+                end
+                cross_Uc(:,1) = U.c{i}(:,1); 
+                %cross_Uc(:,end) = U.c{i}(:,end);
+                cross_Uc = cat(2,cross_Uc,U.c{i}(:,end));
                     
-                    cross_Uc(:,indx) =  filtered(:,col);
-                    indx = indx +1;
-                end
-                
-                end
+                    
+%                 indx =1;
+%                 
+%                 for col = 1:2^i  
+%                     
+%                     eDcross(indx) = eD{i}(col); 
+%                     
+%                     cross_Uc(:,indx) =  filtered(:,col);
+%                     indx = indx +1;
+%                 
+%                 if mod(col,2) == 0                    
+%                     eDcross(indx) = eD{i}(col); 
+%                     cross_Uc(:,indx) =  filtered(:,col);
+%                     indx = indx +1;
+%                 end
+%                 
+%                 end
                 
                 % flip  every couple of elements in cross Uc
-                indx = 1; 
+                
                
                 for col = 1:2:n_Xfilters 
                     
@@ -123,20 +152,72 @@ for n = 1:ITER
                    
                 end
                 
-                cross_filtered = sum(cross_Uc.*w_cross);
-                        
+                %w_cross(1,:) =1;
                 
+                temp_cross_filtered = sum(cross_Uc.*w_cross);
+                
+                indx = 2; 
+                for col= 2:2:n_Xfilters-1
+                   
+                    cross_filtered(:,indx) = temp_cross_filtered(:,col) + temp_cross_filtered(:,col+1);                                        
+                    indx = indx +1 ;
+                                     
+                end
+                
+                cross_filtered(1) = temp_cross_filtered(1); 
+                cross_filtered(end) = temp_cross_filtered(end);
+               
+                
+                               
+%                 indx = 1; 
+%                 cross_filtered(:,indx) = temp_cross_filtered(:,1);
+%                 
+%                 for col = 2:2:n_Xfilters-1
+%                                         
+%                         cross_filtered(:,indx) =  temp_cross_filtered(:,col) + temp_cross_filtered(:,col+1);                        indx = indx +1;
+%                         indx = indx +1;      
+%                 end
+%                 
+%                 cross_filtered(:,indx) = temp_cross_filtered(:,indx);
+                
+                indx =1;
+           
                  for col=1:cols
                    for row=1:rows
-                      
-                      
-                      
-                      eD{i}(indx) = Y.Z(row,col) - (filtered(indx)+cross_filtered);
+                                                                 
+                      eD{i}(indx) = Y.Z(row,col) - (filtered(indx)+cross_filtered(indx));
                        
                
                       indx=indx+1;
                    end  
                  end
+                 
+                 
+                 indx = 2; 
+                
+                for col= 2:2^i-1
+                   
+                   
+                    eDcross(indx) = eD{i}(col); 
+                    eDcross(indx+1) = eD{i}(col); 
+                    indx = indx +2 ;
+                                     
+                end
+              
+                eDcross(1) = eD{i}(end); 
+                eDcross(end) = eD{i}(end);
+                
+                
+                
+                for col = 1:2:n_Xfilters 
+                    
+                    temp = eDcross(:,col);
+                    eDcross(:,col) =  eDcross(:,col+1);
+                    eDcross(:,col+1) =  temp;  
+                   
+                   
+                end
+                    
                 
                 
                 if n >= AdaptStart(i)
@@ -144,7 +225,7 @@ for n = 1:ITER
 %                     w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./((sum(pwr{i})+alpha)); 
                     
                     w = w + mu*U.c{i}.*eD{i}./(sum(U.c{i}.*U.c{i})+alpha); 
-                    w_cross = w_cross + mu*cross_Uc{i}.*eD{i}./(sum(cross_Uc.*cross_Uc)+alpha);         
+                    w_cross = w_cross + mu*cross_Uc.*eDcross./(sum(cross_Uc.*cross_Uc)+alpha);         
                     
                 end 
             

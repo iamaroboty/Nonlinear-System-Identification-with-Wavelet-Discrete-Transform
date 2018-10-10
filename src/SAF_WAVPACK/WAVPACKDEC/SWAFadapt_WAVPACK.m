@@ -79,10 +79,10 @@ for n = 1:ITER
             for col=1:cols
                 for row=1:rows 
                     
-                U.c{i}(:,indx) = cat(1,U.Z(row,col), U.c{i}(1:end-1, indx));
-                Y.c{i}(:,indx) = cat(1,Y.Z(row,col), Y.c{i}(1:end-1, indx));
+                    U.c{i}(:,indx) = cat(1,U.Z(row,col), U.c{i}(1:end-1, indx));
+                    Y.c{i}(:,indx) = cat(1,Y.Z(row,col), Y.c{i}(1:end-1, indx));
               
-                indx=indx+1;
+                    indx=indx+1;
                 end  
             end
             
@@ -103,25 +103,18 @@ for n = 1:ITER
                       indx=indx+1;
                    end  
                  end
-                
-                
+                                
                 if n >= AdaptStart(i)
 %                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}]);
 %                     w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./((sum(pwr{i})+alpha)); 
                     
                     w = w + mu*U.c{i}.*eD{i}./(sum(U.c{i}.*U.c{i})+alpha); 
-                            
-                    
-                end 
-            
-                
-                % do nothing 
-        
+                                                
+                end                     
             end           
             S.iter{i} = S.iter{i} + 1;                
         end
     end    
-
 
     % Synthesis Bank
     for i = level:-1:1
@@ -133,25 +126,20 @@ for n = 1:ITER
         if i == level
             if mod(n,2^i/(Ovr)) == 0
                 indx = 1; 
-               
                 for col = 1:2:2^i-1    
-                eDr{i}(:,indx) = FF*eD{i}(1,col:col+1)' + eDr{i}(:,indx);
-                indx = indx +1;
-                
-                end
-                
-                
+                    eDr{i}(:,indx) = FF*eD{i}(1,col:col+1)' + eDr{i}(:,indx);
+                    indx = indx +1;                
+                end                                
             end
         else
             if mod(n,2^i/(Ovr)) == 0     
                 
-                indx = 1; 
-                
+                indx = 1;                 
                 for col = 1:2:2^i-1
-                eDr{i}(:,indx) = FF*eDr{i+1}(1,col:col+1)' + eDr{i}(:,indx);
-                indx = indx +1;
-                
+                    eDr{i}(:,indx) = FF*eDr{i+1}(1,col:col+1)' + eDr{i}(:,indx);
+                    indx = indx +1;                
                 end
+                
                 eDr{i+1} = [eDr{i+1}(2:end,:); zeros(1,size(eDr{i+1},2))];
             end            
         end
