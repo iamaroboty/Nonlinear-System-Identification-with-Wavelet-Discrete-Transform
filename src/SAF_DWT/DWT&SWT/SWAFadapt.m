@@ -38,8 +38,9 @@ U.tmp = zeros(len,1);
 Y.tmp = zeros(len,1);
 U.Z = zeros(2,1);
 Y.Z = zeros(2,1);
-pwr = w;
-beta = 1./L(2:end-1);
+
+% pwr = w;
+% beta = 1./L(2:end-1);
 
 u = zeros(len,1);                 % Tapped-delay line of input signal (Analysis FB)  
 y = zeros(len,1);                 % Tapped-delay line of desired response (Analysis FB)
@@ -55,6 +56,9 @@ en = zeros(1,ITER);               % Initialize error sequence to zero
 % Testing freezed filters
 % w{1} = zeros(L(end-1),2);
 % w{1}(1,:) = 1;
+
+% dn = [0, dn];
+% un = [0, un];
 
 for n = 1:ITER    
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'

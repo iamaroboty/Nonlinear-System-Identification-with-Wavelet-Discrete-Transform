@@ -9,13 +9,13 @@ clear all;  close all;
 mu = 0.01;                        % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db8';                   % Wavelet family
-J = 1;
+wtype = 'db2';                   % Wavelet family
+J = 4;
 Q = 1;                           % Flag for QMF filter bank
-dwtmode('zpd')
+% dwtmode('zpd')
 
 % Run parameters
-iter = 16.0*80000;                % Number of iterations
+iter = 2.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
@@ -54,7 +54,7 @@ S = DSWAFinit(M, mu, level, wtype, J, Q);   % Initialization
 S.unknownsys = b; 
 [en, S] = DSWAFadapt(un, dn, S); 
 err_sqr = en.^2;
-% EML = S.eml.^2;                     % System error norm (normalized)
+EML = S.eml.^2;                     % System error norm (normalized)
     
 fprintf('Total time = %.3f mins \n',toc/60);
 
@@ -66,13 +66,16 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
-% figure;
-% hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
-% xlabel('Number of iterations (\times 1024 input samples)'); 
-% ylabel('Misalignment (dB)');
-% grid on;
+figure;
+hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Misalignment (dB)');
+grid on;
 
-% %% time domain parameters
+figure; 
+stem([b, S.FULLcoeffs']); legend('Real', 'Estimated');
+
+%% time domain parameters
 % fs = 512; % samples per sec
 % freq = 20; % frequency
 % dt = 1/fs; 
@@ -83,15 +86,13 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 % subplot(2,1,1)
 % stem(delta);
 % title('Input Signal'); 
-% % axis([0 10 -1.5 1.5])
-% out_resp = SWAtest(delta, S, Ovr); 
+% out_resp = filter(S.FULLcoeffs,1,delta);
 % subplot(2,1,2)
 % stem(out_resp);
 % title('Output Signal-Estimated System vs True');
 % hold on; 
 % real_resp = filter(b, 1, delta);
 % stem(real_resp); 
-% % axis([0 2*M -1.5 1.5])
 % 
 % %% sine test signal 
 % amplitude = 1; 
@@ -102,7 +103,7 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 % subplot(2,2,1)
 % plot(input_sine);
 % title('Input Signal'); 
-% out_sine = SWAtest(input_sine, S, Ovr); 
+% out_sine = filter(S.FULLcoeffs,1,input_sine);
 % subplot(2,2,2)
 % plot(out_sine);
 % title('Output Signal - Estimated System vs True');

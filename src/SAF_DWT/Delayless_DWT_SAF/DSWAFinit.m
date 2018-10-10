@@ -14,7 +14,6 @@ function S = DSWAFinit(M, mu, level, wtype, J, Q)
 
 % Assign structure fields
 S.length        = M;              % Unknown system length (Equivalent adpative filter length)
-% S.AdaptStart    = M;              % Transient
 S.step          = mu;             % Step saize 
 S.iter          = cell(1,level);  % Itertion count per level
 S.levels        = level;          % DWT levels 
@@ -35,24 +34,24 @@ elseif Q == 1
     S.synthesis = flip(S.analysis);
 %     E = reshape(db,2,length(db)/2);         % Each row represent a polyphase component
 else
-    error("Set Q either 1 or 2");
+    error("Set Q either 1 or 0");
 end
 
 % Subbands filter lenghts
-lf = length(S.analysis);
-L = [M; zeros(level,1)];
-for i= 1:level
-    L = [floor((L(1)+lf-1)/2); L(1:end-1)];
-end
-S.L = [L(1); L]';
-
-% % Oldshit
-% L = zeros(level,1);
+% lf = length(S.analysis);
+% L = [M; zeros(level,1)];
 % for i= 1:level
-%     L = [M/(2^i); L(1:end-1)];
-%     S.iter{i} = 0;
+%     L = [floor((L(1)+lf-1)/2); L(1:end-1)];
 % end
-% S.L = [L(1); L; M]';            % Wavelet decomposition lenghts [cAn cDn cDn-1 ... cD1]
+% S.L = [L(1); L]';
+
+% % Old
+L = zeros(level,1);
+for i= 1:level
+    L = [M/(2^i); L(1:end-1)];
+    S.iter{i} = 0;
+end
+S.L = [L(1); L; M]';            % Wavelet decomposition lenghts [cAn cDn cDn-1 ... cD1]
 
 for i=1:level
     S.AdaptStart(i) = 2^i*S.L(end-i);

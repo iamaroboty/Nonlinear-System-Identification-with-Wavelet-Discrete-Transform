@@ -6,7 +6,7 @@ clear all; close all
 d = 256;        %Total signal length
 t=0:0.001:10;
 f=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-f = f(1:d)'+0.632;
+f = f(1:d)';
 % f=f(1:256);
 %f = [1; -10; 324; 48; -483; 4; 7; -5532; 34; 8889; -57; 54];
 %d=length(f);
@@ -274,11 +274,7 @@ xD = zeros(2,1);
 % H = [rst, [0 0 0]; uvw, [0 0 0]; 0, H(:,1)', 0; 0, H(:,2)', 0; [ 0 0 0], efg; [ 0 0 0], xyz];
 
 for n = 1:d+delay
-    if n == 1
-        x = [zeros(len,1)];
-    else
-        x = [fpad(n-1); x(1:end-1)];
-    end
+    x = [fpad(n); x(1:end-1)];
     
     tmp = x;
     for i = 1:level
@@ -318,7 +314,7 @@ for n = 1:d+delay
     
 end
 toc
-err2lv = max(abs(f-yn(1+delay:end)))    %problem with delays. This works fine 
+err2lv = max(abs(f-yn(delay:end-1)))    %problem with delays. This works fine 
                                         %but reconstructed signal is shifted for some reason
 
 %% WAVELET FULL PACKET DECOMPOSITION
