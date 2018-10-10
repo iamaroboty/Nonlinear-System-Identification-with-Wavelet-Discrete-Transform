@@ -40,10 +40,10 @@ for i= 1:level
        %w{i} = zeros(L(end-i),1);       % Subband adaptive filter coefficient, initialize to zeros    
 end 
 w = zeros(L(end-i),2^i);           % Last level has 2 columns, cD and cA
-w_cross = zeros(L(end-i),n_Xfilters); 
+w_cross = zeros(L(end-i),6); 
 eD{i} = zeros(1,2^i);              % Last level has 2 columns, cD and cA
 eDcross = zeros(1,n_Xfilters);
-cross_Uc = zeros(1,n_Xfilters);
+%cross_Uc = zeros(1,n_Xfilters);
 cross_filtered = zeros(1,2^i);
 pwr = w;
 beta = 1./L(2:end-1);
@@ -103,69 +103,61 @@ for n = 1:ITER
             if i == level
                 
                 filtered = sum((U.c{i}).*w);
+                
+     %% prova grezza 2 layer            
+                crossUcA1 = sum(U.c{i}(:,2).*w_cross(:,1));  % U.cD1
+                crossUcD1 = sum(U.c{i}(:,1).*w_cross(:,2))+  sum(U.c{i}(:,3).*w_cross(:,3));  
+                crossUcA2 = sum(U.c{i}(:,4).*w_cross(:,4))+  sum(U.c{i}(:,2).*w_cross(:,5)); 
+                crossUcD2 = sum(U.c{i}(:,3).*w_cross(:,6));
+                
+                cross_filtered = [ crossUcA1; crossUcD1;  crossUcA2; crossUcD2];
+                
+                cross_Uc = cat(2, U.c{i}(:,2), U.c{i}(:,1),U.c{i}(:,3), U.c{i}(:,4),U.c{i}(:,2), U.c{i}(:,3) );
+                
+     %%
                 %eD{i} = [1,2];
+                
                 % extend Uc and Ed 
                 
-                indx = 2; 
-                
-                cross_Uc = zeros(size(U.c{i},1),1);
-                
-                for col= 2:2^i-1
-                   
-                    cross_Uc(:,indx) = U.c{i}(:,col);
-                    cross_Uc(:,indx+1) = U.c{i}(:,col);
-                    
-                    indx = indx +2 ;
-                                     
-                end
-                cross_Uc(:,1) = U.c{i}(:,1); 
-                %cross_Uc(:,end) = U.c{i}(:,end);
-                cross_Uc = cat(2,cross_Uc,U.c{i}(:,end));
-                    
-                    
-%                 indx =1;
+%                 indx = 2; 
 %                 
-%                 for col = 1:2^i  
-%                     
-%                     eDcross(indx) = eD{i}(col); 
-%                     
-%                     cross_Uc(:,indx) =  filtered(:,col);
-%                     indx = indx +1;
+%                 cross_Uc = zeros(size(U.c{i},1),1);
 %                 
-%                 if mod(col,2) == 0                    
-%                     eDcross(indx) = eD{i}(col); 
-%                     cross_Uc(:,indx) =  filtered(:,col);
-%                     indx = indx +1;
+%                 for col= 2:2^i-1
+%                    
+%                     cross_Uc(:,indx) = U.c{i}(:,col);
+%                     cross_Uc(:,indx+1) = U.c{i}(:,col);
+%                     
+%                     indx = indx +2 ;
+%                                      
+%                 end
+%                 cross_Uc(:,1) = U.c{i}(:,1);              
+%                 cross_Uc = cat(2,cross_Uc,U.c{i}(:,end));
+%                                  
+%                
+%                 for col = 1:2:n_Xfilters 
+%                     
+%                     temp = cross_Uc(:,col);
+%                     cross_Uc(:,col) =  cross_Uc(:,col+1);
+%                     cross_Uc(:,col+1) =  temp;  
+%                    
+%                    
 %                 end
 %                 
+%                 %w_cross(1,:) =1;
+%                 
+%                 temp_cross_filtered = sum(cross_Uc.*w_cross);
+%                 
+%                 indx = 2; 
+%                 for col= 2:2:n_Xfilters-1
+%                    
+%                     cross_filtered(:,indx) = temp_cross_filtered(:,col) + temp_cross_filtered(:,col+1);                                        
+%                     indx = indx +1 ;
+%                                      
 %                 end
-                
-                % flip  every couple of elements in cross Uc
-                
-               
-                for col = 1:2:n_Xfilters 
-                    
-                    temp = cross_Uc(:,col);
-                    cross_Uc(:,col) =  cross_Uc(:,col+1);
-                    cross_Uc(:,col+1) =  temp;  
-                   
-                   
-                end
-                
-                %w_cross(1,:) =1;
-                
-                temp_cross_filtered = sum(cross_Uc.*w_cross);
-                
-                indx = 2; 
-                for col= 2:2:n_Xfilters-1
-                   
-                    cross_filtered(:,indx) = temp_cross_filtered(:,col) + temp_cross_filtered(:,col+1);                                        
-                    indx = indx +1 ;
-                                     
-                end
-                
-                cross_filtered(1) = temp_cross_filtered(1); 
-                cross_filtered(end) = temp_cross_filtered(end);
+%                 
+%                 cross_filtered(1) = temp_cross_filtered(1); 
+%                 cross_filtered(end) = temp_cross_filtered(end);
                
                 
                                
@@ -204,19 +196,19 @@ for n = 1:ITER
                                      
                 end
               
-                eDcross(1) = eD{i}(end); 
+                eDcross(1) = eD{i}(1); 
                 eDcross(end) = eD{i}(end);
                 
-                
-                
-                for col = 1:2:n_Xfilters 
-                    
-                    temp = eDcross(:,col);
-                    eDcross(:,col) =  eDcross(:,col+1);
-                    eDcross(:,col+1) =  temp;  
-                   
-                   
-                end
+%                 
+%                 
+%                 for col = 1:2:n_Xfilters 
+%                     
+%                     temp = eDcross(:,col);
+%                     eDcross(:,col) =  eDcross(:,col+1);
+%                     eDcross(:,col+1) =  temp;  
+%                    
+%                    
+%                 end
                     
                 
                 
@@ -276,7 +268,7 @@ for n = 1:ITER
 end
 
 en = en(1:ITER);
-S.coeffs = w;
+S.coeffs = [w, w_cross];
 end
 
 

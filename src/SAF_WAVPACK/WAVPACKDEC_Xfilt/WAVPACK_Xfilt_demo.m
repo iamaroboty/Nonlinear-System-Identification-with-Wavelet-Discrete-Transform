@@ -6,7 +6,7 @@ addpath 'Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-mu = 0.3;                      % Step size
+mu = 0.1;                      % Step size
 M = 256;                       % Length of unknown system response
 level = 2;                     % Levels of Wavelet decomposition
 filters = 'db1';               % Set wavelet type
