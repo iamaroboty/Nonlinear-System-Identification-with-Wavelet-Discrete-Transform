@@ -11,8 +11,14 @@ M = S.length;                     % Unknown system length (Equivalent adpative f
 mu = S.step;                      % Step Size
 AdaptStart = S.AdaptStart;        % Transient
 alpha = S.alpha;                  % Small constant (1e-6)
-H = S.analysis;                   % Analysis filter bank
-F = S.synthesis;                  % Synthesis filter bank
+
+F = S.analysis;                   % Analysis filter bank
+H = S.synthesis;                  % Synthesis filter bank
+
+% analysis and synthesis are used in reverse to obtain in U.Z a column
+% vector with cD in the first position
+
+
 [len, ~] = size(H);               % Wavelet filter length
 level = S.levels;                 % Wavelet Levels
 L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
@@ -111,13 +117,13 @@ for n = 1:ITER
                 
                 
                 crossUcD1 = sum(U.c{i}(:,2).*w_cross(:,1));  % U.cD1
-                crossUcA1 = sum(U.c{i}(:,1).*w_cross(:,2))+  sum(U.c{i}(:,3).*w_cross(:,3));  
-                crossUcD2 = sum(U.c{i}(:,2).*w_cross(:,4))+  sum(U.c{i}(:,4).*w_cross(:,5)); 
+                crossUcA1 = sum(U.c{i}(:,1).*w_cross(:,2)) +  sum(U.c{i}(:,3).*w_cross(:,3));  
+                crossUcD2 = sum(U.c{i}(:,4).*w_cross(:,4)) +  sum(U.c{i}(:,2).*w_cross(:,5)); 
                 crossUcA2 = sum(U.c{i}(:,3).*w_cross(:,6));
                 
                 cross_filtered = [ crossUcD1; crossUcA1;  crossUcD2; crossUcA2];
                 
-                cross_Uc = cat(2, U.c{i}(:,2), U.c{i}(:,1),U.c{i}(:,3), U.c{i}(:,4),U.c{i}(:,2), U.c{i}(:,3) );
+                cross_Uc = cat(2, U.c{i}(:,2), U.c{i}(:,1), U.c{i}(:,3), U.c{i}(:,4), U.c{i}(:,2), U.c{i}(:,3));
                 
      %%
                 %eD{i} = [1,2];

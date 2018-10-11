@@ -20,9 +20,9 @@ b = b(1:M);                      % Truncate to length M
 %b = sign(b);
 
 % TESTING, a = delay.
-% a = 1;
-% b = zeros(M,1);
-% b(a+1) = 1;
+a = 1;
+b = zeros(M,1);
+b(a+1) = 1;
 
 %% low pass filter system 
 % norm_freq = 0.39;
