@@ -6,17 +6,19 @@ addpath '../../Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-mu = 0.3;                      % Step size
+mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db4';                   % Wavelet family
+wtype = 'db1';                   % Wavelet family
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
-%b = sign(b);
+% b = sign(b);
+% 
+% b = rand(M,1)-0.5;
 
 % TESTING, a = delay.
 % a = 1;
@@ -49,7 +51,7 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
 % S = SWAFinit(M, mu, level, wtype);   % Initialization
 S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
-[en, S] = SWAFadapt_crossfilt(un, dn, S);                 % Perform WSAF Algorithm 
+[en, S] = SWAFadapt_crossfilt_v2(un, dn, S);                 % Perform WSAF Algorithm 
 
 err_sqr = en.^2;
     

@@ -9,7 +9,7 @@ clear all;
 % Adaptive filter parameters
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
-level = 1;                       % Levels of Wavelet decomposition
+level = 2;                       % Levels of Wavelet decomposition
 wtype = 'db1';                   % Wavelet family
 Ovr = 1;                        % Oversample factor
 

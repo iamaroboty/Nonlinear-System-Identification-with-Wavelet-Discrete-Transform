@@ -20,9 +20,9 @@ b = b(1:M);                      % Truncate to length M
 %b = sign(b);
 
 % TESTING, a = delay.
-a = 1;
-b = zeros(M,1);
-b(a+1) = 1;
+% a = 1;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 %% low pass filter system 
 % norm_freq = 0.39;
@@ -64,57 +64,57 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
-%% time domain parameters
-fs = 512; % samples per sec
-freq = 100; % frequency
-dt = 1/fs; 
-
-%% impulse response
-delta = [1; zeros(fs-2-1,1)];
-figure; 
-subplot(2,1,1)
-stem(delta);
-title('Input Signal'); 
-% axis([0 10 -1.5 1.5])
-out_resp = SWAFtest_WAVPACK_Xfilt(delta, S, Ovr); 
-subplot(2,1,2)
-stem(out_resp);
-title('Output Signal-Estimated System vs True');
-hold on; 
-real_resp = filter(b, 1, delta);
-stem(real_resp); 
-% axis([0 2*M -1.5 1.5])
-
-%% sine test signal 
-amplitude = 1; 
-leng = 1;
-input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
-
-figure; 
-subplot(2,2,1)
-plot(input_sine);
-title('Input Signal'); 
-out_sine = SWAFtest_WAVPACK_Xfilt(input_sine, S, Ovr); 
-subplot(2,2,2)
-plot(out_sine);
-title('Output Signal - Estimated System vs True');
-hold on; 
-real_sys = filter(b,1,input_sine);
-plot(real_sys); legend('Estim', 'True');
-
-%% FFT 
-N = 2*fs;
-faxis = linspace(-fs/2,fs/2,N);
-
-subplot(2, 2, 3);
-fft_true = abs(fft(input_sine, N)/N);
-plot(faxis, fftshift(fft_true)); 
-xlabel('Frequency');
-
-subplot(2, 2, 4);
-fft_out_est = abs(fft(out_sine, N)/N);
-plot(faxis, fftshift(fft_out_est)); 
-xlabel('Frequency');
-hold on; 
-fft_out_true = abs(fft(real_sys,N)/N);
-plot(faxis, fftshift(fft_out_true));
+% %% time domain parameters
+% fs = 512; % samples per sec
+% freq = 100; % frequency
+% dt = 1/fs; 
+% 
+% %% impulse response
+% delta = [1; zeros(fs-2-1,1)];
+% figure; 
+% subplot(2,1,1)
+% stem(delta);
+% title('Input Signal'); 
+% % axis([0 10 -1.5 1.5])
+% out_resp = SWAFtest_WAVPACK_Xfilt(delta, S, Ovr); 
+% subplot(2,1,2)
+% stem(out_resp);
+% title('Output Signal-Estimated System vs True');
+% hold on; 
+% real_resp = filter(b, 1, delta);
+% stem(real_resp); 
+% % axis([0 2*M -1.5 1.5])
+% 
+% %% sine test signal 
+% amplitude = 1; 
+% leng = 1;
+% input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
+% 
+% figure; 
+% subplot(2,2,1)
+% plot(input_sine);
+% title('Input Signal'); 
+% out_sine = SWAFtest_WAVPACK_Xfilt(input_sine, S, Ovr); 
+% subplot(2,2,2)
+% plot(out_sine);
+% title('Output Signal - Estimated System vs True');
+% hold on; 
+% real_sys = filter(b,1,input_sine);
+% plot(real_sys); legend('Estim', 'True');
+% 
+% %% FFT 
+% N = 2*fs;
+% faxis = linspace(-fs/2,fs/2,N);
+% 
+% subplot(2, 2, 3);
+% fft_true = abs(fft(input_sine, N)/N);
+% plot(faxis, fftshift(fft_true)); 
+% xlabel('Frequency');
+% 
+% subplot(2, 2, 4);
+% fft_out_est = abs(fft(out_sine, N)/N);
+% plot(faxis, fftshift(fft_out_est)); 
+% xlabel('Frequency');
+% hold on; 
+% fft_out_true = abs(fft(real_sys,N)/N);
+% plot(faxis, fftshift(fft_out_true));
