@@ -24,8 +24,13 @@ S = SWAFinit(M, mu, level, filters);
 
 M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
 
-H = S.analysis;                   % Analysis filter bank
-F = S.synthesis;                  % Synthesis filter bank
+F = S.analysis;                   % Analysis filter bank
+H = S.synthesis;                  % Synthesis filter bank
+
+% analysis and synthesis are used in reverse to obtain in U.Z a column
+% vector with cD in the first position
+
+
 [len, ~] = size(H);               % Wavelet filter length
 level = S.levels;                 % Wavelet Levels
 L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
@@ -68,7 +73,8 @@ for n = 1:ITER
                 HH = H;
             end
             
-            U.Z = HH'*U.tmp;
+            U.Z = HH'*U.tmp; % column [cD ; cA] 
+            
          
             [rows, cols] = size(U.Z);
             
@@ -88,8 +94,7 @@ for n = 1:ITER
             
             if i == level
                 
-                eD{i} = sum((U.c{i}).*w);
- 
+                eD{i} = sum((U.c{i}).*w);        
         
             end   
             S.iter{i} = S.iter{i} + 1;                
@@ -108,7 +113,9 @@ for n = 1:ITER
             if mod(n,2^i/(Ovr)) == 0
                 indx = 1; 
                
-                for col = 1:2:2^i-1    
+                for col = 1:2:2^i-1 
+                 
+                    
                 eDr{i}(:,indx) = FF*eD{i}(1,col:col+1)' + eDr{i}(:,indx);
                 indx = indx +1;
                 

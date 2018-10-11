@@ -80,7 +80,7 @@ for n = 1:ITER
                 HH = H;
             end
             
-            U.Z = HH'*U.tmp;
+            U.Z = HH'*U.tmp; %% column: [U.cD, U.cA] 
             Y.Z = HH'*Y.tmp; 
             
             [rows, cols] = size(U.Z);
@@ -101,16 +101,21 @@ for n = 1:ITER
             Y.tmp = Y.c{i}(1:len,:);  
             
             if i == level
+                              
+                
                 
                 filtered = sum((U.c{i}).*w);
                 
-     %% prova grezza 2 layer            
-                crossUcA1 = sum(U.c{i}(:,2).*w_cross(:,1));  % U.cD1
-                crossUcD1 = sum(U.c{i}(:,1).*w_cross(:,2))+  sum(U.c{i}(:,3).*w_cross(:,3));  
-                crossUcA2 = sum(U.c{i}(:,4).*w_cross(:,4))+  sum(U.c{i}(:,2).*w_cross(:,5)); 
-                crossUcD2 = sum(U.c{i}(:,3).*w_cross(:,6));
+     %% prova grezza 2 layer    
                 
-                cross_filtered = [ crossUcA1; crossUcD1;  crossUcA2; crossUcD2];
+                
+                
+                crossUcD1 = sum(U.c{i}(:,2).*w_cross(:,1));  % U.cD1
+                crossUcA1 = sum(U.c{i}(:,1).*w_cross(:,2))+  sum(U.c{i}(:,3).*w_cross(:,3));  
+                crossUcD2 = sum(U.c{i}(:,2).*w_cross(:,4))+  sum(U.c{i}(:,4).*w_cross(:,5)); 
+                crossUcA2 = sum(U.c{i}(:,3).*w_cross(:,6));
+                
+                cross_filtered = [ crossUcD1; crossUcA1;  crossUcD2; crossUcA2];
                 
                 cross_Uc = cat(2, U.c{i}(:,2), U.c{i}(:,1),U.c{i}(:,3), U.c{i}(:,4),U.c{i}(:,2), U.c{i}(:,3) );
                 
@@ -220,6 +225,9 @@ for n = 1:ITER
                     w_cross = w_cross + mu*cross_Uc.*eDcross./(sum(cross_Uc.*cross_Uc)+alpha);         
                     
                 end 
+                
+                
+                
             
                 
                 % do nothing 

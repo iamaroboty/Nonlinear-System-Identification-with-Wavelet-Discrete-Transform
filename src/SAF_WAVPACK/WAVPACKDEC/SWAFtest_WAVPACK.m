@@ -65,7 +65,7 @@ for n = 1:ITER
                 HH = H;
             end
             
-            U.Z = HH'*U.tmp;
+            U.Z = HH*U.tmp; % column U.cD U.cA
                     
             [rows, cols] = size(U.Z);
             
