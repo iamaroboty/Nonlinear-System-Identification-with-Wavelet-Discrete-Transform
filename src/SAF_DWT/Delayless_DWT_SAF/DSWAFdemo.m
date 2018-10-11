@@ -6,23 +6,24 @@ addpath 'Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-mu = 0.01;                        % Step size
+mu = 0.03;                        % Step size
 M = 256;                         % Length of unknown system response
-level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db2';                   % Wavelet family
+level = 2;                       % Levels of Wavelet decomposition
+wtype = 'db8';                   % Wavelet family
 J = 4;
 Q = 1;                           % Flag for QMF filter bank
 % dwtmode('zpd')
 
 % Run parameters
-iter = 2.0*80000;                % Number of iterations
+iter = 4.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
+% b = rand(M,1)-0.5;
 % b = sign(b);
 
 % TESTING, a = delay.
-% a = 0;
+% a = 1;
 % b = zeros(M,1);
 % b(a+1) = 1;
 
@@ -49,10 +50,11 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),6,40); %iter, b, seed, ARtype, SNR
 S = DSWAFinit(M, mu, level, wtype, J, Q);   % Initialization
 S.unknownsys = b; 
-[en, S] = DSWAFadapt(un, dn, S); 
+% [en, S] = DSWAFadapt(un, dn, S); 
+[en, S] = DSWAFadapt_v2(un, dn, S); 
 err_sqr = en.^2;
 EML = S.eml.^2;                     % System error norm (normalized)
     
@@ -76,54 +78,54 @@ figure;
 stem([b, S.FULLcoeffs']); legend('Real', 'Estimated');
 
 %% time domain parameters
-% fs = 512; % samples per sec
-% freq = 20; % frequency
-% dt = 1/fs; 
-% 
-% %% impulse response
-% delta = [1; zeros(fs-2-1,1)];
-% figure; 
-% subplot(2,1,1)
-% stem(delta);
-% title('Input Signal'); 
-% out_resp = filter(S.FULLcoeffs,1,delta);
-% subplot(2,1,2)
-% stem(out_resp);
-% title('Output Signal-Estimated System vs True');
-% hold on; 
-% real_resp = filter(b, 1, delta);
-% stem(real_resp); 
-% 
-% %% sine test signal 
-% amplitude = 1; 
-% leng = 1;
-% input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
-% 
-% figure; 
-% subplot(2,2,1)
-% plot(input_sine);
-% title('Input Signal'); 
-% out_sine = filter(S.FULLcoeffs,1,input_sine);
-% subplot(2,2,2)
-% plot(out_sine);
-% title('Output Signal - Estimated System vs True');
-% hold on; 
-% real_sys = filter(b,1,input_sine);
-% plot(real_sys); legend('Estim', 'True');
-% 
-% %% FFT 
-% N = 2*fs;
-% faxis = linspace(-fs/2,fs/2,N);
-% 
-% subplot(2, 2, 3);
-% fft_true = abs(fft(input_sine, N)/N);
-% plot(faxis, fftshift(fft_true)); 
-% xlabel('Frequency');
-% 
-% subplot(2, 2, 4);
-% fft_out_est = abs(fft(out_sine, N)/N);
-% plot(faxis, fftshift(fft_out_est)); 
-% xlabel('Frequency');
-% hold on; 
-% fft_out_true = abs(fft(real_sys,N)/N);
-% plot(faxis, fftshift(fft_out_true));
+fs = 512; % samples per sec
+freq = 20; % frequency
+dt = 1/fs; 
+
+%% impulse response
+delta = [1; zeros(fs-2-1,1)];
+figure; 
+subplot(2,1,1)
+stem(delta);
+title('Input Signal'); 
+out_resp = filter(S.FULLcoeffs,1,delta);
+subplot(2,1,2)
+stem(out_resp);
+title('Output Signal-Estimated System vs True');
+hold on; 
+real_resp = filter(b, 1, delta);
+stem(real_resp); 
+
+%% sine test signal 
+amplitude = 1; 
+leng = 1;
+input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
+
+figure; 
+subplot(2,2,1)
+plot(input_sine);
+title('Input Signal'); 
+out_sine = filter(S.FULLcoeffs,1,input_sine);
+subplot(2,2,2)
+plot(out_sine);
+title('Output Signal - Estimated System vs True');
+hold on; 
+real_sys = filter(b,1,input_sine);
+plot(real_sys); legend('Estim', 'True');
+
+%% FFT 
+N = 2*fs;
+faxis = linspace(-fs/2,fs/2,N);
+
+subplot(2, 2, 3);
+fft_true = abs(fft(input_sine, N)/N);
+plot(faxis, fftshift(fft_true)); 
+xlabel('Frequency');
+
+subplot(2, 2, 4);
+fft_out_est = abs(fft(out_sine, N)/N);
+plot(faxis, fftshift(fft_out_est)); 
+xlabel('Frequency');
+hold on; 
+fft_out_true = abs(fft(real_sys,N)/N);
+plot(faxis, fftshift(fft_out_true));

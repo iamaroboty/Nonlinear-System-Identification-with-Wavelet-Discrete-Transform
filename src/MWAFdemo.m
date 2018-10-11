@@ -21,9 +21,9 @@ b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 % % TESTING, a = delay.
-% a = 0;
-% b = zeros(M,1);
-% b(a+1) = 1;
+a = 0;
+b = zeros(M,1);
+b(a+1) = 1;
 
 tic;
 

@@ -11,12 +11,19 @@ mu = 0.001;                        % Step size (0<mu<2) % mu<0.001
 M = 256;                         % Length of adaptive weight vector
 level = 1;                       % Levels of Wavelet decomposition
 wtype = 'db1';                   % Mother Wavelet type
+dwtmode('zpd');
 
 % Run parameters
 
 iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
+
+% TESTING, a = delay.
+a = 1;
+b = zeros(M,1);
+b(a+1) = 1;
+
 tic;
 
 % Adaptation process

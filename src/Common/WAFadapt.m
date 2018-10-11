@@ -54,12 +54,12 @@ for n = 1:ITER
         w = w + (mu*en(n)*inv_sqrt_power).*U; % Tap-weight adaptation        
         S.iter = S.iter + 1;  
         
-    if mod(n,5000)== 0
-        plot(10*log10(en.^2));
-        xlabel('Number of iteration'); 
-        ylabel('Live MSE error (dB)');    
-        linkdata on %Live plotting      
-    end
+%     if mod(n,5000)== 0
+%         plot(10*log10(en.^2));
+%         xlabel('Number of iteration'); 
+%         ylabel('Live MSE error (dB)');    
+%         linkdata on %Live plotting      
+%     end
    
     end
 end

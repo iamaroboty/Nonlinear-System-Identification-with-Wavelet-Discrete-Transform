@@ -7,7 +7,7 @@ clear all;
 % close all;
 
 % Adaptive filter parameters
-mu = 0.3;                      % Step size
+mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 1;                       % Levels of Wavelet decomposition
 wtype = 'db1';                   % Wavelet family
@@ -21,9 +21,9 @@ b = b(1:M);                      % Truncate to length M
 %b = sign(b);
 
 % TESTING, a = delay.
-a = 1;
-b = zeros(M,1);
-b(a+1) = 1;
+% a = 1;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 %% low pass filter system 
 % norm_freq = 0.39;

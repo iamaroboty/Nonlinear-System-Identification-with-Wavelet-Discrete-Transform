@@ -53,9 +53,11 @@ for i= 1:level
 end
 S.L = [L(1); L; M]';            % Wavelet decomposition lenghts [cAn cDn cDn-1 ... cD1]
 
-for i=1:level
-    S.AdaptStart(i) = 2^i*S.L(end-i);
-end
+% for i=1:level
+%     S.AdaptStart(i) = 2^i*S.L(end-i);
+% end
+
+S.AdaptStart = M;
 
 % S.Polyphase = E;                % Polyphase representation of analysis filter bank
 

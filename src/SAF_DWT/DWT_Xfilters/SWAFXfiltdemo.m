@@ -45,9 +45,9 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
-S = SWAFinit(M, mu, level, wtype);   % Initialization
-% S = QMFInit(M, mu, level, wtype); 
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+% S = SWAFinit(M, mu, level, wtype);   % Initialization
+S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
 [en, S] = SWAFadapt_crossfilt(un, dn, S);                 % Perform WSAF Algorithm 
 
