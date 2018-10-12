@@ -8,8 +8,8 @@ clear all;  close all;
 % Adaptive filter parameters
 mu = 0.3;                      % Step size
 M = 256;                       % Length of unknown system response
-level = 2;                     % Levels of Wavelet decomposition
-filters = 'db2';               % Set wavelet type
+level = 1;                     % Levels of Wavelet decomposition
+filters = 'db1';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % Run parameters
@@ -48,9 +48,10 @@ tic;
 fprintf('DDDWAF \n');
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
-S = QMFInit(M,mu,level,filters);
+% S = QMFInit(M,mu,level,filters);
+ S = SWAFinit(M,mu,level,filters);
 S.unknownsys = b; 
-[en, S] = SWAFadapt_WAVPACK(un, dn, S, Ovr);                 % Perform WSAF Algorithm 
+[en, S] = SWAFadapt_WAVPACK_v2(un, dn, S, Ovr, 1);                 % Perform WSAF Algorithm 
 
 err_sqr = en.^2;
     
@@ -76,7 +77,7 @@ subplot(2,1,1)
 stem(delta);
 title('Input Signal'); 
 % axis([0 10 -1.5 1.5])
-out_resp = SWAFtest_WAVPACK(delta, S, Ovr); 
+out_resp = SWAFtest_WAVPACK_v2(delta, S, Ovr); 
 subplot(2,1,2)
 stem(out_resp);
 title('Output Signal-Estimated System vs True');
@@ -94,7 +95,7 @@ figure;
 subplot(2,2,1)
 plot(input_sine);
 title('Input Signal'); 
-out_sine = SWAFtest_WAVPACK(input_sine, S, Ovr); 
+out_sine = SWAFtest_WAVPACK_v2(input_sine, S, Ovr); 
 subplot(2,2,2)
 plot(out_sine);
 title('Output Signal - Estimated System vs True');
