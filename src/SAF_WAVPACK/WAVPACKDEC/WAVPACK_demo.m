@@ -6,14 +6,14 @@ addpath 'Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-mu = 0.3;                      % Step size
+mu = 0.5;                      % Step size
 M = 256;                       % Length of unknown system response
 level = 1;                     % Levels of Wavelet decomposition
 filters = 'db1';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % Run parameters
-iter = 2.0*80000;                % Number of iterations
+iter = 1.0*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
@@ -52,6 +52,7 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
  S = SWAFinit(M,mu,level,filters);
 S.unknownsys = b; 
 [en, S] = SWAFadapt_WAVPACK_v2(un, dn, S, Ovr, 1);                 % Perform WSAF Algorithm 
+% [en, S] = SWAFadapt_WAVPACK(un, dn, S, Ovr);   
 
 err_sqr = en.^2;
     
