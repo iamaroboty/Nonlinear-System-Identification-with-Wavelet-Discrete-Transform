@@ -10,7 +10,7 @@ clear all;
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 2;                       % Levels of Wavelet decomposition
-wtype = 'db1';                   % Wavelet family
+wtype = 'db2';                   % Wavelet family
 Ovr = 1;                        % Oversample factor
 
 % Run parameters

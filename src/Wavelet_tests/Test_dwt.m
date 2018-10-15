@@ -1,7 +1,7 @@
 %% DISCRETE WAVELET DECOMPOSITION TESTING
 
 % Testing Signal
-clear all;close all
+% clear all;close all
 
 d = 256;        %Total signal length
 t=0:0.001:10;

@@ -7,10 +7,10 @@ clear all;  close all;
 
 % Adaptive filter parameters
 mu = 0.1;                      % Step size
-M = 1024;                       % Length of unknown system response
-level = 2;                     % Levels of Wavelet decomposition
-filters = 'db1';               % Set wavelet type
-Q =1;
+M = 256;                       % Length of unknown system response
+level = 3;                     % Levels of Wavelet decomposition
+filters = 'db2';               % Set wavelet type
+Q =0;
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -38,18 +38,19 @@ b = b(1:M);                      % Truncate to length M
 % b = (1+k)*(b)./(1+k*abs(b));
 
 %  %% load reverb 
- [y,Fs] = audioread('reverb_shimmer.wav');
- yr = resample(y, 1, 100);
- b = yr(510:510-1+M,1);
+%  [y,Fs] = audioread('reverb_shimmer.wav');
+%  yr = resample(y, 1, 100);
+%  b = yr(510:510-1+M,1);
 
 %%
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-S = MWSAFinit(M,mu,level,filters,Q);
+S = SWAFinit(M, mu, level, filters); 
+% S = MWSAFinit(M,mu,level,filters,Q);
 S.unknownsys = b; 
-[en, S] = MWSAFadapt(un, dn, S);                 % Perform WSAF Algorithm 
+[en, S] = MWSAFadapt_v2(un, dn, S);                 % Perform WSAF Algorithm 
 
 EML = S.eml.^2;                  % System error norm (normalized)
 err_sqr = en.^2;

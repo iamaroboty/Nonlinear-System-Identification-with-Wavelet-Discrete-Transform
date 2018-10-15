@@ -15,7 +15,7 @@ un = un(1:d)';
 
 mu = 0.3;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
-level = 5;                     % Levels of Wavelet decomposition
+level = 2;                     % Levels of Wavelet decomposition
 filters = 'db2';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
@@ -153,7 +153,6 @@ hold on;
 stem(un); 
 
 %% GNA  
-clear U en;
 a = zeros(len,1); d = zeros(len,1); 
 
 A{1} = zeros(len,2);    
@@ -171,14 +170,12 @@ for i = 1:level
 end
 eD{i} = zeros(1,2);
 
+ITER = length(un);
+en = zeros(1,ITER);               % Initialize error sequence to zero
 
  t=0:0.001:1;
  un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
  dn = un;
-
-ITER = length(un);
-en = zeros(1,ITER);               % Initialize error sequence to zero
-
 	
 for n = 1:ITER
     
@@ -198,10 +195,10 @@ for n = 1:ITER
             Dtmp = D{i}(1:len,1);
             
             if i == level
-                eD{i} = dD' - U{i}'*w;
+                eD{i} = dD - U{i}'*w;
             
             else
-                A{i+1} = [U{i}(1:2:len*2,1), U{i}(3:2:len*2+1,1)];  %Update buffer for next level, filled with cA
+                A{i+1} = [U{i}(1:2:len*2,1), U{i}(2:2:len*2+1,1)];  %Update buffer for next level, filled with cA
                 eD{i} = [eD{i}(2:end); dD(2) - U{i}(:,2)'*w];
             end
         end
@@ -222,13 +219,6 @@ for n = 1:ITER
     eDr{i} = [eDr{i}(2:end); 0];  
 end
 
-%% check for perfect reconstruction
-
-tot_delay = (2^level - 1)*(len-1) +1 ;
-
-stem(en(tot_delay:end));
-hold on;
-stem(un); 
 
     
 
