@@ -16,7 +16,7 @@ un = un(1:d)';
 mu = 0.3;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 2;                     % Levels of Wavelet decomposition
-filters = 'db2';               % Set wavelet type
+filters = 'db3';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % S = QMFInit(M,mu,level,filters);

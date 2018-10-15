@@ -47,20 +47,23 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+%[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
+
 % S = SWAFinit(M, mu, level, wtype);   % Initialization
 S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
-[en, S] = SWAFadapt_crossfilt_v2(un, dn, S);                 % Perform WSAF Algorithm 
+tic;
+[en, S] = SWAFadapt_crossfilt(un, dn, S);                 % Perform WSAF Algorithm 
 
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
 
 figure;         % Plot MSE
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+q = 0.9999; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
-axis([0 iter/1024 -60 10]);
+axis([0 iter/1024 -80 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))

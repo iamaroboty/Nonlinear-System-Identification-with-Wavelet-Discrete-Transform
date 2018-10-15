@@ -10,7 +10,7 @@ clear all;
 mu = 0.1;                      % Step size
 M = 256;                         % Length of unknown system response
 level = 2;                       % Levels of Wavelet decomposition
-wtype = 'db1';                   % Wavelet family
+wtype = 'db2';                   % Wavelet family
 Ovr = 1;                        % Oversample factor
 
 % Run parameters
@@ -47,7 +47,8 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f, Sample = %dx \n', wtype, level, mu, Ovr);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+%[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
 S = SWAFinit(M, mu, level, wtype);   % Initialization
 % S = QMFInit(M, mu, level, wtype); 
 S.unknownsys = b; 
@@ -58,7 +59,7 @@ err_sqr = en.^2;
 fprintf('Total time = %.3f mins \n',toc/60);
 
 figure;         % Plot MSE
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+q = 0.9999; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
