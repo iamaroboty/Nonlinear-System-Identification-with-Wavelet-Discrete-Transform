@@ -36,13 +36,20 @@ H = S.synthesis;                  % Synthesis filter bank
 %upsampled filters
 
 
-H_af = zeros(2^(level)*size(H,1)-1, 2^(level+1)-1);
-col = 1; 
-already_computed = 0; 
-
-%check for two layers
+% %check for two layers
 check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
 % H0, H1, H2, H3, H4
+Hi = upsample(H,2);
+Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];  
+if mod(length(Hi),2) ~= 0
+    Hi = Hi(1:end-1,:);
+end
+S.analysis = Hi;
+S.synthesis = flip(Hi);
+
+check_H_extd = check_H_extd(1:end-1,:);
+
+
 check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_extd(:,1), check_H_extd(:,2)), ...
                 conv(check_H_extd(:,2), check_H_extd(:,2)),  conv(check_H_extd(:,2), check_H_extd(:,3)), ...
                   conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
@@ -50,14 +57,21 @@ check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_ext
 
 H_af = check_H_af;
 H = check_H_extd; 
-F = cat(2, conv(F(:,1), upsample(F(:,1),2)), conv(F(:,1), upsample(F(:,2),2)), conv(F(:,2), upsample(F(:,1),2)), conv(F(:,2), upsample(F(:,2),2)) ); 
- F = flipud(H);   
+%F = cat(2, conv(F(:,1), upsample(F(:,1),2)), conv(F(:,1), upsample(F(:,2),2)), conv(F(:,2), upsample(F(:,1),2)), conv(F(:,2), upsample(F(:,2),2)) ); 
+F = flip(H);   
 
 %check one layer
 % H_af = cat(2, conv(H(:,1), H(:,1)), conv(H(:,1), H(:,2)), conv(H(:,2), H(:,2))); 
 
 
 % aliasing free petraglia filters
+
+% H_af = zeros(2^(level)*size(H,1)-1, 2^(level+1)-1);
+% col = 1; 
+% already_computed = 0; 
+% 
+
+
 % for i =1:size(H,2) 
 %     
 % for j=1:size(H,2)
@@ -126,20 +140,20 @@ L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter lengt
 
 % everything is brought to the first level
     
-U_c = zeros(L(end-i),2^(level+1)-1);            
+U_c = zeros(L(end-level),2^level);            
 eDr = zeros(len,1);          % Error signal, time domain
 delay = 1;                    % Level delay for synthesis
            
-w = zeros(L(end-i),2^level);           % Last level has 2 columns, cD and cA
+w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
 
-w(1,:) = 0.707;                   % set filters to kronecker delta
+w(1,:) = 1;                   % set filters to kronecker delta
 
 eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 
 pwr = w;
 beta = 1./L(2:end-1);
 
-u = zeros(len_af,1);                 % Tapped-delay line of input signal (Analysis FB)  
+u = zeros(len,1);                 % Tapped-delay line of input signal (Analysis FB)  
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
@@ -151,14 +165,10 @@ for n = 1:ITER
     % Analysis Bank
     U.tmp = u;
     
-        if mod(n,2^i/(Ovr)) == 0
-            if (i==1 && Ovr == 2)
-                HH = H./sqrt(2);
-            else
-                HH = H;
-            end
+        if mod(n,2^level) == 0
             
-            U.Z = H_af'*U.tmp; % column [cD ; cA] 
+            
+            U.Z = H'*U.tmp; % column [cD ; cA] 
             
          
             [rows, cols] = size(U.Z);
@@ -181,85 +191,68 @@ for n = 1:ITER
             indx = 1; 
             
             % direct nodes 
-            for j=1:2:size(U_c,2)
+            for j=1:1:size(U_c,2)
             direct(:,indx) = sum(U_c(:,j).*w(:,indx));
             indx = indx +1; 
             end
             
-            cross = zeros(1 ,2^(level+1)-2);
+%             cross = zeros(1 ,2^(level+1)-2);
+%             
+%             indx1 = 1; 
+%             indx2 = 2; 
+%             
+%             %cross nodes 
+%             for j=2:2:size(U_c,2)
+%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+%             indx1 = indx1+1; 
+%             indx2 = indx2 -1; 
+%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+%             indx1 = indx1+1; 
+%             indx2 = indx2 +2; 
+%             end
+%             
+%             % sum nodes 
+%             tmp = zeros(1 ,2^level); 
+%             
+%              
+%             tmp(:,1) = cross(:,1);
+%             indx = 2;
+%             
+%             for j=2:2:size(cross,2)-1
+%                tmp(:,indx) = cross(:,j) + cross(:, j+1);
+%               
+%                 
+%             end
+%             
+%             tmp(:,end) = cross(:,end);
             
-            indx1 = 1; 
-            indx2 = 2; 
             
-            %cross nodes 
-            for j=2:2:size(U_c,2)
-            cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-            indx1 = indx1+1; 
-            indx2 = indx2 -1; 
-            cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-            indx1 = indx1+1; 
-            indx2 = indx2 +2; 
-            end
             
-            % sum nodes 
-            tmp = zeros(1 ,2^level); 
-            
-             
-            tmp(:,1) = cross(:,1);
-            indx = 2;
-            
-            for j=2:2:size(cross,2)-1
-               tmp(:,indx) = cross(:,j) + cross(:, j+1);
-              
                 
-            end
-            
-            tmp(:,end) = cross(:,end);
-            
-            
-            
+                eD = direct' ; 
                 
-                eD = (direct + tmp)';  
+                
+                
+            % Synthesis 
+            eDr = F*eD ;
                      
            
-            S.iter{i} = S.iter{i} + 1;                
-        end
-       
-
-
-    % Synthesis Bank
-   
-            if (i==1 && Ovr == 2)
-                FF = F./sqrt(2);
-            else
-                FF = F;
-            end
+            S.iter{1} = S.iter{1} + 1;  
             
-            if mod(n,2^i/(Ovr)) == 0
-
-               
-                %for col = 1:2:size(eD,2)-1 
-                 
-                    
-                eDr = FF*eD + eDr;
-                %indx = indx +1;
-                
-                %end
-                
-                
-            end
+            en(n-2^level+1:n) = eDr(1:2^level);
+            
+        end
+        
+        
         
       
-    en(n) = eDr(1);
-    eDr = [eDr(2:end); 0];           
 end
-
 en = en(1:ITER);
 
 
 %% check for perfect reconstruction
 
-tot_delay = (2^level - 1)*(len-1) +1 ;
+tot_delay = 1;%(2^level - 1)*(len-1) +1 ;
 
 stem(en(tot_delay:end));
 hold on;

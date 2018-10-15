@@ -58,9 +58,9 @@ for n = 1:ITER
             w = w + U*(eD./(sum(U.*U)+alpha)')*mu; % Tap-weight adaptation
             S.iter = S.iter + 1;
         end
-        z = F*eD + z;                                       
+        z = F*eD; %+ z;                                       
         en(n-2^level+1:n) = z(1:2^level); 
-        z = [z(2^level+1:end); zeros(2^level,1)];
+        %z = [z(2^level+1:end); zeros(2^level,1)]; 
     end
                           
 end
