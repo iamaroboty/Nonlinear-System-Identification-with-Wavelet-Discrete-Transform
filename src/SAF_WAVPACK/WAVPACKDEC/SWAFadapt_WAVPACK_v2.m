@@ -16,7 +16,7 @@ F = S.synthesis;                  % Synthesis filter bank
 
 if flag == 1
     Hi = upsample(H,2);
-    Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,1)), conv(Hi(:,2),H(:,2))];    
+    Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];    
     Hi = Hi(1:end-1,:);
     F = Hi;
     S.analysis = F;
@@ -25,7 +25,7 @@ if flag == 1
 end
 
 [len, ~] = size(H);               % Wavelet filter length
-level = S.levels;                 % Wavelet Levels
+level = 1;                 % Wavelet Levels
 L = S.L.*Ovr./2;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 % Init Arrays
@@ -114,7 +114,7 @@ for n = 1:ITER
                 
                  for col=1:cols
                    for row=1:rows
-%                       eD{i}(indx) = Y.Z(row,col) - (filtered(indx)+cross_filtered(indx));    
+                      eD{i}(indx) = Y.Z(row,col) - (filtered(indx)+cross_filtered(indx));    
                       eD{i}(indx) = Y.Z(row,col) - (filtered(indx));
                                       
                       indx=indx+1;
