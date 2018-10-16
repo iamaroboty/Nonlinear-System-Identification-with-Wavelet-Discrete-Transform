@@ -56,7 +56,7 @@ L = [M; zeros(level,1)];
 for i= 1:level
     L = [floor((L(1)+lf-1)/2); L(1:end-1)];
 end
-S.L = [L(1); L]'./2;
+S.L = [L(1); L]';
 
 % % Old
 % L = zeros(level,1);
