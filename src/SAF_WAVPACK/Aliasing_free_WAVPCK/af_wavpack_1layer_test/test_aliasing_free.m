@@ -1,7 +1,7 @@
 %% WAVELET PACKET DECOMPOSITION TEST FOR PERFECT RECONSTRUTION
 
 addpath 'Common';             % Functions in Common folder
-% clear all; close all
+clear all; close all
 
 % Testing Signal
 
@@ -39,13 +39,14 @@ H = S.synthesis;                  % Synthesis filter bank
 % %check for two layers
 check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
 % H0, H1, H2, H3, H4
-Hi = upsample(H,2);
-Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];  
-if mod(length(Hi),2) ~= 0
-    Hi = Hi(1:end-1,:);
-end
-S.analysis = Hi;
-S.synthesis = flip(Hi);
+% Hi = upsample(H,2);
+% Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];  
+% if mod(length(Hi),2) ~= 0
+%     Hi = Hi(1:end-1,:);
+% end
+% S.analysis = Hi;
+% S.synthesis = flip(Hi);
+% 
 
 check_H_extd = check_H_extd(1:end-1,:);
 
@@ -55,74 +56,52 @@ check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_ext
                   conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
                    conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
 
+
+
+Hi = zeros(2^(level-1)*size(H,1), 2^(level));
+
+indx = 1;
+
+for i = 1:size(H,2)
+for j=1:level-1
+    
+   up{i,j} = upsample(H(:,i), 2^(j)); 
+   
+   
+end
+end
+
+
+% outer product
+% H_tmp = H; 
+% for i=1:size(up,2)
+% 
+% H_tmp = outer_conv(H_tmp, up(:,i));
+% end
+% 
+% Hi = H_tmp(1:find(H_tmp(:,1), 1, 'last'),:); % bug works only db1 
+% 
+% % petraglia's structure af filters
+% 
+% indx = 1; 
+% indx2 = 1 ; 
+% 
+% for i= 1:size(Hi,2)
+%                           
+%       H_af(:,indx) = conv(Hi(:,i), Hi(:,i));
+%       indx = indx +1; 
+%       
+%       if i+1 <= size(Hi,2)
+%       H_af(:,indx) = conv(Hi(:,i), Hi(:,i+1));
+%       indx = indx +1; 
+%       end         
+%     
+% end
+
+%H_af = cat(2, conv(H(:,1), H(:,1)), conv(H(:,1), H(:,2)), conv(H(:,2), H(:,2))); 
 H_af = check_H_af;
-H = check_H_extd; 
-%F = cat(2, conv(F(:,1), upsample(F(:,1),2)), conv(F(:,1), upsample(F(:,2),2)), conv(F(:,2), upsample(F(:,1),2)), conv(F(:,2), upsample(F(:,2),2)) ); 
-F = flip(H);   
-
-%check one layer
-% H_af = cat(2, conv(H(:,1), H(:,1)), conv(H(:,1), H(:,2)), conv(H(:,2), H(:,2))); 
-
-
-% aliasing free petraglia filters
-
-% H_af = zeros(2^(level)*size(H,1)-1, 2^(level+1)-1);
-% col = 1; 
-% already_computed = 0; 
-% 
-
-
-% for i =1:size(H,2) 
-%     
-% for j=1:size(H,2)
-%     
-%     
-%     temp = H(:,i); 
-%     
-%     if already_computed == 1
-%          already_computed = 0;
-%         continue; 
-%     end
-%     
-%     for indx=1:level
-%     
-%     temp = conv(temp, upsample(H(:,j), 2^(indx-1)));
-%  
-%         
-%     end
-%     
-%     if j-i==1
-%        already_computed =1;  
-%     end
-%     
-%     H_af(:,col) = temp;
-%     col = col +1;   
-%     
-% end
-% 
-% end
-% 
-% % equivalent filters in one level: 
-% 
-% 
-% H_lvl = zeros(2^(level-1)*size(H,1), 2^(level));
-% 
-% for i=1:size(H(:,2))
-%     
-%     tmp=H(:,i); 
-% 
-% for j=2:level
-%     
-%     tmp = conv(tmp, upsample(H(:,i), 2^(j-1))); 
-%     
-% 
-% end
-% 
-% H_lvl(:,i) = tmp; 
-% 
-% 
-% end
-
+H = check_H_extd;
+F = flip(H); 
 
 
 
@@ -140,20 +119,20 @@ L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter lengt
 
 % everything is brought to the first level
     
-U_c = zeros(L(end-level),2^level);            
+U_c = zeros(L(end-level),2^(level+1)-1);            
 eDr = zeros(len,1);          % Error signal, time domain
 delay = 1;                    % Level delay for synthesis
            
 w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
 
-w(1,:) = 1;                   % set filters to kronecker delta
+w(1,:) = 2^1/4;                   % set filters to kronecker delta
 
 eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 
 pwr = w;
 beta = 1./L(2:end-1);
 
-u = zeros(len,1);                 % Tapped-delay line of input signal (Analysis FB)  
+u = zeros(len_af,1);                 % Tapped-delay line of input signal (Analysis FB)  
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
@@ -168,7 +147,7 @@ for n = 1:ITER
         if mod(n,2^level) == 0
             
             
-            U.Z = H'*U.tmp; % column [cD ; cA] 
+            U.Z = H_af'*U.tmp; % column [cD ; cA] 
             
          
             [rows, cols] = size(U.Z);
@@ -191,45 +170,43 @@ for n = 1:ITER
             indx = 1; 
             
             % direct nodes 
-            for j=1:1:size(U_c,2)
+            for j=1:2:size(U_c,2)
             direct(:,indx) = sum(U_c(:,j).*w(:,indx));
             indx = indx +1; 
             end
             
-%             cross = zeros(1 ,2^(level+1)-2);
-%             
-%             indx1 = 1; 
-%             indx2 = 2; 
-%             
-%             %cross nodes 
-%             for j=2:2:size(U_c,2)
-%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-%             indx1 = indx1+1; 
-%             indx2 = indx2 -1; 
-%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-%             indx1 = indx1+1; 
-%             indx2 = indx2 +2; 
-%             end
-%             
-%             % sum nodes 
-%             tmp = zeros(1 ,2^level); 
-%             
-%              
-%             tmp(:,1) = cross(:,1);
-%             indx = 2;
-%             
-%             for j=2:2:size(cross,2)-1
-%                tmp(:,indx) = cross(:,j) + cross(:, j+1);
-%               
-%                 
-%             end
-%             
-%             tmp(:,end) = cross(:,end);
+            cross = zeros(1 ,2^(level+1)-2);
             
+            indx1 = 1; 
+            indx2 = 2; 
             
+            %cross nodes 
+            for j=2:2:size(U_c,2)
+            cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+            indx1 = indx1+1; 
+            indx2 = indx2 -1; 
+            cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+            indx1 = indx1+1; 
+            indx2 = indx2 +2; 
+            end
             
+            % sum nodes 
+            tmp = zeros(1 ,2^level); 
+            
+             
+            tmp(:,1) = cross(:,1);
+            indx = 2;
+            
+            for j=2:2:size(cross,2)-1
+               tmp(:,indx) = cross(:,j) + cross(:, j+1);
+               indx = indx+1; 
+              
                 
-                eD = direct' ; 
+            end
+            
+            tmp(:,end) = cross(:,end);
+            
+            eD = [direct+tmp]' ; 
                 
                 
                 
@@ -252,7 +229,7 @@ en = en(1:ITER);
 
 %% check for perfect reconstruction
 
-tot_delay = 1;%(2^level - 1)*(len-1) +1 ;
+tot_delay = 1;
 
 stem(en(tot_delay:end));
 hold on;

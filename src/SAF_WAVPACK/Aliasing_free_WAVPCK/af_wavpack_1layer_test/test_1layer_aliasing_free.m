@@ -1,7 +1,7 @@
 %% WAVELET PACKET DECOMPOSITION TEST FOR PERFECT RECONSTRUTION
 
 addpath 'Common';             % Functions in Common folder
-% clear all; close all
+clear all; close all
 
 % Testing Signal
 

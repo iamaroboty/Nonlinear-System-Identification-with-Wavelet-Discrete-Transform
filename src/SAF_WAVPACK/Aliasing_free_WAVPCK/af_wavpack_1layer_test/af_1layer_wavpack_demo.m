@@ -6,10 +6,10 @@ addpath 'Common';             % Functions in Common folder
 clear all;  close all;
 
 % Adaptive filter parameters
-mu = 0.3;                      % Step size
+mu = 0.1;                      % Step size
 M = 256;                       % Length of unknown system response
-level = 1;                     % Levels of Wavelet decomposition
-filters = 'db8';               % Set wavelet type
+level = 2;                     % Levels of Wavelet decomposition
+filters = 'db1';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % Run parameters
@@ -47,7 +47,7 @@ tic;
 % Adaptation process
 fprintf('DDDWAF \n');
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 S = QMFInit(M,mu,level,filters);
 % S = SWAFinit(M,mu,level,filters);
 S.unknownsys = b; 

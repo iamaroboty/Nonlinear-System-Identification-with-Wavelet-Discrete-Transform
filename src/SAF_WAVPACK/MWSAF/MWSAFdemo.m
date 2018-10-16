@@ -7,7 +7,7 @@ clear all;  close all;
 
 % Adaptive filter parameters
 mu = 0.1;                      % Step size
-M = 1024;                       % Length of unknown system response
+M = 256;                       % Length of unknown system response
 level = 2;                     % Levels of Wavelet decomposition
 filters = 'db1';               % Set wavelet type
 Q =1;
@@ -38,9 +38,9 @@ b = b(1:M);                      % Truncate to length M
 % b = (1+k)*(b)./(1+k*abs(b));
 
 %  %% load reverb 
- [y,Fs] = audioread('reverb_shimmer.wav');
- yr = resample(y, 1, 100);
- b = yr(510:510-1+M,1);
+%  [y,Fs] = audioread('reverb_shimmer.wav');
+%  yr = resample(y, 1, 100);
+%  b = yr(510:510-1+M,1);
 
 %%
 tic;

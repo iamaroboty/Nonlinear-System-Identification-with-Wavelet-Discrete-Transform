@@ -18,80 +18,97 @@ level = S.levels;                 % Wavelet Levels
 L = S.L;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 
+M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
 
-% petraglia structure extended analysis filters
-% 4 band structure 
-H_1lvl = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)));
-% H0 , H1, H2, H3
-H_af = cat(2, conv(H_1lvl(:,1), H_1lvl(:,1)), conv(H_1lvl(:,1), H_1lvl(:,2)), conv(H_1lvl(:,2), H_1lvl(:,2)),  conv(H_1lvl(:,3), H_1lvl(:,2)),  conv(H_1lvl(:,3), H_1lvl(:,3)),conv(H_1lvl(:,3), H_1lvl(:,4)),  conv(H_1lvl(:,4), H_1lvl(:,4)) );
-% H0H0 , H0H1, H1H1, H1H2, H2H2; 
-F_1lvl = cat(2, conv(F(:,1), upsample(F(:,1),2)), conv(F(:,1), upsample(F(:,2),2)), conv(F(:,2), upsample(F(:,1),2)), conv(F(:,2), upsample(F(:,2),2)));
-
-% high pass , band pass, low pass 
+F = S.analysis;                   % Analysis filter bank
+H = S.synthesis;                  % Synthesis filter bank 
 
 
-[len_af, ~] = size(H_af);               % Wavelet filter length
-[len, ~] = size(H); 
+% petraglia aliasing free structure adaptation
+
+% filters for the aliasing free bank 
+
+%upsampled filters
 
 
-%% petraglia aliasing free structure adaptation
+% %check for two layers
+check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
+% H0, H1, H2, H3, H4
+% Hi = upsample(H,2);
+% Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];  
+% if mod(length(Hi),2) ~= 0
+%     Hi = Hi(1:end-1,:);
+% end
+% S.analysis = Hi;
+% S.synthesis = flip(Hi);
+% 
 
+Hi = check_H_extd(1:end-1,:);
+
+
+H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_extd(:,1), check_H_extd(:,2)), ...
+                conv(check_H_extd(:,2), check_H_extd(:,2)),  conv(check_H_extd(:,2), check_H_extd(:,3)), ...
+                  conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
+                   conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
+               
+        
+
+F = flip(Hi); 
 
 
 % analysis and synthesis are used in reverse to obtain in U.Z a column
 % vector with cD in the first position
 
+[len_af, ~] = size(H_af);               % Wavelet filter length
+[len, ~] = size(Hi); 
+
+level = S.levels;                 % Wavelet Levels
+L = S.L;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 % Init Arrays
-for i= 1:level
-     
-       U.c{i} = zeros(L(end-i),7);    
+% everything is brought to the first level
     
-       Y.c{i} = zeros(L(end-i),2^(i));   % nb is different !!!    
-    
-       eD{i} = zeros(L(end-i),2^(i-1));      % Error signa, transformed domain
-       eDr{i} = zeros(len,2^(i-1));          % Error signal, time domain
-       delays(i) = 2^i-1;                    % Level delay for synthesis
-    
-      
-end 
-w = zeros(L(end-i),4);           % Last level has 2 columns, cD and cA
-eD{i} = zeros(1,2^i/2);              % Last level has 2 columns, cD and cA
+U_c = zeros(L(end-level),2^(level+1)-1);  
+Y_c = zeros(L(end-level),2^(level)); 
+
+eDr = zeros(len,1);          % Error signal, time domain
+delay = 1;                    % Level delay for synthesis
+           
+w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
+
+
+
+eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 
 pwr = w;
 beta = 1./L(2:end-1);
 
 u = zeros(len_af,1);                 % Tapped-delay line of input signal (Analysis FB)  
-y = zeros(len,1);                 % Tapped-delay line of desired response (Analysis FB)
+y = zeros(len,1); 
+
+ytap = zeros(len_af-len,1); 
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
 
-% % ONLY FOR TESTING PURPOSE
-%  t=0:0.001:1;
-%  un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
-%  ITER = length(un);
-%  w(1,1:end) = 1;
-
-ytap = zeros(len_af-len,1); 
-
 for n = 1:ITER    
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
+    
+
     y = [ytap(end); y(1:end-1)];        % Desired response vector
     
     ytap = [dn(n); ytap(1:end-1)]; 
     
-    % Analysis Bank
+    
     U.tmp = u;
-    Y.tmp= y;
+    Y.tmp = y; 
     
-    for i = 1:level
-        if mod(n,2^i) == 0
-    
-            U.Z = H_af'*U.tmp;
-            Y.Z = H'*Y.tmp;  % normal
-            
+        if mod(n,2^level) == 0
+                       
+            U.Z = H_af'*U.tmp; % column [cD ; cA] 
+            Y.Z = Hi'*Y.tmp; 
+                     
             [rows, cols] = size(U.Z);
             
             indx = 1;
@@ -99,114 +116,89 @@ for n = 1:ITER
             for col=1:cols
                 for row=1:rows 
                     
-                    U.c{i}(:,indx) = cat(1,U.Z(row,col), U.c{i}(1:end-1, indx));
-                    
-              
-                    indx=indx+1;
+                    U_c(:,indx) = cat(1,U.Z(row,col), U_c(1:end-1, indx)); %CD||CA
+        
+                indx=indx+1;
                 end  
             end
-            
-            indx = 1;
-            [rows, cols] = size(Y.Z);
-            
-             for col=1:cols
-                for row=1:rows 
-                    
-                    Y.c{i}(:,indx) = cat(1,Y.Z(row,col), Y.c{i}(1:end-1, indx));
-                    
-              
-                    indx=indx+1;
-                end  
-            end
-            
-                   
-            
-            %U.tmp = U.c{i}(1:len,:);    
-            %Y.tmp = Y.c{i}(1:len,:);  
-            
-            if i == level
-                
-                
-                directcD = sum(U.c{i}(:,1).*w(:,1)); 
-                directcA = sum(U.c{i}(:,3).*w(:,2)); 
-                
-                
-                crosscD = sum(U.c{i}(:,2).*w(:,2)); 
-                crosscA = sum(U.c{i}(:,2).*w(:,1));
-                
-                
-                filtered =  [directcD+crosscD; directcA+crosscA]'; 
+                          
+%             direct = zeros(1 ,2^level); 
+%             
+%             indx = 1; 
+%             
+%             % direct nodes 
+%             for j=1:2:size(U_c,2)
+%             direct(:,indx) = sum(U_c(:,j).*w(:,indx));
+%             indx = indx +1; 
+%             end
+%             
+%             cross = zeros(1 ,2^(level+1)-2);
+%             
+%             indx1 = 1; 
+%             indx2 = 2; 
+%             
+%             %cross nodes 
+%             for j=2:2:size(U_c,2)
+%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+%             indx1 = indx1+1; 
+%             indx2 = indx2 -1; 
+%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+%             indx1 = indx1+1; 
+%             indx2 = indx2 +2; 
+%             end
+%             
+%             % sum nodes 
+%             tmp = zeros(1 ,2^level); 
+%             
+%              
+%             tmp(:,1) = cross(:,1);
+%             indx = 2;
+%             
+%             for j=2:2:size(cross,2)-1
+%                tmp(:,indx) = cross(:,j) + cross(:, j+1);
+%                indx = indx+1; 
+%               
+%                 
+%             end
+%             
+%             tmp(:,end) = cross(:,end);
 
+            directH0H0 = sum(U_c(:,1).*w(:,1)); 
+            directH1H1 = sum(U_c(:,3).*w(:,2)); 
+            directH2H2 = sum(U_c(:,5).*w(:,3)); 
+            directH3H3 = sum(U_c(:,7).*w(:,4)); 
+            
+            crossH1H0G1 = sum(U_c(:,2).*w(:,2));
+            crossH1H0G0 = sum(U_c(:,2).*w(:,1));
+            crossH2H1G2 = sum(U_c(:,4).*w(:,3));
+            crossH2H1G1 = sum(U_c(:,4).*w(:,2));
+            crossH3H2G3 = sum(U_c(:,6).*w(:,4));
+            crossH3H2G2 = sum(U_c(:,6).*w(:,2));
+            
+            summed = [directH0H0+crossH1H0G1; directH1H1+crossH1H0G0+crossH2H1G2; directH2H2+crossH2H1G1+crossH3H2G3; ...
+                   directH3H3+crossH3H2G2];
+            
+            eD = Y.Z - (summed) ;
+            
+            
+            if n >= AdaptStart
+
+                    
+            w = w + mu.*(U_c(:,1:2:end).*eD'./(sum(U_c(:,1:2:end).*U_c(:,1:2:end))+alpha)); 
+                                  
+            end       
+            
+            % Synthesis 
+            eDr = F*eD ;
+           
+            S.iter{1} = S.iter{1} + 1;  
+            
+            en(n-2^level+1:n) = eDr(1:2^level);
+            
+        end
+            
       
-                eD{i} = Y.Z' - filtered; 
-                
-%                  for col=1:cols
-%                    for row=1:rows
-%                       eD{i}(indx) = Y.Z(row,col) - filtered(indx);
-%                        
-%                
-%                       indx=indx+1;
-%                    end  
-%                  end
-
-
-
-                                
-                if n >= AdaptStart(i)
-%                     pwr{i} = beta(i)*pwr{i}+ (1-beta(i))*([U.cA{i},U.cD{i}].*[U.cA{i},U.cD{i}]);
-%                     w{i} = w{i} + mu*[U.cA{i},U.cD{i}].*eD{i}./((sum(pwr{i})+alpha)); 
-                    
-                   % w = w + mu*U.c{i}.*eD{i}./(sum(U.c{i}.*U.c{i})+alpha); 
-                    
-                    w(:,1) = w(:,1) + mu*(U.c{i}(:,1).*eD{i}(1)./(sum(U.c{i}(:,1).*U.c{i}(:,1))+alpha) +  U.c{i}(:,2).*eD{i}(2)./(sum(U.c{i}(:,2).*U.c{i}(:,2))+alpha) ); 
-                    w(:,2) = w(:,2) + mu*(U.c{i}(:,3).*eD{i}(2)./(sum(U.c{i}(:,3).*U.c{i}(:,3))+alpha) +  U.c{i}(:,2).*eD{i}(1)./(sum(U.c{i}(:,2).*U.c{i}(:,2))+alpha) ); 
-%                     w(:,1) = 0.707.*w(:,1) ;
-%                     w(:,2) = 0.707.*w(:,2) ;
-%                                                                             
-                                                
-                                                
-                end                     
-            end           
-            S.iter{i} = S.iter{i} + 1;                
-        end
-    end    
-
-      % Synthesis Bank
-    for i = level:-1:1
-            
-        if i == level
-            if mod(n,2^i) == 0
-                indx = 1; 
-               
-                for col = 1:2:size(eD{i},2)-1 
-                 
-                    
-                eDr{i}(:,indx) = F*eD{i}(1,col:col+1)' + eDr{i}(:,indx);
-                indx = indx +1;
-                
-                end
-                
-                
-            end
-        else
-            if mod(n,2^i) == 0     
-                
-                indx = 1; 
-                
-                for col = 1:2:2^i-1
-                eDr{i}(:,indx) = F*eDr{i+1}(1,col:col+1)' + eDr{i}(:,indx);
-                indx = indx +1;
-                
-                end
-                eDr{i+1} = [eDr{i+1}(2:end,:); zeros(1,size(eDr{i+1},2))];
-            end            
-        end
-    end   
-    en(n) = eDr{i}(1);
-    eDr{i} = [eDr{i}(2:end); 0];           
 end
-
-
 en = en(1:ITER);
 S.coeffs = w;
 end

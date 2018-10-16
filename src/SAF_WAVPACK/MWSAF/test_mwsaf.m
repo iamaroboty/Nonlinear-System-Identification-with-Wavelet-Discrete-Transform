@@ -16,7 +16,7 @@ Ovr = 1;
 
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
-level = 5;                     % Levels of Wavelet decomposition
+level = 2;                     % Levels of Wavelet decomposition
 filters = 'db1';               % Set wavelet type
 
 
@@ -85,64 +85,6 @@ end
 
 Hi = H_tmp(1:find(H_tmp(:,1), 1, 'last'),:); % bug works only db1 
 
-% for k=1:size(up,2)  
-%     
-%     
-% 
-% % for i=1:size(H_temp,2)
-% %     
-% %     tmp = H_temp(:,i);
-% %     
-% %     for j=1:size(up,1)                  
-% %     
-% %     tmp = conv(tmp1, up{j,k});
-% %     H_tmp{indx} = tmp(1:find(tmp, 1, 'last'),:);
-% %     indx = indx +1; 
-% %      
-% %     end
-%     
-%     
-%     
-% end 
-% 
-%    Hi(:, indx) = tmp(1:find(tmp, 1, 'last'),:); % strip zeros
-%     indx = indx + 1;  
-% 
-% end
-
-
-
-
-
-% indx =1 ; 
-% 
-% for i=1:size(H(:,2))
-%     
-%     
-%     
-% for k=1:size(H(:,2))
-%     
-%     tmp=H(:,i);
-%     
-%     
-% for j=2:level
-%     
-%     tmp = conv(tmp, upsample(H(:,k), 2^(j-1)));
-%     
-%     tmp = tmp(1:find(tmp, 1, 'last'),:); % strip zeros
-% 
-%  
-% end
-% 
-% 
-% 
-% Hi(:,indx) = tmp; 
-% indx = indx+1; 
-% 
-% end
-% 
-% end
-
 Fi = flip(Hi); 
 
 % analysis and synthesis are used in reverse to obtain in U.Z a column
@@ -207,7 +149,7 @@ for n = 1:ITER
             
             indx = 1; 
             
-            % direct nodes 
+            % direct  
             for j=1:1:size(U_c,2)
             direct(:,indx) = sum(U_c(:,j).*w(:,indx));
             indx = indx +1; 
