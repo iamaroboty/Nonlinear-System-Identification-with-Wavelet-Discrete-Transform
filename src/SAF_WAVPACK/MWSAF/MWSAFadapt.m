@@ -26,9 +26,10 @@ w = zeros(M,1);
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
-%  t=0:0.001:1;
-%  un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
-%  dn = un;
+ t=0:0.001:1;
+ un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
+ dn = un;
+ tot_delay = (2^level - 1)*(len-1) +1 ;
 
 
 if isfield(S,'unknownsys')
