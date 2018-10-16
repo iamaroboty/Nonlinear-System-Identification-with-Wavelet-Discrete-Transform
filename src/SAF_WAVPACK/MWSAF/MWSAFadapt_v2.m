@@ -18,9 +18,8 @@ F = S.synthesis;                  % Synthesis filter bank
 level = S.levels;                 % Wavelet Levels
 L = S.L;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
-
 for i = 1:level
-    A{i} = zeros(len,2^i);
+    A{i} = zeros(2^(i-1)*len,2^i);
     U{i} = zeros(M,2);
     D{i} = zeros(M,2);
     eDr{i} = zeros(len,1);
@@ -57,7 +56,7 @@ end
 for n = 1:ITER    
     d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
     a = [un(n); a(1:end-1)];                       % Update tapped-delay line of u(n)
-    A{1} = [a, A{1}(:,1:end-1)];                         % Update buffer
+    A{1} = [a, A{1}(:,1:end-1)];                   % Update buffer
     
     if ComputeEML == 1
         eml(n) = norm(b-w)/norm_b;                 % System error norm (normalized)
@@ -85,8 +84,13 @@ for n = 1:ITER
                 end
             
             else
-                Dtmp = D{i}(1:len,1);
-                A{i+1} = [U{i}(1:len*(i+1),1), U{i}(2:len*(i+1)+1,1), U{i}(3:len*(i+1)+2,1), U{i}(4:len*(i+1)+3,1)];  %Update buffer for next level, filled with cA
+                Dtmp = D{i}(1:len,1);               % Update buffer
+                tmpcat = [];                    % Improve speed here!!
+                for j = 1:2^(i+1)
+                    tmpcat = cat(2,tmpcat,U{i}(j:len*2^i+(j-1),1));
+                end
+                A{i+1} = tmpcat;
+%                 A{i+1} = [U{i}(1:len*(i+1),1), U{i}(2:len*(i+1)+1,1), U{i}(3:len*(i+1)+2,1), U{i}(4:len*(i+1)+3,1)];  %Update buffer for next level, filled with cA
                 eD{i} = [eD{i}(2:end); dD(2) - U{i}(:,2)'*w];
                 
                 if n >= AdaptStart
