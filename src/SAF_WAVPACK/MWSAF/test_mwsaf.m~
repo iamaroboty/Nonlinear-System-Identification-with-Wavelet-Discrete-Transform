@@ -15,8 +15,8 @@ Ovr = 1;
 %% wavpack parameters
 
 mu = 0.1;                      % ignored here 
-M = 256;                        % Length of unknown system response also ignored here
-level = 2;                     % Levels of Wavelet decomposition
+M = 1024;                        % Length of unknown system response also ignored here
+level = 3;                     % Levels of Wavelet decomposition
 filters = 'db1';               % Set wavelet type
 
 
@@ -37,15 +37,15 @@ H = S.synthesis;                  % Synthesis filter bank
 
 
 % %check for two layers
-check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
-% H0, H1, H2, H3, H4
-
-check_H_extd = check_H_extd(1:end-1,:);
-
-check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_extd(:,1), check_H_extd(:,2)), ...
-                conv(check_H_extd(:,2), check_H_extd(:,2)),  conv(check_H_extd(:,2), check_H_extd(:,3)), ...
-                  conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
-                   conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
+% check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
+% % H0, H1, H2, H3, H4
+% 
+% check_H_extd = check_H_extd(1:end-1,:);
+% 
+% check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_extd(:,1), check_H_extd(:,2)), ...
+%                 conv(check_H_extd(:,2), check_H_extd(:,2)),  conv(check_H_extd(:,2), check_H_extd(:,3)), ...
+%                   conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
+%                    conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
 
 
 %F = cat(2, conv(F(:,1), upsample(F(:,1),2)), conv(F(:,1), upsample(F(:,2),2)), conv(F(:,2), upsample(F(:,1),2)), conv(F(:,2), upsample(F(:,2),2)) ); 
@@ -65,7 +65,7 @@ indx = 1;
 for i = 1:size(H,2)
 for j=1:level-1
     
-   up{i,j} = upsample(H(:,i), 2^(j)); 
+   up{i,j} = upsample_fir(H(:,i), 2^(j)); 
    
    
 end
@@ -83,7 +83,8 @@ for i=1:size(up,2)
 H_tmp = outer_conv(H_tmp, up(:,i));
 end
 
-Hi = H_tmp(1:find(H_tmp(:,1), 1, 'last'),:); % bug works only db1 
+
+Hi = H_tmp; %H_tmp(1:find(H_tmp(:,1), 1, 'last'),:); % bug works only db1 
 
 Fi = flip(Hi); 
 
@@ -100,7 +101,7 @@ L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter lengt
 % everything is brought to the first level
     
 U_c = zeros(L(end-level),2^level);            
-eDr = zeros(len,1);          % Error signal, time domain
+eDr = zeros(2^level,1);          % Error signal, time domain
 delay = 1;                    % Level delay for synthesis
            
 w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
@@ -158,11 +159,12 @@ for n = 1:ITER
             eD = direct' ; 
                 
             % Synthesis 
-            eDr = Fi*eD ;
+            eDr = Fi*eD + eDr;
            
             S.iter{1} = S.iter{1} + 1;  
             
             en(n-2^level+1:n) = eDr(1:2^level);
+            eDr = [eDr(2^level+1:end); zeros(2^level,1)]; 
             
         end
         
@@ -173,7 +175,7 @@ en = en(1:ITER);
 
 %% check for perfect reconstruction
 
-tot_delay = 1;%(2^level - 1)*(len-1) +1 ;
+tot_delay = len-3 ;
 
 stem(en(tot_delay:end));
 hold on;

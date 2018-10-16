@@ -37,24 +37,24 @@ H = S.synthesis;                  % Synthesis filter bank
 
 
 % %check for two layers
-check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
-% H0, H1, H2, H3, H4
-% Hi = upsample(H,2);
-% Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];  
-% if mod(length(Hi),2) ~= 0
-%     Hi = Hi(1:end-1,:);
-% end
-% S.analysis = Hi;
-% S.synthesis = flip(Hi);
+% check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
+% % H0, H1, H2, H3, H4
+% % Hi = upsample(H,2);
+% % Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];  
+% % if mod(length(Hi),2) ~= 0
+% %     Hi = Hi(1:end-1,:);
+% % end
+% % S.analysis = Hi;
+% % S.synthesis = flip(Hi);
+% % 
 % 
-
-check_H_extd = check_H_extd(1:end-1,:);
-
-
-check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_extd(:,1), check_H_extd(:,2)), ...
-                conv(check_H_extd(:,2), check_H_extd(:,2)),  conv(check_H_extd(:,2), check_H_extd(:,3)), ...
-                  conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
-                   conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
+% check_H_extd = check_H_extd(1:end-1,:);
+% 
+% 
+% check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_extd(:,1), check_H_extd(:,2)), ...
+%                 conv(check_H_extd(:,2), check_H_extd(:,2)),  conv(check_H_extd(:,2), check_H_extd(:,3)), ...
+%                   conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
+%                    conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
 
 
 
@@ -72,36 +72,35 @@ end
 end
 
 
-% outer product
-% H_tmp = H; 
-% for i=1:size(up,2)
-% 
-% H_tmp = outer_conv(H_tmp, up(:,i));
-% end
-% 
-% Hi = H_tmp(1:find(H_tmp(:,1), 1, 'last'),:); % bug works only db1 
-% 
-% % petraglia's structure af filters
-% 
-% indx = 1; 
-% indx2 = 1 ; 
-% 
-% for i= 1:size(Hi,2)
-%                           
-%       H_af(:,indx) = conv(Hi(:,i), Hi(:,i));
-%       indx = indx +1; 
-%       
-%       if i+1 <= size(Hi,2)
-%       H_af(:,indx) = conv(Hi(:,i), Hi(:,i+1));
-%       indx = indx +1; 
-%       end         
-%     
-% end
+%outer product
+H_tmp = H; 
+for i=1:size(up,2)
+
+H_tmp = outer_conv(H_tmp, up(:,i));
+end
+
+Hi = H_tmp; 
+
+% petraglia's structure af filters
+
+indx = 1; 
+indx2 = 1 ; 
+
+for i= 1:size(Hi,2)
+                          
+      H_af(:,indx) = conv(Hi(:,i), Hi(:,i));
+      indx = indx +1; 
+      
+      if i+1 <= size(Hi,2)
+      H_af(:,indx) = conv(Hi(:,i), Hi(:,i+1));
+      indx = indx +1; 
+      end         
+    
+end
 
 %H_af = cat(2, conv(H(:,1), H(:,1)), conv(H(:,1), H(:,2)), conv(H(:,2), H(:,2))); 
-H_af = check_H_af;
-H = check_H_extd;
-F = flip(H); 
+
+F = flip(Hi); 
 
 
 
@@ -110,7 +109,7 @@ F = flip(H);
 
 
 [len_af, ~] = size(H_af);               % Wavelet filter length
-[len, ~] = size(H); 
+[len, ~] = size(Hi); 
 
 level = S.levels;                 % Wavelet Levels
 L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
@@ -121,11 +120,12 @@ L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter lengt
     
 U_c = zeros(L(end-level),2^(level+1)-1);            
 eDr = zeros(len,1);          % Error signal, time domain
+tmp = zeros(len_af,1); 
 delay = 1;                    % Level delay for synthesis
            
 w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
 
-w(1,:) = 2^1/4;                   % set filters to kronecker delta
+w(1,:) = 1;                   % set filters to kronecker delta
 
 eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 
@@ -165,61 +165,81 @@ for n = 1:ITER
             
             %U.tmp = U_c(1:len,:);    
             
-            direct = zeros(1 ,2^level); 
+%             direct = zeros(1 ,2^level); 
+%             
+%             indx = 1; 
+%             
+%             % direct nodes 
+%             for j=1:2:size(U_c,2)
+%             direct(:,indx) = sum(U_c(:,j).*w(:,indx));
+%             indx = indx +1; 
+%             end
+%             
+%             cross = zeros(1 ,2^(level+1)-2);
+%             
+%             indx1 = 1; 
+%             indx2 = 2; 
+%             
+%             %cross nodes 
+%             for j=2:2:size(U_c,2)
+%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+%             indx1 = indx1+1; 
+%             indx2 = indx2 -1; 
+%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
+%             indx1 = indx1+1; 
+%             indx2 = indx2 +2; 
+%             end
+%             
+%             % sum nodes 
+%             tmp = zeros(1 ,2^level); 
+%             
+%              
+%             tmp(:,1) = cross(:,1);
+%             indx = 2;
+%             
+%             for j=2:2:size(cross,2)-1
+%                tmp(:,indx) = cross(:,j) + cross(:, j+1);
+%                indx = indx+1; 
+%               
+%                 
+%             end
+%             
+%             tmp(:,end) = cross(:,end);
+%             
+%             eD = [direct+tmp]' ; 
+
+            directH0H0 = sum(U_c(:,1).*w(:,1)); 
+            directH1H1 = sum(U_c(:,3).*w(:,2)); 
+            directH2H2 = sum(U_c(:,5).*w(:,3)); 
+            directH3H3 = sum(U_c(:,7).*w(:,4)); 
             
-            indx = 1; 
+            crossH1H0G1 = sum(U_c(:,2).*w(:,2));
+            crossH1H0G0 = sum(U_c(:,2).*w(:,1));
+            crossH2H1G2 = sum(U_c(:,4).*w(:,3));
+            crossH2H1G1 = sum(U_c(:,4).*w(:,2));
+            crossH3H2G3 = sum(U_c(:,6).*w(:,4));
+            crossH3H2G2 = sum(U_c(:,6).*w(:,2));
             
-            % direct nodes 
-            for j=1:2:size(U_c,2)
-            direct(:,indx) = sum(U_c(:,j).*w(:,indx));
-            indx = indx +1; 
-            end
+            summed = [directH0H0+crossH1H0G1; directH1H1+crossH1H0G0+crossH2H1G2; directH2H2+crossH2H1G1+crossH3H2G3; ...
+                   directH3H3+crossH3H2G2];
             
-            cross = zeros(1 ,2^(level+1)-2);
-            
-            indx1 = 1; 
-            indx2 = 2; 
-            
-            %cross nodes 
-            for j=2:2:size(U_c,2)
-            cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-            indx1 = indx1+1; 
-            indx2 = indx2 -1; 
-            cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-            indx1 = indx1+1; 
-            indx2 = indx2 +2; 
-            end
-            
-            % sum nodes 
-            tmp = zeros(1 ,2^level); 
-            
-             
-            tmp(:,1) = cross(:,1);
-            indx = 2;
-            
-            for j=2:2:size(cross,2)-1
-               tmp(:,indx) = cross(:,j) + cross(:, j+1);
-               indx = indx+1; 
-              
-                
-            end
-            
-            tmp(:,end) = cross(:,end);
-            
-            eD = [direct+tmp]' ; 
+            eD =  (summed) ;
+
                 
                 
                 
             % Synthesis 
-            eDr = F*eD ;
-                     
-           
+            tmp = [F*eD + tmp(1:len); tmp(len:end)] ; 
+            
+            eDr = tmp(len_af-len:-1:end);
+                    
             S.iter{1} = S.iter{1} + 1;  
             
-            en(n-2^level+1:n) = eDr(1:2^level);
+           
             
         end
-        
+        en(n) = eDr(1);
+        eDr = [eDr(2:end); 0];  
         
         
       

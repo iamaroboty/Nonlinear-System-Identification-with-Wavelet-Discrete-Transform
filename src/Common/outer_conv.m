@@ -8,6 +8,7 @@ for i=1:size(vector1,2)
     for j=1:size(vector2,1)
        
         H(:, indx) = conv(vector1(:,i), vector2{j});
+        
         indx = indx +1; 
                       
     end
