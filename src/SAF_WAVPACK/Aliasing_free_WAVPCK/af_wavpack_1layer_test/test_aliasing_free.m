@@ -17,7 +17,7 @@ Ovr = 1;
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 2;                     % Levels of Wavelet decomposition
-filters = 'db4';               % Set wavelet type
+filters = 'db2';               % Set wavelet type
 
 
 % S = QMFInit(M,mu,level,filters);
@@ -108,21 +108,19 @@ F = flip(Hi);
 
 % figure;
 % for i = 1:7
-% plot(abs(fft(H_af(:,i),512)), 'LineWidth',2); hold on;
+% plot(10*log10(abs(fft(H_af(:,i),512))), 'LineWidth',2); hold on;
 % end
-% legend('H0H0', 'H0H1', 'H1H1' , 'H2H2', 'H2H3', 'H3H3');
+% legend('H0H0', 'H0H1', 'H1H1' , 'H1H2', 'H2H2', 'H2H3', 'H3H3');
 % title('Petraglia Structure');
-% axis([-inf 256 -inf inf])
-% axis([-inf 256 -inf inf])
-% 
+% axis([-inf 256 -40 inf])
+% % 
 % figure;
 % for i = 1:4
-% plot(abs(fft(Hi(:,i),512)), 'LineWidth',2); hold on;
+% plot(10*log10(abs(fft(Hi(:,i),512))), 'LineWidth',2); hold on;
 % end
 % legend('H0', 'H1', 'H2','H3');
 % title('2 level filterbank (db1)');
-% axis([-inf 256 -inf inf])
-% axis([-inf 256 -inf inf])
+% axis([-inf 256 -20 inf])
 
 % analysis and synthesis are used in reverse to obtain in U.Z a column
 % vector with cD in the first position
@@ -164,7 +162,7 @@ for n = 1:ITER
 
     % Analysis Bank
 %     U.tmp = u;
-    U.tmp = u(1:4);
+    U.tmp = u(1:len);
     
         if (mod(n,2^level) == 0)
             
@@ -254,7 +252,7 @@ for n = 1:ITER
 %             eDr = tmp(len_af-len:-1:end);                    
 %             S.iter{1} = S.iter{1} + 1;  
             
-           z = F*eD; + z;                                       
+           z = F*eD + z;                                       
            en(n-2^level+1:n) = z(1:2^level); 
            z = [z(2^level+1:end); zeros(2^level,1)]; 
             

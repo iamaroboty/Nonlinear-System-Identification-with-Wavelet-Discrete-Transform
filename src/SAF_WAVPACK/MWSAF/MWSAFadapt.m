@@ -26,10 +26,10 @@ w = zeros(M,1);
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
- t=0:0.001:1;
- un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
- dn = un;
- tot_delay = (2^level - 1)*(len-1) +1 ;
+%  t=0:0.001:1;
+%  un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
+%  dn = un;
+%  tot_delay = (2^level - 1)*(len-1) +1 ;
 
 
 if isfield(S,'unknownsys')
@@ -63,7 +63,7 @@ for n = 1:ITER
             w = w + U*(eD./(sum(U.*U)+alpha)')*mu; % Tap-weight adaptation
             S.iter = S.iter + 1;
         end
-        z = F*eD; + z;                                       
+        z = F*eD + z;                                       
         en(n-2^level+1:n) = z(1:2^level); 
         z = [z(2^level+1:end); zeros(2^level,1)]; 
     end
