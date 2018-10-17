@@ -18,8 +18,8 @@ Ovr = 1;
 
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
-level = 2  ;                   % Levels of Wavelet decomposition
-filters = 'db1';               % Set wavelet type
+level = 4;
+filters = 'db2';               % Set wavelet type
 
 
 % S = QMFInit(M,mu,level,filters);
@@ -82,9 +82,11 @@ end
 
 Hi = H_tmp; 
 
-if mod(length(Hi),2) ~= 0
-    Hi = Hi(1:end-1,:);
-end
+% if mod(length(Hi),2) ~= 0
+%     Hi = Hi(1:end-1,:);
+% end
+
+HH = create_multilevel_bank(H,level);
 
 % petraglia's structure af filters
 
@@ -106,7 +108,7 @@ end
 %H_af = cat(2, conv(H(:,1), H(:,1)), conv(H(:,1), H(:,2)), conv(H(:,2), H(:,2))); 
 
 F = flip(Hi);
-% eq = [6.125, 4.8125, 6.5625, 4.375];
+eq = [6.125, 4.8125, 6.5625, 4.375];
 % F = F./eq;
 
 
@@ -146,16 +148,12 @@ delay = 1;                    % Level delay for synthesis
 z = zeros(len,1);
            
 w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
-
-w(1,:) = 1/2;                   % set filters to kronecker delta
-=======
-w(1,:) = 2^1/4;                   % set filters to kronecker delta
->>>>>>> aa6053d178f8ca57cd254b01e6872f741c4e804f
+w(1,:) = 1 ;
 
 eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 
-pwr = w;
-beta = 1./L(2:end-1);
+% pwr = w;
+% beta = 1./L(2:end-1);
 
 u = zeros(len_af,1);                 % Tapped-delay line of input signal (Analysis FB)  
 
@@ -167,8 +165,7 @@ for n = 1:ITER
 
     % Analysis Bank
     U.tmp = u;
-%     U.tmp = u(1:len);
-    
+   
         if (mod(n,2^level) == 0)            
             
             U.Z = H_af'*U.tmp; % column [cD ; cA] 
@@ -187,51 +184,6 @@ for n = 1:ITER
                 end  
             end
             
-            %U.tmp = U_c(1:len,:);    
-            
-%             direct = zeros(1 ,2^level); 
-%             
-%             indx = 1; 
-%             
-%             % direct nodes 
-%             for j=1:2:size(U_c,2)
-%             direct(:,indx) = sum(U_c(:,j).*w(:,indx));
-%             indx = indx +1; 
-%             end
-%             
-%             cross = zeros(1 ,2^(level+1)-2);
-%             
-%             indx1 = 1; 
-%             indx2 = 2; 
-%             
-%             %cross nodes 
-%             for j=2:2:size(U_c,2)
-%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-%             indx1 = indx1+1; 
-%             indx2 = indx2 -1; 
-%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-%             indx1 = indx1+1; 
-%             indx2 = indx2 +2; 
-%             end
-%             
-%             % sum nodes 
-%             tmp = zeros(1 ,2^level); 
-%             
-%              
-%             tmp(:,1) = cross(:,1);
-%             indx = 2;
-%             
-%             for j=2:2:size(cross,2)-1
-%                tmp(:,indx) = cross(:,j) + cross(:, j+1);
-%                indx = indx+1; 
-%               
-%                 
-%             end
-%             
-%             tmp(:,end) = cross(:,end);
-%             
-%             eD = [direct+tmp]' ; 
-
             directH0H0 = sum(U_c(:,1).*w(:,1)); 
             directH1H1 = sum(U_c(:,3).*w(:,2)); 
             directH2H2 = sum(U_c(:,5).*w(:,3)); 
@@ -248,13 +200,9 @@ for n = 1:ITER
                         directH2H2+crossH2H1G1+crossH3H2G3; ...
                         directH3H3+crossH3H2G2];
             
+
             eD =  (summed) ;    
 %             eD = U.Z;
-                
-            % Synthesis 
-%             tmp = [F*eD + tmp(1:len); tmp(len:end)] ;             
-%             eDr = tmp(len_af-len:-1:end);                    
-%             S.iter{1} = S.iter{1} + 1;  
             
            z = F*eD + z;                                       
            en(n-2^level+1:n) = z(1:2^level); 
@@ -272,8 +220,7 @@ en = en(1:ITER);
 
 %% check for perfect reconstruction
 
-% tot_delay = (2^level - 1)*(len-1) +1 ;
-tot_delay = 2;
+tot_delay = len_af-1;
 
 stem(en(tot_delay:end));
 hold on;

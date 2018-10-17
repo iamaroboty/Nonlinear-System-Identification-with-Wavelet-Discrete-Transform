@@ -1,4 +1,4 @@
-function [en,S] = MWSAFadapt_v2(un,dn,S)
+function [en,S] = MWSAFadapt_DWT(un,dn,S)
 % Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
 % 
 % Arguments:
@@ -87,7 +87,7 @@ for n = 1:ITER
                 Dtmp = D{i}(1:len,1);               % Update buffer
                 tmpcat = [];                    % Improve speed here!!
                 for j = 1:2^(i+1)
-                    tmpcat = cat(2,tmpcat,U{i}(j:len*2^i+(j-1),1));
+                    tmpcat = cat(2,tmpcat, U{i}(j:len*2^i+(j-1),1));
                 end
                 A{i+1} = tmpcat;
 %                 A{i+1} = [U{i}(1:len*(i+1),1), U{i}(2:len*(i+1)+1,1), U{i}(3:len*(i+1)+2,1), U{i}(4:len*(i+1)+3,1)];  %Update buffer for next level, filled with cA

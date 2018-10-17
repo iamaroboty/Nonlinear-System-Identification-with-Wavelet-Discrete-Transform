@@ -111,9 +111,9 @@ for n = 1:ITER
         if (mod(n,2^level) == 0)
             
             U.Z = H_af'*U.tmp;
-            
-            Y.Z = yztap(:,end); %Hi'*Y.tmp;
-            yztap = cat(2, Hi'*Y.tmp, yztap(:,1:end-1));
+            Y.Z = Hi'*Y.tmp;
+%             Y.Z = yztap(:,end); %Hi'*Y.tmp;
+%             yztap = cat(2, Hi'*Y.tmp, yztap(:,1:end-1));
          
             [rows, cols] = size(U.Z);
             
@@ -128,51 +128,6 @@ for n = 1:ITER
                 end  
             end
             
-%             
-%             direct = zeros(1 ,2^level); 
-%             
-%             indx = 1; 
-%             
-%             % direct nodes 
-%             for j=1:2:size(U_c,2)
-%             direct(:,indx) = sum(U_c(:,j).*w(:,indx));
-%             indx = indx +1; 
-%             end
-%             
-%             cross = zeros(1 ,2^(level+1)-2);
-%             
-%             indx1 = 1; 
-%             indx2 = 2; 
-%             
-%             %cross nodes 
-%             for j=2:2:size(U_c,2)
-%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-%             indx1 = indx1+1; 
-%             indx2 = indx2 -1; 
-%             cross(:,indx1) = sum(U_c(:,j).*w(:,indx2));
-%             indx1 = indx1+1; 
-%             indx2 = indx2 +2; 
-%             end
-%             
-%             % sum nodes 
-%             tmp = zeros(1 ,2^level); 
-%             
-%              
-%             tmp(:,1) = cross(:,1);
-%             indx = 2;
-%             
-%             for j=2:2:size(cross,2)-1
-%                tmp(:,indx) = cross(:,j) + cross(:, j+1);
-%                indx = indx+1; 
-%               
-%                 
-%             end
-%             
-%             tmp(:,end) = cross(:,end);
-%             
-%             eD = Y.Z - (direct+tmp)' ;
-%             eDvec(:,n) =eD; 
-
             directH0H0 = sum(U_c(:,1).*w(:,1)); 
             directH1H1 = sum(U_c(:,3).*w(:,2)); 
             directH2H2 = sum(U_c(:,5).*w(:,3)); 
@@ -193,28 +148,7 @@ for n = 1:ITER
              
              if n >= AdaptStart
                  
-             w = w + mu.*(U_c(:,1:2:end).*eD'./(sum(U_c(:,1:2:end).*U_c(:,1:2:end))+alpha)); %+  U.c{i}(:,2).*eD{i}(2)./(sum(U.c{i}(:,2).*U.c{i}(:,2))+alpha) ); 
-             
-%              w(:,1) = w(:,1) + mu*(U_c(:,1).*eD(1)./(sum(U_c(:,1).*U_c(:,1))+alpha) ...
-%                  +  U_c(:,2).*eD(2)./(sum(U_c(:,2).*U_c(:,2))+alpha) ) ; 
-%              
-%              w(:,2) = w(:,2) + mu*(U_c(:,2).*eD(1)./(sum(U_c(:,2).*U_c(:,2))+alpha) ...
-%                  +  U_c(:,3).*eD(2)./(sum(U_c(:,3).*U_c(:,3))+alpha) ...
-%                  +  U_c(:,4).*eD(3)./(sum(U_c(:,4).*U_c(:,4))+alpha) ) ; 
-%              
-%              w(:,3) = w(:,3) + mu*(U_c(:,6).*eD(4)./(sum(U_c(:,6).*U_c(:,6))+alpha) ...
-%                  +  U_c(:,4).*eD(2)./(sum(U_c(:,4).*U_c(:,4))+alpha)...
-%                  + U_c(:,5).*eD(3)./(sum(U_c(:,5).*U_c(:,5))+alpha) ) ; 
-%              
-%              w(:,4) = w(:,4) + mu*(U_c(:,7).*eD(4)./(sum(U_c(:,7).*U_c(:,7))+alpha) ...
-%                  +  U_c(:,6).*eD(3)./(sum(U_c(:,6).*U_c(:,6))+alpha) ) ; 
-%              
-             
-             
-             
-             
-             
-             
+             w = w + mu.*(U_c(:,1:2:end).*eD'./(sum(U_c(:,1:2:end).*U_c(:,1:2:end))+alpha));              
              
              end
 

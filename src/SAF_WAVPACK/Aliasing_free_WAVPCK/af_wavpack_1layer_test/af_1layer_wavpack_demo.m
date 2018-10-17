@@ -9,7 +9,7 @@ clear all;  close all;
 mu = 0.1;                      % Step size
 M = 256;                       % Length of unknown system response
 level = 1;                     % Levels of Wavelet decomposition
-filters = 'db4';               % Set wavelet type
+filters = 'db2';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % Run parameters
@@ -51,7 +51,11 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 S = QMFInit(M,mu,level,filters);
 % S = SWAFinit(M,mu,level,filters);
 S.unknownsys = b; 
-[en, S] = Adapt_1layer_af(un, dn, S);                 % Perform WSAF Algorithm 
+if level == 1
+    [en, S] = Adapt_1layer_af(un, dn, S);                 % Perform WSAF Algorithm 
+else
+     [en, S] = Adapt_2layer_af(un, dn, S); 
+end
 
 err_sqr = en.^2;
     

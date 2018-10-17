@@ -8,7 +8,7 @@ clear all; close all
 d = 256;        %Total signal length
 t=0:0.001:10;
 un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-un = ones(1,d);
+% un = ones(1,d);
 un = un(1:d);
 Ovr = 1; 
 
@@ -18,10 +18,10 @@ Ovr = 1;
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 1;                     % Levels of Wavelet decomposition
-filters = 'db4';               % Set wavelet type
+filters = 'db1';               % Set wavelet type
 
 
-% S = QMFInit(M,mu,level,filters);
+%S = QMFInit(M,mu,level,filters);
 S = SWAFinit(M, mu, level, filters); 
 
 M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
@@ -171,7 +171,7 @@ en = en(1:ITER);
 
 %% check for perfect reconstruction
 
-tot_delay = ceil(len_af/2+len/2);
+tot_delay = (2^level - 1)*(len-1) +1 ;
 
 stem(en(tot_delay:end));
 hold on;
