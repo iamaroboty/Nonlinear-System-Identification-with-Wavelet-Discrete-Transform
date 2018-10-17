@@ -7,7 +7,7 @@ addpath 'Common';             % Functions in Common folder
 
 d = 256;        %Total signal length
 t=0:0.001:10;
-un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150)+1;
 un = un(1:d)';
 Ovr = 1; 
 
@@ -15,9 +15,9 @@ Ovr = 1;
 %% wavpack parameters
 
 mu = 0.1;                      % ignored here 
-M = 1024;                        % Length of unknown system response also ignored here
-level = 4;                     % Levels of Wavelet decomposition
-filters = 'db3';               % Set wavelet type
+M = 256;                        % Length of unknown system response also ignored here
+level = 2;                     % Levels of Wavelet decomposition
+filters = 'db1';               % Set wavelet type
 
 
 S = QMFInit(M,mu,level,filters);
@@ -133,12 +133,12 @@ for n = 1:ITER
                 
             % Synthesis 
             eDr = Fi*eD + eDr;
-           
+%            en(n-2^level+1:n) = eDr(1:2^level); 
+%            eDr = [eDr(2^level+1:end); zeros(2^level,1)]; 
+            
             S.iter{1} = S.iter{1} + 1;  
             
-            %en(n-2^level+1:n) = eDr(1:2^level);
-            %eDr = [eDr(2^level+1:end); zeros(2^level,1)]; 
-            
+           
         end
         en(n) = eDr(1);
         eDr = [eDr(2:end); 0];  
@@ -150,9 +150,9 @@ en = en(1:ITER);
 
 %% check for perfect reconstruction
 
-tot_delay = len-1 ;
+tot_delay = len ;
 
-stem(en(tot_delay:end));
-hold on;
 stem(un); 
+hold on;
+stem(en(tot_delay:end));
 

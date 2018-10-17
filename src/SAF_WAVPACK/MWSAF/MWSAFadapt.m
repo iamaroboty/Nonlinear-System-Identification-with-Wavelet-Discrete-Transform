@@ -12,10 +12,15 @@ mu = S.step;                      % Step Size
 AdaptStart = S.AdaptStart;        % Transient
 alpha = S.alpha;                  % Small constant (1e-6)
 H = S.analysis;                   % Analysis filter bank
-F = S.synthesis;                  % Synthesis filter bank
+level = S.levels;                 % Wavelet Levels
+
+H = create_multilevel_bank(H, level);
+F = flip(H);
+
+S.analysis_bank = H;
+S.synthesis_bank = F;
 
 [len, ~] = size(H);               % Wavelet filter length
-level = S.levels;                 % Wavelet Levels
 L = S.L;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 U = zeros(M,2^level);                      % Adaptive filtering
@@ -61,7 +66,7 @@ for n = 1:ITER
         eD = dD - U'*w;                            % Error estimation
         if n >= AdaptStart
             w = w + U*(eD./(sum(U.*U)+alpha)')*mu; % Tap-weight adaptation
-            S.iter = S.iter + 1;
+%             S.iter = S.iter + 1;
         end
         z = F*eD + z;                                       
         en(n-2^level+1:n) = z(1:2^level); 

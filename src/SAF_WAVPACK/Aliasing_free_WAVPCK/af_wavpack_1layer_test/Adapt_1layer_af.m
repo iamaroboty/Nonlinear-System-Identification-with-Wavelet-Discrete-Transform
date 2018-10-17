@@ -71,9 +71,9 @@ ytap = zeros(len_af-len,1);
 
 for n = 1:ITER    
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
-    y = [ytap(end); y(1:end-1)];        % Desired response vector
-    
-    ytap = [dn(n); ytap(1:end-1)]; 
+%     y = [ytap(end); y(1:end-1)];        % Desired response vector
+     y = [dn(n); y(1:end-1)];
+%     ytap = [dn(n); ytap(1:end-1)]; 
     
     % Analysis Bank
     U.tmp = u;
