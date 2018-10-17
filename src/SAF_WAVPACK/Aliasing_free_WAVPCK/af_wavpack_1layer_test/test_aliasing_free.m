@@ -148,6 +148,9 @@ z = zeros(len,1);
 w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
 
 w(1,:) = 1/2;                   % set filters to kronecker delta
+=======
+w(1,:) = 2^1/4;                   % set filters to kronecker delta
+>>>>>>> aa6053d178f8ca57cd254b01e6872f741c4e804f
 
 eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 

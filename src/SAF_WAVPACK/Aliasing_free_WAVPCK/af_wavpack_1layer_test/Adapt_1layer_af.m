@@ -59,7 +59,7 @@ y = zeros(len,1);                 % Tapped-delay line of desired response (Analy
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
-
+eDvec = zeros(2,ITER);
 
 % % ONLY FOR TESTING PURPOSE
 %  t=0:0.001:1;
@@ -133,6 +133,7 @@ for n = 1:ITER
       
                 eD{i} = Y.Z' - filtered; 
                 
+                eDvec(:,n)=eD{i};
 %                  for col=1:cols
 %                    for row=1:rows
 %                       eD{i}(indx) = Y.Z(row,col) - filtered(indx);
