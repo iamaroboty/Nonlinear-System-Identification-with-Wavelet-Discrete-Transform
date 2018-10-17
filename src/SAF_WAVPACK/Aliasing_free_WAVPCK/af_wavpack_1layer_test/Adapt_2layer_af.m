@@ -1,62 +1,21 @@
-%% WAVELET PACKET DECOMPOSITION TEST FOR PERFECT RECONSTRUTION
-
-addpath 'Common';             % Functions in Common folder
-clear all; close all
-
-% Testing Signal
-
-d = 256;        %Total signal length
-t=0:0.001:10;
-un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-un = un(1:d);
-Ovr = 1; 
-
-
-%% wavpack parameters
-
-mu = 0.1;                      % ignored here 
-M = 256;                        % Length of unknown system response also ignored here
-level = 2;                     % Levels of Wavelet decomposition
-filters = 'db1';               % Set wavelet type
-
-
-% S = QMFInit(M,mu,level,filters);
-S = SWAFinit(M, mu, level, filters); 
+function [en,S] = Adapt_2layer_af(un, dn, S)
+% Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
+% 
+% Arguments:
+% un                Input signal
+% dn                Desired signal
+% S                 Adptive filter parameters as defined in WSAFinit.m
+% en                History of error signal
 
 M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
+mu = S.step;                      % Step Size
+AdaptStart = S.AdaptStart;        % Transient
+alpha = S.alpha;                  % Small constant (1e-6)
 
 F = S.analysis;                   % Analysis filter bank
-H = S.synthesis;                  % Synthesis filter bank 
-
-
-%% petraglia aliasing free structure adaptation
-
-% filters for the aliasing free bank 
-
-%upsampled filters
-
-
-% %check for two layers
-% check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
-% % H0, H1, H2, H3, H4
-% % Hi = upsample(H,2);
-% % Hi = [conv(Hi(:,1),H(:,1)), conv(Hi(:,2),H(:,1)), conv(Hi(:,1),H(:,2)), conv(Hi(:,2),H(:,2))];  
-% % if mod(length(Hi),2) ~= 0
-% %     Hi = Hi(1:end-1,:);
-% % end
-% % S.analysis = Hi;
-% % S.synthesis = flip(Hi);
-% % 
-% 
-% check_H_extd = check_H_extd(1:end-1,:);
-% 
-% 
-% check_H_af = cat(2, conv(check_H_extd(:,1), check_H_extd(:,1)), conv(check_H_extd(:,1), check_H_extd(:,2)), ...
-%                 conv(check_H_extd(:,2), check_H_extd(:,2)),  conv(check_H_extd(:,2), check_H_extd(:,3)), ...
-%                   conv(check_H_extd(:,3), check_H_extd(:,3)),  conv(check_H_extd(:,3), check_H_extd(:,4)), ...
-%                    conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
-
-
+H = S.synthesis;                  % Synthesis filter bank
+level = S.levels;                 % Wavelet Levels
+L = S.L;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 Hi = zeros(2^(level-1)*size(H,1), 2^(level));
 
@@ -67,12 +26,14 @@ for j=1:level-1
     
    up{i,j} = upsample(H(:,i), 2^(j)); 
    
-   
 end
 end
 
 
 %outer product
+
+% Hi equivalent one level filters
+
 H_tmp = H; 
 for i=1:size(up,2)
 
@@ -102,35 +63,21 @@ for i= 1:size(Hi,2)
     
 end
 
-%H_af = cat(2, conv(H(:,1), H(:,1)), conv(H(:,1), H(:,2)), conv(H(:,2), H(:,2))); 
 
 F = flip(Hi); 
 
-% figure;
-% for i = 1:7
-% plot(10*log10(abs(fft(H_af(:,i),512))), 'LineWidth',2); hold on;
-% end
-% legend('H0H0', 'H0H1', 'H1H1' , 'H1H2', 'H2H2', 'H2H3', 'H3H3');
-% title('Petraglia Structure');
-% axis([-inf 256 -40 inf])
-% % 
-% figure;
-% for i = 1:4
-% plot(10*log10(abs(fft(Hi(:,i),512))), 'LineWidth',2); hold on;
-% end
-% legend('H0', 'H1', 'H2','H3');
-% title('2 level filterbank (db1)');
-% axis([-inf 256 -20 inf])
+%% petraglia aliasing free structure adaptation
+
+
 
 % analysis and synthesis are used in reverse to obtain in U.Z a column
 % vector with cD in the first position
 
-
-[len_af, ~] = size(H_af);               % Wavelet filter length
+[len_af, ~] = size(H_af);         % Wavelet filter length
 [len, ~] = size(Hi); 
 
 level = S.levels;                 % Wavelet Levels
-L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
+L = S.L;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 % Init Arrays
 
@@ -138,37 +85,35 @@ L = S.L.*Ovr;                     % Wavelet decomposition Length, sufilter lengt
     
 U_c = zeros(L(end-level),2^(level+1)-1);            
 eDr = zeros(len,1);          % Error signal, time domain
-tmp = zeros(len_af,1); 
-delay = 1;                    % Level delay for synthesis
-z = zeros(len,1);
+z = zeros(len,1);            % reconstructed error signal
            
-w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
+w = zeros(L(end-level),2^level);  % 2^level filters
 
-w(1,:) = 2^1/4;                   % set filters to kronecker delta
-
-eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
-
-pwr = w;
-beta = 1./L(2:end-1);
-
-u = zeros(len_af,1);                 % Tapped-delay line of input signal (Analysis FB)  
+u = zeros(len_af,1);              % Tapped-delay line of input signal (Analysis FB)  
+y = zeros(len,1);                 % Tapped-delay line of desired response (Analysis FB)
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
+eDvec = zeros(2^level, ITER);
 
+ytap = zeros(len_af-len,1); 
+yztap = zeros(2^level, floor((len_af+len)/8));
 
 for n = 1:ITER    
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
-
-    % Analysis Bank
-%     U.tmp = u;
+    y = [dn(n); y(1:end-1)]; 
+   
+    %ytap = [dn(n); ytap(1:end-1)]; % tapped delay line for desired signal 
+    
     U.tmp = u;
+    Y.tmp = y; 
     
         if (mod(n,2^level) == 0)
             
-            
-%             U.Z = H_af'*U.tmp; % column [cD ; cA] 
             U.Z = H_af'*U.tmp;
+            
+            Y.Z = yztap(:,end); %Hi'*Y.tmp;
+            yztap = cat(2, Hi'*Y.tmp, yztap(:,1:end-1));
          
             [rows, cols] = size(U.Z);
             
@@ -183,8 +128,7 @@ for n = 1:ITER
                 end  
             end
             
-            %U.tmp = U_c(1:len,:);    
-            
+%             
 %             direct = zeros(1 ,2^level); 
 %             
 %             indx = 1; 
@@ -226,7 +170,8 @@ for n = 1:ITER
 %             
 %             tmp(:,end) = cross(:,end);
 %             
-%             eD = [direct+tmp]' ; 
+%             eD = Y.Z - (direct+tmp)' ;
+%             eDvec(:,n) =eD; 
 
             directH0H0 = sum(U_c(:,1).*w(:,1)); 
             directH1H1 = sum(U_c(:,3).*w(:,2)); 
@@ -238,39 +183,51 @@ for n = 1:ITER
             crossH2H1G2 = sum(U_c(:,4).*w(:,3));
             crossH2H1G1 = sum(U_c(:,4).*w(:,2));
             crossH3H2G3 = sum(U_c(:,6).*w(:,4));
-            crossH3H2G2 = sum(U_c(:,6).*w(:,2));
+            crossH3H2G2 = sum(U_c(:,6).*w(:,3));
             
             summed = [directH0H0+crossH1H0G1; directH1H1+crossH1H0G0+crossH2H1G2;...
                         directH2H2+crossH2H1G1+crossH3H2G3; ...
                         directH3H3+crossH3H2G2];
             
-             eD =  (summed) ;    
-            %eD = U.Z;
-                
-            % Synthesis 
-%             tmp = [F*eD + tmp(1:len); tmp(len:end)] ;             
-%             eDr = tmp(len_af-len:-1:end);                    
-%             S.iter{1} = S.iter{1} + 1;  
+             eD =  Y.Z - (summed) ;   
+             
+             if n >= AdaptStart
+                 
+             w = w + mu.*(U_c(:,1:2:end).*eD'./(sum(U_c(:,1:2:end).*U_c(:,1:2:end))+alpha)); %+  U.c{i}(:,2).*eD{i}(2)./(sum(U.c{i}(:,2).*U.c{i}(:,2))+alpha) ); 
+             
+%              w(:,1) = w(:,1) + mu*(U_c(:,1).*eD(1)./(sum(U_c(:,1).*U_c(:,1))+alpha) ...
+%                  +  U_c(:,2).*eD(2)./(sum(U_c(:,2).*U_c(:,2))+alpha) ) ; 
+%              
+%              w(:,2) = w(:,2) + mu*(U_c(:,2).*eD(1)./(sum(U_c(:,2).*U_c(:,2))+alpha) ...
+%                  +  U_c(:,3).*eD(2)./(sum(U_c(:,3).*U_c(:,3))+alpha) ...
+%                  +  U_c(:,4).*eD(3)./(sum(U_c(:,4).*U_c(:,4))+alpha) ) ; 
+%              
+%              w(:,3) = w(:,3) + mu*(U_c(:,6).*eD(4)./(sum(U_c(:,6).*U_c(:,6))+alpha) ...
+%                  +  U_c(:,4).*eD(2)./(sum(U_c(:,4).*U_c(:,4))+alpha)...
+%                  + U_c(:,5).*eD(3)./(sum(U_c(:,5).*U_c(:,5))+alpha) ) ; 
+%              
+%              w(:,4) = w(:,4) + mu*(U_c(:,7).*eD(4)./(sum(U_c(:,7).*U_c(:,7))+alpha) ...
+%                  +  U_c(:,6).*eD(3)./(sum(U_c(:,6).*U_c(:,6))+alpha) ) ; 
+%              
+             
+             
+             
+             
+             
+             
+             
+             end
+
             
            z = F*eD + z;                                       
            en(n-2^level+1:n) = z(1:2^level); 
            z = [z(2^level+1:end); zeros(2^level,1)]; 
             
         end
-%         en(n) = eDr(1);
-%         eDr = [eDr(2:end); 0];  
-        
-        
       
 end
 en = en(1:ITER);
+S.coeffs = w;
+end
 
-
-%% check for perfect reconstruction
-
-tot_delay = len_af-1;
-
-stem(en(tot_delay:end));
-hold on;
-stem(un); 
 
