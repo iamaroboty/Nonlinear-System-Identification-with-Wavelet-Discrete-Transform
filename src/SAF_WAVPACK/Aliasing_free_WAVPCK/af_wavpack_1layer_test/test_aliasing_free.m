@@ -8,6 +8,7 @@ clear all; close all
 d = 256;        %Total signal length
 t=0:0.001:10;
 un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+un = sin(2*pi*t*10);
 % un = ones(d,1);
 % un = zeros(d,1); un(1) = 1;
 un = un(1:d);
@@ -18,8 +19,8 @@ Ovr = 1;
 
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
-level = 4;
-filters = 'db2';               % Set wavelet type
+level = 2;
+filters = 'db1';               % Set wavelet type
 
 
 % S = QMFInit(M,mu,level,filters);
@@ -132,6 +133,8 @@ eq = [6.125, 4.8125, 6.5625, 4.375];
 % vector with cD in the first position
 
 
+H_af = H_af(1:end-2,:);
+
 [len_af, ~] = size(H_af);               % Wavelet filter length
 [len, ~] = size(Hi); 
 
@@ -148,7 +151,7 @@ delay = 1;                    % Level delay for synthesis
 z = zeros(len,1);
            
 w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
-w(1,:) = 1 ;
+w(1,:) = 1/sqrt(4) ;
 
 eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 
