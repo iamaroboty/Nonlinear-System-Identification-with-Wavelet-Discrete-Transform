@@ -8,11 +8,11 @@ clear all;
 
 % Adaptive filter parameters
 mu = 0.1;                      % Step size
-M = 1024;                       % Length of unknown system response
-level = 4;                     % Levels of Wavelet decomposition
-filters = 'db4';               % Set wavelet type
+M = 256;                       % Length of unknown system response
+level = 2;                     % Levels of Wavelet decomposition
+filters = 'db2';               % Set wavelet type
 Q =1;   %useless
-DWT_flag = 0;
+DWT_flag = 1;
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -48,14 +48,14 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
-% [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
-[un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+% [un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
 
 S = SWAFinit(M, mu, level, filters); 
 % S = MWSAFinit(M,mu,level,filters,Q);
 S.unknownsys = b; 
 
-if DWT_flag
+if DWT_flag == 1
     [en, S] = MWSAFadapt_DWT(un, dn, S); 
 else
     [en, S] = MWSAFadapt(un, dn, S);                

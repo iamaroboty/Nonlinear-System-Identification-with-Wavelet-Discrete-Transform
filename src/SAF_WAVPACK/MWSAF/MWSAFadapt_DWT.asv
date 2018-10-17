@@ -44,26 +44,26 @@ ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
 
 
-% if isfield(S,'unknownsys')
-%     b = S.unknownsys;
-%     norm_b = norm(b);
-%     eml = zeros(1,ITER);
-%     ComputeEML = 1;
-%     u = zeros(M,1);
-% else
-%     ComputeEML = 0;
-% end
+if isfield(S,'unknownsys')
+    b = S.unknownsys;
+    norm_b = norm(b);
+    eml = zeros(1,ITER);
+    ComputeEML = 1;
+    u = zeros(M,1);
+else
+    ComputeEML = 0;
+end
 	
 for n = 1:ITER    
     d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
     a = [un(n); a(1:end-1)];                       % Update tapped-delay line of u(n)
     A{1} = [a, A{1}(:,1:end-1)];                   % Update buffer
     
-%     if ComputeEML == 1
-%         eml(n) = norm(b-w)/norm_b;                 % System error norm (normalized)
+    if ComputeEML == 1
+        eml(n) = norm(b-w)/norm_b;                 % System error norm (normalized)
 %         u = [un(n); u(1:end-1)];
 %         UDerr(n) = (b-w)'*u;                       % Undisturbed error 
-%     end
+    end
     
     % Analysis
     Dtmp = d; 
@@ -118,8 +118,8 @@ for n = 1:ITER
 end
 
 S.coeffs = w;
-% if ComputeEML == 1
-%     S.eml = eml;
+if ComputeEML == 1
+    S.eml = eml;
 %     S.UDerr = UDerr;
 end
 
