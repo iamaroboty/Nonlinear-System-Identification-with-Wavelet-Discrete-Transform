@@ -94,6 +94,11 @@ end
 
 Hi = H_tmp; 
 
+tmp = Hi(:,3); 
+Hi(:,3) = Hi(:,end);
+Hi(:,end) = tmp; 
+
+
 HH = create_multilevel_bank(H,level);
 
 % petraglia's structure af filters
@@ -130,6 +135,13 @@ F = flip(Hi);
 %    H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
 %     
 % end
+=======
+
+for i= 1:size(H_af,2)
+   H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
+    
+end
+>>>>>>> 00fed81ea46f5027a44c8196cefdf8b57567d5a1
 
 
 %F = F./eq;
