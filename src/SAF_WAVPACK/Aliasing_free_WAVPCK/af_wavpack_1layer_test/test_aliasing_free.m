@@ -133,13 +133,16 @@ end
 
 
 %F = F./eq;
-
+sumplot = 0; 
 
 figure;
 for i = 1:7
-plot(10*log10(abs(fft(H_af(:,i),512))), 'LineWidth',2); hold on;
+tmpplot = 10*log10(abs(fft(H_af(:,i),512)));
+plot((tmpplot), 'LineWidth',2); hold on;
+sumplot = sumplot.*tmpplot; 
 end
-legend('H0H0', 'H0H1', 'H1H1' , 'H1H2', 'H2H2', 'H2H3', 'H3H3');
+plot((sumplot), 'LineWidth',2); hold on;
+legend('H0H0', 'H0H1', 'H1H1' , 'H1H2', 'H2H2', 'H2H3', 'H3H3', 'TOT');
 title('Petraglia Structure');
 axis([-inf 256 -40 inf])
 
