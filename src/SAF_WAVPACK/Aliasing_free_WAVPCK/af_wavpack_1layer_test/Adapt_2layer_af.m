@@ -21,7 +21,7 @@ Hi = zeros(2^(level-1)*size(H,1), 2^(level));
 
 indx = 1;
 
-H = flip(H,2); 
+
 
 for i = 1:size(H,2)
 for j=1:level-1
@@ -48,8 +48,9 @@ if mod(length(Hi),2) ~= 0
     Hi = Hi(1:end-1,:);
 end
 
-
-
+% tmp = Hi(:,3); 
+% Hi(:,3) = Hi(:,end);
+% Hi(:,end) = tmp; 
 
 % petraglia's structure af filters
 
@@ -68,10 +69,6 @@ for i= 1:size(Hi,2)
     
 end
 
-% for i= 1:size(H_af,2)
-%    H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
-%     
-% end
 
 
 F = flip(Hi); 
