@@ -16,14 +16,16 @@ else
     for i=1:size(up,2)
         H_tmp = outer_conv(H_tmp, up(:,i));
     end
+    Hi = H_tmp;
     
-    %calculate useless z in H
-    nz = 0;
-    for i = 0:(level-1)
-        nz = 2^i + nz;
-    end
-    nz = nz - level;
-  
-    Hi = H_tmp(1:end-nz,:);
+%     %calculate useless z in H
+%     nz = 0;
+%     for i = 0:(level-1)
+%         nz = 2^i + nz;
+%     end
+%     nz = nz - level;
+%   
+%     Hi = H_tmp(1:end-nz,:);
+        
 end
 

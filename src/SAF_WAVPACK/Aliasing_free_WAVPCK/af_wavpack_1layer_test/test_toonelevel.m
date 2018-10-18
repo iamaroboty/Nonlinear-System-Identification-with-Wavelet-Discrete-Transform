@@ -7,7 +7,7 @@ addpath 'Common';             % Functions in Common folder
 
 d = 256;        %Total signal length
 t=0:0.001:10;
-un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150)+1;
+un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
 un = un(1:d)';
 Ovr = 1; 
 
@@ -16,17 +16,17 @@ Ovr = 1;
 
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
-level = 2;                     % Levels of Wavelet decomposition
-filters = 'db1';               % Set wavelet type
+level = 4;                     % Levels of Wavelet decomposition
+filters = 'db2';               % Set wavelet type
 
 
-S = QMFInit(M,mu,level,filters);
-%S = SWAFinit(M, mu, level, filters); 
+%S = QMFInit(M,mu,level,filters);
+S = SWAFinit(M, mu, level, filters); 
 
 M = S.length;                     % Unknown system length (Equivalent adpative filter lenght)
 
-F = S.analysis;                   % Analysis filter bank
-H = S.synthesis;                  % Synthesis filter bank 
+H = S.analysis;                   % Analysis filter bank
+F = S.synthesis;                  % Synthesis filter bank 
 
 % equivalent filters in one level: 
 
@@ -38,8 +38,7 @@ indx = 1;
 for i = 1:size(H,2)
 for j=1:level-1
     
-   up{i,j} = upsample(H(:,i), 2^(j)); 
-   
+   up{i,j} = upsample(H(:,i), 2^(j));    
    
 end
 end

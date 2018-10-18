@@ -15,7 +15,7 @@ subplot(2,1,2); plot(fshift,powershift)
 
 %% Wavelet QMF
 % Load scaling filter associated with an orthogonal wavelet. 
-wtype = 'db10';
+wtype = 'db2';
 [low_d,high_d,low_r,high_r] = wfilters(wtype);
 
 db = dbwavf(wtype);

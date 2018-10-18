@@ -7,8 +7,8 @@ clear all; close all
 
 d = 256;        %Total signal length
 t=0:0.001:10;
-%un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-un = sin(2*pi*t*40);
+un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+% un = sin(2*pi*t*40);
 % un = ones(d,1);
 % un = zeros(d,1); un(1) = 1;
 un = un(1:d);
@@ -20,7 +20,7 @@ Ovr = 1;
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 2;
-filters = 'db4';               % Set wavelet type
+filters = 'db2';               % Set wavelet type
 
 
 % S = QMFInit(M,mu,level,filters);
@@ -119,17 +119,17 @@ F = flip(Hi);
 
 %% equalization 
 
-eq = [6.125, 4.8125, 6.5625, 4.375];
-
-for i= 1:size(Hi,2)
-   Hi(:,i) = Hi(:,i)./((sum(abs(Hi(:,i))))); 
-    
-end
-
-for i= 1:size(H_af,2)
-   H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
-    
-end
+% eq = [6.125, 4.8125, 6.5625, 4.375];
+% 
+% for i= 1:size(Hi,2)
+%    Hi(:,i) = Hi(:,i)./((sum(abs(Hi(:,i))))); 
+%     
+% end
+% 
+% for i= 1:size(H_af,2)
+%    H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
+%     
+% end
 
 
 %F = F./eq;
@@ -151,7 +151,7 @@ for i = 1:4
 plot(10*log10(abs(fft(Hi(:,i),512))), 'LineWidth',2); hold on;
 end
 legend('H0', 'H1', 'H2','H3');
-title('2 level filterbank (db1)');
+title(sprintf('2 level filterbank (%s)', filters));
 axis([-inf 256 -20 inf])
 
 % analysis and synthesis are used in reverse to obtain in U.Z a column
@@ -250,7 +250,9 @@ en = en(1:ITER);
 
 tot_delay = len_af-1;
 
+figure;
 stem(en(tot_delay:end));
 hold on;
 stem(un); 
+legend('Reconstructed', 'Real');
 
