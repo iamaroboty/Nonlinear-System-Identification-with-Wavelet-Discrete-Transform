@@ -7,8 +7,8 @@ clear all; close all
 
 d = 256;        %Total signal length
 t=0:0.001:10;
-un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
-un = sin(2*pi*t*10);
+%un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+un = sin(2*pi*t*40);
 % un = ones(d,1);
 % un = zeros(d,1); un(1) = 1;
 un = un(1:d);
@@ -20,7 +20,7 @@ Ovr = 1;
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 2;
-filters = 'db1';               % Set wavelet type
+filters = 'db4';               % Set wavelet type
 
 
 % S = QMFInit(M,mu,level,filters);
@@ -33,6 +33,8 @@ S = SWAFinit(M, mu, level, filters);
 
 F = S.analysis;                   % Analysis filter bank
 H = S.synthesis;                  % Synthesis filter bank 
+
+
 %% petraglia aliasing free structure adaptation
 
 % filters for the aliasing free bank 
@@ -64,6 +66,9 @@ H = S.synthesis;                  % Synthesis filter bank
 
 Hi = zeros(2^(level-1)*size(H,1), 2^(level));
 
+
+if level > 1
+
 indx = 1;
 for i = 1:size(H,2)
 for j=1:level-1
@@ -74,6 +79,12 @@ for j=1:level-1
 end
 end
 
+else 
+    up{1,1} = H(:,1); 
+    up{2,1} = H(:,2); 
+    
+end
+
 % up = upsample(H,2);
 %outer product
 H_tmp = H; 
@@ -82,10 +93,6 @@ H_tmp = outer_conv(H_tmp, up(:,i));
 end
 
 Hi = H_tmp; 
-
-% if mod(length(Hi),2) ~= 0
-%     Hi = Hi(1:end-1,:);
-% end
 
 HH = create_multilevel_bank(H,level);
 
@@ -109,25 +116,40 @@ end
 %H_af = cat(2, conv(H(:,1), H(:,1)), conv(H(:,1), H(:,2)), conv(H(:,2), H(:,2))); 
 
 F = flip(Hi);
+
+%% equalization 
+
 eq = [6.125, 4.8125, 6.5625, 4.375];
-% F = F./eq;
+
+for i= 1:size(Hi,2)
+   Hi(:,i) = Hi(:,i)./((sum(abs(Hi(:,i))))); 
+    
+end
+
+for i= 1:size(H_af,2)
+   H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
+    
+end
 
 
-% figure;
-% for i = 1:7
-% plot(10*log10(abs(fft(H_af(:,i),512))), 'LineWidth',2); hold on;
-% end
-% legend('H0H0', 'H0H1', 'H1H1' , 'H1H2', 'H2H2', 'H2H3', 'H3H3');
-% title('Petraglia Structure');
-% axis([-inf 256 -40 inf])
-% 
-% figure;
-% for i = 1:4
-% plot(10*log10(abs(fft(Hi(:,i),512))), 'LineWidth',2); hold on;
-% end
-% legend('H0', 'H1', 'H2','H3');
-% title('2 level filterbank (db1)');
-% axis([-inf 256 -20 inf])
+%F = F./eq;
+
+
+figure;
+for i = 1:7
+plot(10*log10(abs(fft(H_af(:,i),512))), 'LineWidth',2); hold on;
+end
+legend('H0H0', 'H0H1', 'H1H1' , 'H1H2', 'H2H2', 'H2H3', 'H3H3');
+title('Petraglia Structure');
+axis([-inf 256 -40 inf])
+
+figure;
+for i = 1:4
+plot(10*log10(abs(fft(Hi(:,i),512))), 'LineWidth',2); hold on;
+end
+legend('H0', 'H1', 'H2','H3');
+title('2 level filterbank (db1)');
+axis([-inf 256 -20 inf])
 
 % analysis and synthesis are used in reverse to obtain in U.Z a column
 % vector with cD in the first position
@@ -151,7 +173,7 @@ delay = 1;                    % Level delay for synthesis
 z = zeros(len,1);
            
 w = zeros(L(end-level),2^level);           % Last level has 2 columns, cD and cA
-w(1,:) = 1/sqrt(4) ;
+w(1,:) = 1 ;
 
 eD = zeros(1,2^level);              % Last level has 2 columns, cD and cA
 

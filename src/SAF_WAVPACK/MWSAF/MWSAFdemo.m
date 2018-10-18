@@ -7,10 +7,10 @@ clear all;
 % close all;
 
 % Adaptive filter parameters
-mu = 0.1;                      % Step size
+mu = 0.3;                      % Step size
 M = 256;                       % Length of unknown system response
-level = 2;                     % Levels of Wavelet decomposition
-filters = 'db2';               % Set wavelet type
+level = 1;                     % Levels of Wavelet decomposition
+filters = 'db1';               % Set wavelet type
 Q =1;   %useless
 DWT_flag = 1;
 
@@ -61,7 +61,7 @@ else
     [en, S] = MWSAFadapt(un, dn, S);                
 end
     
-EML = S.eml.^2;                  % System error norm (normalized)
+%EML = S.eml.^2;                  % System error norm (normalized)
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
@@ -74,11 +74,11 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
-figure;                          % Plot misalignment
-hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Misalignment (dB)');
-grid on;
+% figure;                          % Plot misalignment
+% hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
+% xlabel('Number of iterations (\times 1024 input samples)'); 
+% ylabel('Misalignment (dB)');
+% grid on;
 
 
 % %% time domain parameters

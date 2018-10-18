@@ -48,6 +48,9 @@ if mod(length(Hi),2) ~= 0
     Hi = Hi(1:end-1,:);
 end
 
+
+
+
 % petraglia's structure af filters
 
 indx = 1; 
@@ -64,6 +67,11 @@ for i= 1:size(Hi,2)
       end         
     
 end
+
+% for i= 1:size(H_af,2)
+%    H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
+%     
+% end
 
 
 F = flip(Hi); 

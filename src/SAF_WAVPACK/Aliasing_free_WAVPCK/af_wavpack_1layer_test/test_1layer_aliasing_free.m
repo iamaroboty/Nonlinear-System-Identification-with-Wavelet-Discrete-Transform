@@ -18,7 +18,7 @@ Ovr = 1;
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 1;                     % Levels of Wavelet decomposition
-filters = 'db1';               % Set wavelet type
+filters = 'db8';               % Set wavelet type
 
 
 %S = QMFInit(M,mu,level,filters);
