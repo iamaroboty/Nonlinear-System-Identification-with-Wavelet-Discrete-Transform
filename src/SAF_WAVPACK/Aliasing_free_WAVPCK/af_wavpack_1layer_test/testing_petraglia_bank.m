@@ -90,3 +90,4 @@ disp(sum(abs(fft(H_af)).^2));
 % Sum of petraglia for synthesis
 Ti = sum(abs(HHi).^2);
 Taf = sum(abs(HH_af).^2);
+Tsum = [Taf(1)+Taf(2) , Taf(2)+Taf(3)+Taf(4), Taf(4)+Taf(5)+Taf(6), Taf(6)+Taf(7)]

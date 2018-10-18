@@ -20,7 +20,11 @@ Ovr = 1;
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 2;
+<<<<<<< HEAD
 filters = 'db2';               % Set wavelet type
+=======
+filters = 'db8';               % Set wavelet type
+>>>>>>> 00fed81ea46f5027a44c8196cefdf8b57567d5a1
 
 
 % S = QMFInit(M,mu,level,filters);
@@ -33,6 +37,7 @@ S = SWAFinit(M, mu, level, filters);
 
 F = S.analysis;                   % Analysis filter bank
 H = S.synthesis;                  % Synthesis filter bank 
+
 
 
 %% petraglia aliasing free structure adaptation
@@ -124,12 +129,18 @@ F = flip(Hi);
 
 %% equalization 
 
+<<<<<<< HEAD
 % eq = [6.125, 4.8125, 6.5625, 4.375];
 % 
+=======
+eq = [6.125, 4.8125, 6.5625, 4.375];
+
+>>>>>>> 00fed81ea46f5027a44c8196cefdf8b57567d5a1
 % for i= 1:size(Hi,2)
 %    Hi(:,i) = Hi(:,i)./((sum(abs(Hi(:,i))))); 
 %     
 % end
+<<<<<<< HEAD
 % 
 % for i= 1:size(H_af,2)
 %    H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
@@ -168,6 +179,7 @@ axis([-inf 256 -20 inf])
 
 % analysis and synthesis are used in reverse to obtain in U.Z a column
 % vector with cD in the first position
+
 
 
 H_af = H_af(1:end-2,:);
