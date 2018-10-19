@@ -37,11 +37,12 @@ ARcoeffs(5).a = [1.0000; -1.3193;  0.8610; -0.4541;...
 un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
 
-max_len= max(Volterra_sys.lengths); 
+
+max_len= max(Volterra_sys.M); 
 
 for i = 1:Volterra_sys.order                                % Generate desired response d(n)
     
-    tmp = filter(Volterra_sys{i}, 1, un^i); 
+    tmp = filter(Volterra_sys.Responses{i}, 1, un.^i); 
     
     % if shorter than max_len pad to maxlen 
 %     if size(tmp,1) < max_len
@@ -58,7 +59,7 @@ un = un(max_len+1:end);
 
 dn= 0;
 
-for i=1:volterra_sys.order
+for i=1:Volterra_sys.order
     
     dn= dn_mat{i} + dn;
     
