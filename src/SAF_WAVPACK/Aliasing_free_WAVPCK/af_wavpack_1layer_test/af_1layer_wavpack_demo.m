@@ -9,7 +9,7 @@ clear all;  close all;
 mu = 0.1;                      % Step size
 M = 256;                       % Length of unknown system response
 level = 2;                     % Levels of Wavelet decomposition
-filters = 'db3';               % Set wavelet type
+filters = 'db8';               % Set wavelet type
 Ovr = 1;                       % Oversampling factor
 
 % Run parameters
@@ -48,8 +48,8 @@ tic;
 fprintf('Wavpack petraglia \n');
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-S = QMFInit(M,mu,level,filters);
-% S = SWAFinit(M,mu,level,filters);
+%S = QMFInit(M,mu,level,filters);
+ S = SWAFinit(M,mu,level,filters);
 S.unknownsys = b; 
 if level == 1
     [en, S] = Adapt_1layer_af(un, dn, S);                 % Perform WSAF Algorithm 

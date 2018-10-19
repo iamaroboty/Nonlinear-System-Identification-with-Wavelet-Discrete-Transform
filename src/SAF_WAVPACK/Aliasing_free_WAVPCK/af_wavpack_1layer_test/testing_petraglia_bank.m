@@ -3,7 +3,7 @@ clear all;
 close all;
 
 level = 2;
-wtype = 'db2';
+wtype = 'db16';
 DFTpoint = 1024;
 delta_w = 2*pi/DFTpoint;
 w = (0:DFTpoint-1)*delta_w;

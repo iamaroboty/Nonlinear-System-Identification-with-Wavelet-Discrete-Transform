@@ -48,9 +48,9 @@ if mod(length(Hi),2) ~= 0
     Hi = Hi(1:end-1,:);
 end
 
-% tmp = Hi(:,3); 
-% Hi(:,3) = Hi(:,end);
-% Hi(:,end) = tmp; 
+tmp = Hi(:,3); 
+Hi(:,3) = Hi(:,end);
+Hi(:,end) = tmp; 
 
 % petraglia's structure af filters
 
