@@ -1,6 +1,6 @@
 function [un,dn,vn] = GenerateResponses_Volterra(iter,Volterra_sys,seed,ARtype,SNR)
 
-% GenerateResponses     Generate Input and Desired Responses
+% GenerateResponses_volterra     Generate Input and Desired Responses
 %
 % Arguments:
 % iter                  Number of samples in u(n)
@@ -9,9 +9,7 @@ function [un,dn,vn] = GenerateResponses_Volterra(iter,Volterra_sys,seed,ARtype,S
 % ARtype                Set ARtype = 1 for generating white noise
 % SNR                   Set SNR = inf for noiseless signal
 %
-% by Lee, Gan, and Kuo, 2008
-% Subband Adaptive Filtering: Theory and Implementation
-% Publisher: John Wiley and Sons, Ltd
+
 
 if nargin < 3
     seed = sum(100*clock);

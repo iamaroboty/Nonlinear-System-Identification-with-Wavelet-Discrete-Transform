@@ -19,12 +19,8 @@ Ovr = 1;
 
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
-level = 2;
-<<<<<<< HEAD
+level = 1;
 filters = 'db2';               % Set wavelet type
-=======
-filters = 'db8';               % Set wavelet type
->>>>>>> 00fed81ea46f5027a44c8196cefdf8b57567d5a1
 
 
 % S = QMFInit(M,mu,level,filters);
@@ -39,14 +35,11 @@ F = S.analysis;                   % Analysis filter bank
 H = S.synthesis;                  % Synthesis filter bank 
 
 
-
 %% petraglia aliasing free structure adaptation
 
 % filters for the aliasing free bank 
 
 %upsampled filters
-
-
 % %check for two layers
 % check_H_extd = cat(2, conv(H(:,1), upsample(H(:,1),2)), conv(H(:,1), upsample(H(:,2),2)), conv(H(:,2), upsample(H(:,1),2)), conv(H(:,2), upsample(H(:,2),2)) ); 
 % % H0, H1, H2, H3, H4
@@ -68,9 +61,7 @@ H = S.synthesis;                  % Synthesis filter bank
 %                    conv(check_H_extd(:,4), check_H_extd(:,4))   ); 
 
 
-
 Hi = zeros(2^(level-1)*size(H,1), 2^(level));
-
 
 if level > 1
 
@@ -86,8 +77,7 @@ end
 
 else 
     up{1,1} = H(:,1); 
-    up{2,1} = H(:,2); 
-    
+    up{2,1} = H(:,2);    
 end
 
 % up = upsample(H,2);
@@ -129,30 +119,22 @@ F = flip(Hi);
 
 %% equalization 
 
-<<<<<<< HEAD
-% eq = [6.125, 4.8125, 6.5625, 4.375];
-% 
-=======
-eq = [6.125, 4.8125, 6.5625, 4.375];
-
->>>>>>> 00fed81ea46f5027a44c8196cefdf8b57567d5a1
 % for i= 1:size(Hi,2)
 %    Hi(:,i) = Hi(:,i)./((sum(abs(Hi(:,i))))); 
 %     
 % end
-<<<<<<< HEAD
+
 % 
 % for i= 1:size(H_af,2)
 %    H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
 %     
 % end
-=======
 
-for i= 1:size(H_af,2)
-   H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
-    
-end
->>>>>>> 00fed81ea46f5027a44c8196cefdf8b57567d5a1
+
+% for i= 1:size(H_af,2)
+%    H_af(:,i) = H_af(:,i)./((sum(abs(H_af(:,i))))); 
+%     
+% end
 
 
 %F = F./eq;
@@ -181,8 +163,7 @@ axis([-inf 256 -20 inf])
 % vector with cD in the first position
 
 
-
-H_af = H_af(1:end-2,:);
+% H_af = H_af(1:end-2,:);
 
 [len_af, ~] = size(H_af);               % Wavelet filter length
 [len, ~] = size(Hi); 

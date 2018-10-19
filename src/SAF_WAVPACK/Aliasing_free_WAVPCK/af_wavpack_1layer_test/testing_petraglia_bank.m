@@ -3,7 +3,7 @@ clear all;
 close all;
 
 level = 2;
-wtype = 'db16';
+wtype = 'db45';
 DFTpoint = 1024;
 delta_w = 2*pi/DFTpoint;
 w = (0:DFTpoint-1)*delta_w;
@@ -68,7 +68,7 @@ xlabel('Frequency,\omega (\pi)'); ylabel('Gain (dB)');
 figure; hold on;
 for i = 1:size(H_af')
     if mod(i,2) == 0
-        plot(w2/pi, 20*log10(abs(HH_af(1:DFTpoint/2, i))+eps), 'LineWidth', 2, ...
+        plot(w2/pi, 20*log10(abs(HH_af(1:DFTpoint/2, i))+eps),':', 'LineWidth', 2, ...
             'Displayname', ['H' num2str(floor((i-1)/2)) 'H' num2str(i/2)]);
     else
         plot(w2/pi, 20*log10(abs(HH_af(1:DFTpoint/2, i))+eps), 'LineWidth', 2, ...

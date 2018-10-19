@@ -9,6 +9,8 @@ d = 256;        %Total signal length
 t=0:0.001:10;
 un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
 % un = ones(1,d);
+% un = zeros(1,d);
+% un(10) = 1;
 un = un(1:d);
 Ovr = 1; 
 
@@ -18,7 +20,7 @@ Ovr = 1;
 mu = 0.1;                      % ignored here 
 M = 256;                        % Length of unknown system response also ignored here
 level = 1;                     % Levels of Wavelet decomposition
-filters = 'db8';               % Set wavelet type
+filters = 'db10';               % Set wavelet type
 
 
 %S = QMFInit(M,mu,level,filters);
@@ -55,7 +57,7 @@ for i= 1:level
 end 
 w = zeros(L(end-i),2^i);           % Last level has 2 columns, cD and cA
 
-w(1,:) = 1/sqrt(2);                   % set filters to kronecker delta
+w(1,:) = 1;                 % set filters to kronecker delta
 
 
 eD{i} = zeros(1,2^i/2);              % Last level has 2 columns, cD and cA
