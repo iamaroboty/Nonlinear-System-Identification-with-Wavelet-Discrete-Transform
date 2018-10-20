@@ -38,35 +38,28 @@ un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
 max_len= max(Volterra_sys.M); 
 
-tmp = 0;
+
 
 for i = 1:Volterra_sys.order                                % Generate desired response d(n)
     
     if i ==1
-    tmp = filter(Volterra_sys.Responses{i}(:,1), 1, un.^i);
+    tmp = filter(Volterra_sys.Responses{i}(:,1), 1, un);
     
     else
+   
     tmp = 0; 
     
     for j=1:size(Volterra_sys.Responses{2},1) % columns
-                
-            
-     % shifted inputs matrix 
-    if j ==1 
-        
-        A = un.*un;
-        
-    else
-     
-    A = cat(2, zeros(1,j-1), un(j:end)).* un(j);
-    
-    end
+                         
+    % shifted inputs matrix 
+
+    A = cat(2, zeros(1,j), un(1:end)).* un;
     
     tmp = tmp + filter(Volterra_sys.Responses{2}(j,:), 1, A);
     
     end
     
-    end
+    
     
     % if shorter than max_len pad to maxlen 
 %     if size(tmp,1) < max_len

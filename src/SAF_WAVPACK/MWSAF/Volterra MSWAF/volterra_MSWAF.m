@@ -14,7 +14,7 @@ M2 = 16; % length of second order volterra kernel
 
 M = [M1, M2];
 
-gains = [1, 0.5];
+gains = [1, 0.2];
 
 NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 
