@@ -10,11 +10,34 @@ clear all;
 
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 128; % length of second order volterra kernel
+M2 = 16; % length of second order volterra kernel
 
 M = [M1, M2];
 
 NL_system = create_volterra_sys(order, M, 'nlsys1'); 
+
+%plot 2-D kernel 
+if order ==2
+    
+    n_points = 1024;
+    w = linspace(-1,1, n_points);
+    res = fft2(NL_system.Responses{2}, n_points, n_points);
+    surf(w, w, 20*log10(fftshift((abs(res)))), 'LineStyle', 'none');
+    colormap(jet);
+
+    % Create zlabel
+    zlabel('Magnitude (dB)');
+
+    % Create ylabel
+    ylabel('Normalized Frequency (\times\pi rad/sample)');
+ 
+     % Create xlabel
+    xlabel('Normalized Frequency (\times\pi rad/sample)');
+ 
+
+    grid on;
+       
+end
 
 
 % Adaptive filter parameters
@@ -36,6 +59,32 @@ tic;
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
+
+
+% linear model
+
+M=256; 
+level =1; 
+filters = 'db8';
+mu = 0.1;
+
+S = SWAFinit(M, mu, level, filters); 
+[en, S] = MWSAFadapt_DWT(un, dn, S); 
+
+err_sqr = en.^2;
+    
+fprintf('Total time = %.3f mins \n',toc/60);
+
+figure;         % Plot MSE
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
+axis([0 iter/1024 -60 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Mean-square error (with delay)'); grid on;
+fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
+
+
+
 
 S = SWAFinit(M, mu, level, filters); 
 % S = MWSAFinit(M,mu,level,filters,Q);

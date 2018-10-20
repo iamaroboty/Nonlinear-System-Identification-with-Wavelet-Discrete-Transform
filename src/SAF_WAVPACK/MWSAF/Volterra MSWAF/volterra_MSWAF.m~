@@ -16,6 +16,32 @@ M = [M1, M2];
 
 NL_system = create_volterra_sys(order, M, 'nlsys1'); 
 
+%plot 2-D kernel 
+if order ==2
+    
+    n_points = 512;
+    w = linspace(-1,1, n_points);
+    res = fft2(NL_system.Responses{2}, n_points, n_points);
+    figure = surf(w, w, 20*log10(fftshift((abs(res)))), 'LineStyle', 'none');
+    colormap(jet);
+
+
+
+% Create zlabel
+zlabel('Magnitude (dB)');
+
+% Create ylabel
+ylabel('Normalized Frequency (\times\pi rad/sample)');
+
+% Create xlabel
+xlabel('Normalized Frequency (\times\pi rad/sample)');
+
+
+grid on;
+    
+   
+end
+
 
 % Adaptive filter parameters
 
