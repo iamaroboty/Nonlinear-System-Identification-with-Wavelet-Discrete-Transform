@@ -1,4 +1,4 @@
-function [Sys_obj] = create_volterra_sys(order, lengths, name )
+function [Sys_obj] = create_volterra_sys(order, lengths, gains, name )
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -21,12 +21,12 @@ for i = 1:order
     
     if order ==1
         
-    Sys_obj.Responses{i} = rand(lengths(i),1);
+    Sys_obj.Responses{i} = gains(i).*rand(lengths(i),1);
     
     else
      tmp = rand(lengths(i),lengths(i));
                            
-    Sys_obj.Responses{i} =   (tmp + tmp')/2  ; % if matrix is square this is symmetric 
+    Sys_obj.Responses{i} =   gains(i).*(tmp + tmp')/2  ; % if matrix is square this is symmetric 
     end
     
 end
