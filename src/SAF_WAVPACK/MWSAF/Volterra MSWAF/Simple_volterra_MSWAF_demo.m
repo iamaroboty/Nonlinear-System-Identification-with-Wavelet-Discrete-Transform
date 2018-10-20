@@ -19,8 +19,10 @@ gains = [1, 0.2];
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 ker1 = zeros(M1,1); 
 ker1(1) = gains(2);
-ker2 = zeros(M2,M2); 
-ker2(1,1) = gains(2);
+% ker2 = zeros(M2,M2); 
+% ker2(1,1) = gains(2);
+ker2 = gains(2).*eye(M2,M2); 
+
 NL_system.Responses = {ker1, ker2};
     
 
@@ -50,10 +52,9 @@ end
 
 % Adaptive filter parameters
 
-mu = [0.1, 0.1];                 % Step sizes for different kernels 
-
-level = [1];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db2';               % Set wavelet type for different kernels
+mu = [0.3, 0.1];                 % Step sizes for different kernels 
+level = [3];                  % Levels of Wavelet decomposition for different kernels
+filters = 'db1';               % Set wavelet type for different kernels
 DWT_flag = 0; 
 Q = 0; 
 
