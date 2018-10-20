@@ -40,15 +40,7 @@ max_len= max(Volterra_sys.M);
 
 for i = 1:Volterra_sys.order                                % Generate desired response d(n)
     
-    tmp = filter(Volterra_sys.Responses{i}, 1, un.^i); 
-    
-    % if shorter than max_len pad to maxlen 
-%     if size(tmp,1) < max_len
-%         
-%         tmp = padarray(tmp, [0 max_len-size(tmp,1)], 0, 'pre');
-%     
-%     end
-    
+    tmp = filter(Volterra_sys.Responses{i}, 1, un.^i);    
     dn_mat{i} = tmp(max_len+1:end);                            % Adjusting starting index of signals
     
 end
