@@ -36,6 +36,8 @@ un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
 
 
+% max_len= max(Volterra_sys.M); 
+% 
 max_len= max(Volterra_sys.M); 
 
 % for i = 1:Volterra_sys.order                                % Generate desired response d(n)
@@ -45,7 +47,7 @@ max_len= max(Volterra_sys.M);
 %     
 % end
 
-% using fast volterra filtering 
+% using fast volterra filtering
 
 %Volterra_sys.Responses{} are kernels
 %Volterra_sys.M is the size of kernels
