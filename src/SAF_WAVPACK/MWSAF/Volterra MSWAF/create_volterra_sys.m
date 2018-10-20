@@ -1,4 +1,4 @@
-function [Sys_obj] = create_volterra_sys(order, lengths, name )
+function [Sys_obj] = create_volterra_sys(order, lengths, gains, name )
 %UNTITLED4 Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -12,7 +12,27 @@ Sys_obj.name = name;
 
 for i = 1:order    
     Sys_obj.M(i) = lengths(i); % append lengths of kernels 
-    Sys_obj.Responses{i} = rand(lengths(i),1);
+    
+    if order > 2
+        
+        error("not supported order >2");
+        
+    end
+    
+    if i ==1
+        
+    Sys_obj.Responses{i} = gains(i).*rand(1,lengths(i));
+    
+    elseif i ==2
+        
+        
+     tmp = rand(lengths(i),lengths(i));
+                           
+    Sys_obj.Responses{i} =   gains(i).*(tmp + tmp')/2  ; % if matrix is square this is symmetric 
+    
+    
+    end
+    
 end
 
 end

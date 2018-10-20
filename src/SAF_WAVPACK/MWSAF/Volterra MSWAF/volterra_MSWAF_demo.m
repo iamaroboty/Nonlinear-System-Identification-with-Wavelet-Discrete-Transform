@@ -10,11 +10,11 @@ clear all;
 
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 16; % length of second order volterra kernel
+M2 = 8; % length of second order volterra kernel
 
 M = [M1, M2];
 
-gains = [1, 0.2];
+gains = [1, 0.1];
 
 NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 
@@ -44,11 +44,12 @@ end
 
 % Adaptive filter parameters
 
-mu = [0.3, 0.3];                 % Step sizes for different kernels 
+mu = [0.05, 0.05];                 % Step sizes for different kernels 
 
-level = [2, 1];                  % Levels of Wavelet decomposition for different kernels
-filters = ['db2'];               % Set wavelet type for different kernels
+level = [1];                  % Levels of Wavelet decomposition for different kernels
+filters = 'db2';               % Set wavelet type for different kernels
 DWT_flag = 0; 
+Q = 0; 
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -62,13 +63,38 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
+% nonlinear model 
+
+
+S = Volterra_Init(M, mu, level, filters); 
+% S = MWSAFinit(M,mu,level,filters,Q);
+
+
+[en, S] = Volterra_2ord_adapt(un, dn, S);                
+
+    
+
+err_sqr = en.^2;
+    
+fprintf('Total time = %.3f mins \n',toc/60);
+
+figure;         % Plot MSE
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
+axis([0 iter/1024 -60 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Mean-square error (with delay)'); grid on;
+fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
+
+
+
 
 % linear model
 
 M=256; 
 level =1; 
-filters = 'db1';
-mu = 0.1;
+filters = 'db2';
+mu = 0.05;
 
 S = SWAFinit(M, mu, level, filters); 
 [en, S] = MWSAFadapt_DWT(un, dn, S); 
@@ -86,30 +112,6 @@ ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
-
-
-S = SWAFinit(M, mu, level, filters); 
-% S = MWSAFinit(M,mu,level,filters,Q);
-S.unknownsys = b; 
-
-if DWT_flag == 1
-    [en, S] = MWSAFadapt_DWT(un, dn, S); 
-else
-    [en, S] = MWSAFadapt(un, dn, S);                
-end
-    
-
-err_sqr = en.^2;
-    
-fprintf('Total time = %.3f mins \n',toc/60);
-
-figure;         % Plot MSE
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
-axis([0 iter/1024 -60 10]);
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Mean-square error (with delay)'); grid on;
-fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 % figure;                          % Plot misalignment
 % hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
