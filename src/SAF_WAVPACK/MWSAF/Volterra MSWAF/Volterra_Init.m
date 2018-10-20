@@ -20,7 +20,7 @@ S.wtype         = wtype;          % Filter type
 S.alpha         = 1e-6;           % Small positive constant
 
 
-display("only first level parameter is taken for entire structure for now, must be generalized")
+disp("only first level parameter is taken for entire structure for now, must be generalized")
 
 [low_d,high_d,low_r,high_r] = wfilters(wtype);
 S.analysis = [low_d', high_d'];     % Analysis filters

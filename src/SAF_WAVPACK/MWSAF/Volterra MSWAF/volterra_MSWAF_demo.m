@@ -2,9 +2,9 @@
 % 
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
-addpath '../../Common';             % Functions in Common folder
+addpath '../../../../Common';             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 
 %% Unidentified System parameters
 
