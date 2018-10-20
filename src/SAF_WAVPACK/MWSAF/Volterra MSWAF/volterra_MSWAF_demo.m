@@ -10,7 +10,7 @@ clear all;
 
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 16; % length of second order volterra kernel
+M2 = 8; % length of second order volterra kernel
 
 M = [M1, M2];
 
@@ -44,11 +44,12 @@ end
 
 % Adaptive filter parameters
 
-mu = [0.3, 0.3];                 % Step sizes for different kernels 
+mu = [0.05, 0.05];                 % Step sizes for different kernels 
 
-level = [2];                  % Levels of Wavelet decomposition for different kernels
+level = [1];                  % Levels of Wavelet decomposition for different kernels
 filters = 'db2';               % Set wavelet type for different kernels
 DWT_flag = 0; 
+Q = 0; 
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -65,7 +66,7 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 % nonlinear model 
 
 
-S = SWAFinit(M, mu, level, filters); 
+S = Volterra_Init(M, mu, level, filters); 
 % S = MWSAFinit(M,mu,level,filters,Q);
 
 
@@ -92,8 +93,8 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 M=256; 
 level =1; 
-filters = 'db1';
-mu = 0.1;
+filters = 'db2';
+mu = 0.05;
 
 S = SWAFinit(M, mu, level, filters); 
 [en, S] = MWSAFadapt_DWT(un, dn, S); 
