@@ -38,7 +38,7 @@ d = zeros(len,1);
 A1 = zeros(len,2^level);  
 A2 = zeros(len,2^level);
 
-un2_tap = zeros(S.length(2), 1); 
+un2_tap = zeros(1, 1); 
 
 z = zeros(len,1);
 
@@ -58,12 +58,12 @@ for n = 1:ITER
     
     d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
     
-    un2_tap = [un(n); un2_tap(1:end-1) ]; 
+    un2_tap = [un(n)^2; un2_tap(1:end-1) ]; 
     
     a1 = [un(n); a1(1:end-1)];                       % Update tapped-delay line of u(n)
     A1 = [a1, A1(:,1:end-1)];                         % Update buffer
     
-    a2 = [un2_tap(end)^2; a2(1:end-1)];                       % Update tapped-delay line of u(n)
+    a2 = [un2_tap(end); a2(1:end-1)];                       % Update tapped-delay line of u(n)
     A2 = [a2, A2(:,1:end-1)];                         % Update buffer
    
        
