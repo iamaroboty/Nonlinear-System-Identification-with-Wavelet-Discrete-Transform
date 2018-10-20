@@ -22,7 +22,6 @@ Hi = zeros(2^(level-1)*size(H,1), 2^(level));
 indx = 1;
 
 
-
 for i = 1:size(H,2)
 for j=1:level-1
     
@@ -44,9 +43,9 @@ end
 
 Hi = H_tmp; 
 
-if mod(length(Hi),2) ~= 0
-    Hi = Hi(1:end-1,:);
-end
+% if mod(length(Hi),2) ~= 0
+%     Hi = Hi(1:end-1,:);
+% end
 
 tmp = Hi(:,3); 
 Hi(:,3) = Hi(:,end);
@@ -152,7 +151,7 @@ for n = 1:ITER
                         directH3H3+crossH3H2G2];
             
              eD =  Y.Z - (summed) ;  
-             eDvec(:,n) =eD;
+%              eDvec(:,n) =eD;
              
              if n >= AdaptStart
                  
