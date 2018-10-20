@@ -23,10 +23,14 @@ for i = 1:order
         
     Sys_obj.Responses{i} = gains(i).*rand(1,lengths(i));
     
-    else
+    elseif i ==2
+        
+        
      tmp = rand(lengths(i),lengths(i));
                            
     Sys_obj.Responses{i} =   gains(i).*(tmp + tmp')/2  ; % if matrix is square this is symmetric 
+    
+    
     end
     
 end
