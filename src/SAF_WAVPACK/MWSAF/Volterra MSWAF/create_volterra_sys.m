@@ -19,9 +19,9 @@ for i = 1:order
         
     end
     
-    if order ==1
+    if i ==1
         
-    Sys_obj.Responses{i} = gains(i).*rand(lengths(i),1);
+    Sys_obj.Responses{i} = gains(i).*rand(1,lengths(i));
     
     else
      tmp = rand(lengths(i),lengths(i));

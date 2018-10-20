@@ -39,48 +39,19 @@ un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 max_len= max(Volterra_sys.M); 
 
 
+% using fast volterra filtering 
 
-for i = 1:Volterra_sys.order                                % Generate desired response d(n)
-    
-    if i ==1
-    tmp = filter(Volterra_sys.Responses{i}(:,1), 1, un);
-    
-    else
-   
-    tmp = 0; 
-    
-    for j=1:size(Volterra_sys.Responses{2},1) % columns
-                         
-    % shifted inputs matrix 
+%Volterra_sys.Responses{} are kernels
+%Volterra_sys.M is the size of kernels
 
-    A = cat(2, zeros(1,j), un(1:end)).* un;
-    
-    tmp = tmp + filter(Volterra_sys.Responses{2}(j,:), 1, A);
-    
-    end
-    
-    
-    
-    % if shorter than max_len pad to maxlen 
-%     if size(tmp,1) < max_len
-%         
-%         tmp = padarray(tmp, [0 max_len-size(tmp,1)], 0, 'pre');
+% for i=1:Volterra_sys.order
+%    kernels{i} = triu(Volterra_sys.Responses{i});
 %     
-%     end
-    
-    dn_mat{i} = tmp(max_len+1:end);                            % Adjusting starting index of signals
-    
-end
+% end
 
-un = un(max_len+1:end);
+dn = fastVMcell(un, Volterra_sys.Responses , Volterra_sys.M);
+dn = sum(dn,1);
 
-dn= 0;
-
-for i=1:Volterra_sys.order
-    
-    dn= dn_mat{i} + dn;
-    
-end
 
 % Normalization of u(n) and d(n)
 
