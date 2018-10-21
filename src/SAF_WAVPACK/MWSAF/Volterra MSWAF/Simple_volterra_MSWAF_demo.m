@@ -19,8 +19,10 @@ gains = [1, 1];
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 ker1 = zeros(M1,1); 
 ker1(1) = gains(2);
-ker2 = zeros(M2,M2); 
-ker2(1,1) = gains(2);
+% ker2 = zeros(M2,M2); 
+% ker2(1,1) = gains(2);
+ker2 = gains(2).*eye(M2,M2); 
+
 NL_system.Responses = {ker1, ker2};
     
 
