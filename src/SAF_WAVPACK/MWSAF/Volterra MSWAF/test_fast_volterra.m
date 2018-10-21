@@ -7,8 +7,9 @@ amplitude = 1;
 leng = 1; 
 
 s = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
+s2 = s + s.^2;
 
-plot(s+ s.^2); 
+plot(s2); 
 hold on; 
 
 ker1 = zeros(256,1); 
