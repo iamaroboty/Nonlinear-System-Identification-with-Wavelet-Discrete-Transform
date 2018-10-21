@@ -58,7 +58,7 @@ for n = 1:ITER
     
     d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
     
-    un2_tap = [un(n)^2; un2_tap(1:end-1) ]; 
+    un2_tap = [un(n)^2; un2_tap(1:end-1) ]; %% NOT NEEDED 
     
     a1 = [un(n); a1(1:end-1)];                       % Update tapped-delay line of u(n)
     A1 = [a1, A1(:,1:end-1)];                         % Update buffer

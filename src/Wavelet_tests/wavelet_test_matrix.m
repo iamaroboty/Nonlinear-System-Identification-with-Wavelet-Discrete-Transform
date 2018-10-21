@@ -53,9 +53,10 @@ d_cD=conv(f,high_d,cmod);
 d_cD=downsample(d_cD,2,1);
 [McA,McD] = dwt(f,low_d,high_d);
 
+
 % Level 2
 d_cA2=conv(d_cA,low_d,cmod);
-d_cA2=downsample(d_cA2,2,1);
+d_cA2_sq=downsample(d_cA2,2,1);
 
 d_cD2=conv(d_cA,high_d,cmod);
 d_cD2=downsample(d_cD2,2,1);

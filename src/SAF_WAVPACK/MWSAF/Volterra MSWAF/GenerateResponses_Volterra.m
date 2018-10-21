@@ -60,7 +60,6 @@ max_len= max(Volterra_sys.M);
 dn = fastVMcell(un, Volterra_sys.Responses , Volterra_sys.M);
 dn = sum(dn,1);
 
-
 % Normalization of u(n) and d(n)
 
 un = un/std(dn);
