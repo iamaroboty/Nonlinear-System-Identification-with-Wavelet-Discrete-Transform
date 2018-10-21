@@ -24,7 +24,7 @@ plot(w_freq(1:N/2), abs(U(1:N/2)));
 xlabel('Normalized frequency \omega (\pi)'); ylabel('Amplitude');
 
 
-[low_d,high_d,low_r,high_r] = wfilters('db1');
+[low_d,high_d,low_r,high_r] = wfilters('db12');
 
 H = [low_d', high_d'];  % filter matrix analysis
 F = [low_r', high_r'];
@@ -45,9 +45,9 @@ yn = zeros(size(t,2), 1);
 U2_s = zeros(len,2); 
 U3_s = zeros(len,2); 
 
-lag =97;
+lag =2;
 
-Utap = zeros(len,len,lag);
+Utap = zeros(len,2,lag);
 utap = zeros(lag,1); 
 
 % Analysis and synth
@@ -100,8 +100,7 @@ for i=1:size(t,2)
             
       error = (abs(U3)-abs(U3_s)) + (abs(U2)-abs(U2_s));
    
-    tmp = (error*F)';
-    er_rr = tmp(:,1);
+    er_rr = F*error(1,:)' + er_rr;
     
     end
     yn(i) = er_rr(1);

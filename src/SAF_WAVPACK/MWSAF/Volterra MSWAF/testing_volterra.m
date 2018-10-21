@@ -34,9 +34,10 @@ ker2(1,1) = gains(2);
 ker = {ker1, ker2};
 y = fastVMcell(u, ker, [M1 M2]);
 yr = sum(y,1);
+yr = yr - mean(yr);
+Y = fft(yr, N);
 
 subplot(3, 1, 3);
-plot(abs(fft(yr, N)));
+plot(w_freq(1:N/2), abs(Y(1:N/2)));
 
-figure; plot(abs(fft(y(2,:))));
 

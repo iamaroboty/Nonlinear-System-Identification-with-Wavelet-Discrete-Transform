@@ -4,24 +4,24 @@
 
 addpath '../../Common';             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 
 %% Unidentified System parameters
 
 NL_system.order = 2; 
 
 M1 = 256; % length of first order volterra kernel
-M2 = 32; % length of second order volterra kernel
+M2 = 128; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
 gains = [1, 1];
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
-ker1 = zeros(M1,1); 
-ker1(1) = gains(2);
-% ker2 = zeros(M2,M2); 
-% ker2(1,1) = gains(2);
-ker2 = gains(2).*eye(M2,M2); 
+ker1 = rand(M1,1)-0.5; 
+% ker1(2) = gains(2);
+ker2 = diag(rand(M2,1)-0.5); 
+% ker2(10,10) = gains(2);
+% ker2 = gains(2).*eye(M2,M2); 
 
 NL_system.Responses = {ker1, ker2};
     
@@ -33,8 +33,8 @@ if NL_system.order ==2
     n_points = 1024;
     w = linspace(-1,1, n_points);
     res = fft2(NL_system.Responses{2}, n_points, n_points);
-    surf(w, w, 20*log10(fftshift((abs(res)))), 'LineStyle', 'none');
-%     surf([1:M2], [1:M2], NL_system.Responses{2}, 'LineStyle', 'none');
+%     surf(w, w, 20*log10(fftshift((abs(res)))), 'LineStyle', 'none');
+    surf([1:M2], [1:M2], NL_system.Responses{2}, 'LineStyle', 'none');
     colormap(jet);
 
     % Create zlabel
@@ -57,7 +57,7 @@ end
 mu = [0.1, 0.1];                 % Step sizes for different kernels 
 
 level = [2];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db4';               % Set wavelet type for different kernels
+filters = 'db1';               % Set wavelet type for different kernels
 DWT_flag = 0; 
 Q = 0; 
 
