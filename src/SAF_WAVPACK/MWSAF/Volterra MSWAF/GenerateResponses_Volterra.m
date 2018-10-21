@@ -38,6 +38,7 @@ un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
 % max_len= max(Volterra_sys.M); 
 % 
+
 max_len= max(Volterra_sys.M); 
 
 % for i = 1:Volterra_sys.order                                % Generate desired response d(n)
