@@ -42,10 +42,10 @@ u2 = zeros(len, 1);
 u3 = zeros(len, 1);
 yn = zeros(size(t,2), 1);
 
-U2_smart = zeros(len,2); 
-U3_smart = zeros(len,2); 
+U2_s = zeros(len,2); 
+U3_s = zeros(len,2); 
 
-lag =98;
+lag =97;
 
 Utap = zeros(len,len,lag);
 utap = zeros(lag,1); 
@@ -79,7 +79,7 @@ for i=1:size(t,2)
         
         Utap = cat(3,cat(2,term1 , term2), Utap(:,:,1:end-1)); 
         
-        U2_smart = [ [sum(term1.*u1); sum(term2.*u1)]' ; U2_smart(1:end-1,:)];
+        U2_s = [ [sum(term1.*u1); sum(term2.*u1)]' ; U2_s(1:end-1,:)];
         
         loc_lag = floor(lag/2)-1;
         
@@ -87,18 +87,18 @@ for i=1:size(t,2)
         
         
            
-        U3_smart = [ [sum(Utap(:,1, end-loc_lag).*u1); sum(Utap(:,2, end-loc_lag).*u1)]' ; U3_smart(1:end-1,:)]; % shifting property 
+        U3_s = [ [sum(Utap(:,1, end-loc_lag).*u1); sum(Utap(:,2, end-loc_lag).*u1)]' ; U3_s(1:end-1,:)]; % shifting property 
         
         else
         
         tmp1 = [Utap(2,1, end-loc_lag-1)  ;Utap(1,1, end-loc_lag)];
         tmp2 = [Utap(2,2, end-loc_lag-1)  ;Utap(1,2, end-loc_lag)];
             
-        U3_smart = [ [sum(tmp1.*u1); sum(tmp2.*u1)]' ; U3_smart(1:end-1,:)];
+        U3_s = [ [sum(tmp1.*u1); sum(tmp2.*u1)]' ; U3_s(1:end-1,:)];
          
         end
             
-      error = (abs(U3)-abs(U3_smart)) + (abs(U2)-abs(U2_smart));
+      error = (abs(U3)-abs(U3_s)) + (abs(U2)-abs(U2_s));
    
     tmp = (error*F)';
     er_rr = tmp(:,1);
