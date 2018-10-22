@@ -19,7 +19,8 @@ gains = [1, 1];
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 ker1 = rand(M1,1)-0.5; 
 % ker1(2) = gains(2);
-ker2 = diag(rand(M2,1)-0.5); 
+ker2 = diag(rand(M2,M2)-0.5,2);  %% extract 2nd diagonal
+ker2 = diag(ker2,2);              %% create a matrix with only that diagonal != 0 
 % ker2(10,10) = gains(2);
 % ker2 = gains(2).*eye(M2,M2); 
 

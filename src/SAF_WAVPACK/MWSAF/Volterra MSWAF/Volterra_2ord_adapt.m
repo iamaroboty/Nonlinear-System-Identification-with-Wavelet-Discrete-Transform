@@ -40,7 +40,7 @@ d = zeros(len,1);
 A1 = zeros(len,2^level);  
 A2 = zeros(len, 2^level);
 
-%un2_tap = zeros(S.length(2), 1); 
+un2_tap = zeros(3, 1); 
 
 z = zeros(len,1);
 
@@ -48,7 +48,7 @@ w1 = zeros(S.length(1),1);
 w2 = zeros(S.length(2),1);
 
 ITER = length(un);
-en = zeros(1,ITER);               % Initialize error sequence to zero
+en = zeros(1,ITER);     % Initialize error sequence to zero
 
 %  t=0:0.001:1;
 %  un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);  
@@ -60,27 +60,27 @@ for n = 1:ITER
     
     d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
     
-    %un2_tap = [un(n); un2_tap(1:end-1) ]; %% NOT NEEDED 
+    un2_tap = [un(n); un2_tap(1:end-1) ]; %% NOT NEEDED 
     
     a1 = [un(n); a1(1:end-1)];                       % Update tapped-delay line of u(n)
-    A1 = [a1, A1(:,1:end-1)];                         % Update buffer
+    A1 = [a1, A1(:,1:end-1)];                        % Update buffer
     
-    a2 =  [un(n)*un(n); a2(1:end-1)];                   % Update tapped-delay line of u(n)
+    a2 =  [un(n)*un2_tap(end); a2(1:end-1)];                % Update tapped-delay line of u(n)
     A2 =  [a2, A2(:,1:end-1)];                       % Update buffer
    
     
-    if (mod(n,2^level)==0)                               % Tap-weight adaptation at decimated rate
+    if (mod(n,2^level)==0)                          % Tap-weight adaptation at decimated rate
         U1 = (H'*A1)';                              % Partitioning u(n) 
         U1_2 = U1_tot(1:end-2^level,:);
-        U1_tot = [U1', U1_2']';                           % Subband data matrix
+        U1_tot = [U1', U1_2']';                     % Subband data matrix
         
         U2 = (H'*A2)';                              % Partitioning u(n) 
         U2_2 = U2_tot(1:end-2^level,:);
-        U2_tot = [U2', U2_2']';                           % Subband data matrix
+        U2_tot = [U2', U2_2']';                     % Subband data matrix
            
-        dD = H'*d;                                 % Partitioning d(n) 
+        dD = H'*d;                                  % Partitioning d(n) 
         
-        eD = dD - U1_tot'*w1- U2_tot'*w2;                         % Error estimation
+        eD = dD - U1_tot'*w1- U2_tot'*w2;           % Error estimation
                        
         if n >= AdaptStart
             w1 = w1 + U1_tot*(eD./(sum(U1_tot.*U1_tot)+alpha)')*mu(1); % Tap-weight adaptation
