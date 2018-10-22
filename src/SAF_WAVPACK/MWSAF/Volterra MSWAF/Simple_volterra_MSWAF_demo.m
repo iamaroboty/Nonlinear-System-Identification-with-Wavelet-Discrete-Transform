@@ -11,7 +11,7 @@ close all;
 NL_system.order = 2; 
 
 M1 = 256; % length of first order volterra kernel
-M2 = 128; % length of second order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
