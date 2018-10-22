@@ -35,20 +35,11 @@ ARcoeffs(5).a = [1.0000; -1.3193;  0.8610; -0.4541;...
 un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
 
-
-% max_len= max(Volterra_sys.M); 
-% 
-
 max_len= max(Volterra_sys.M); 
 
-% for i = 1:Volterra_sys.order                                % Generate desired response d(n)
-%     
-%     tmp = filter(Volterra_sys.Responses{i}, 1, un.^i);    
-%     dn_mat{i} = tmp(max_len+1:end);                            % Adjusting starting index of signals
-%     
-% end
 
-% using fast volterra filtering
+% Fast volterra filtering from {Morhac, M., 1991 - A Fast Algorithm of
+%                               Nonlinear Volterra Filtering}
 
 %Volterra_sys.Responses{} are kernels
 %Volterra_sys.M is the size of kernels
@@ -60,6 +51,12 @@ max_len= max(Volterra_sys.M);
 
 dn = fastVMcell(un, Volterra_sys.Responses , Volterra_sys.M);
 dn = sum(dn,1);
+
+% Adjusting starting index of signals
+
+dn = dn(1:length(un));      
+dn = dn(max_len+1:end);
+un = un(max_len+1:end);
 
 % Normalization of u(n) and d(n)
 

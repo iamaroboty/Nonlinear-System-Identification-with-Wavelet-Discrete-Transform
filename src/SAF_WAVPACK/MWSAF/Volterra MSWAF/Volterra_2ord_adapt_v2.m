@@ -1,5 +1,4 @@
-
-function [en,S] = Volterra_2ord_adapt(un,dn,S)
+function [en,S] = Volterra_2ord_adapt_v2(un,dn,S)
 % Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
 % 
 % Arguments:
@@ -8,7 +7,8 @@ function [en,S] = Volterra_2ord_adapt(un,dn,S)
 % S                 Adptive filter parameters as defined in WSAFinit.m
 % en                History of error signal
 
-M = S.kernel_length;                     % kernel lengths  (array) 
+K = S.kernel_length;              % Kernel dimensions (1st and second order)
+M = S.length;                     % filter lengths (array) 
 mu = S.step;                      % Step Size here is an array 
 
 AdaptStart = S.AdaptStart;        % Transient
@@ -18,27 +18,27 @@ alpha = S.alpha;                  % Small constant (1e-6)
 H = S.analysis;                   % Analysis filter bank
 level = S.levels;                 % Wavelet Levels
 
-
-
 H = create_multilevel_bank(H, level);
 F = flip(H);
 
 S.analysis_bank = H;
 S.synthesis_bank = F;
-
 [len, ~] = size(H);               % Wavelet filter length
-
 
 U1_tot = zeros(M(1),2^level); % output of analysis filters for 1st order signal 
 U2_tot = zeros(M(2),2^level); % output of analysis filters for 2nd order signal 
 
+for i = 1:K(2)
+    D{i} = zeros(K(2)-i+1, 1);
+end
+
 a1 = zeros(len,1);
 a2 = zeros(len,1);
-d = zeros(len,1); 
+d = zeros(len,1);               
+u = zeros(K(2),1);
+u2 = zeros(K(2),1);
 A1 = zeros(len,2^level);  
 A2 = zeros(len,2^level);
-
-un2_tap = zeros(1, 1); 
 
 z = zeros(len,1);
 
@@ -56,15 +56,17 @@ en = zeros(1,ITER);               % Initialize error sequence to zero
 	
 for n = 1:ITER
     
-    d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
+    d = [dn(n); d(1:end-1)];                        % Update tapped-delay line of d(n)
+    u = [un(n); u(1:end-1)];                        % Update tapped-delay line of u(n)
+    A1 = [u(1:len), A1(:,1:end-1)];                 % Update buffer linear signal
     
-    un2_tap = [un(n)^2; un2_tap(1:end-1) ]; %% NOT NEEDED 
+    % Building delay line for quadratic adaptive filter
+    for i = 1:K(2)
+        D{i} = [un(n)*u(i); D{i}(1:end-1)];
+    end
     
-    a1 = [un(n); a1(1:end-1)];                       % Update tapped-delay line of u(n)
-    A1 = [a1, A1(:,1:end-1)];                         % Update buffer
-    
-    a2 = [un2_tap(end); a2(1:end-1)];                       % Update tapped-delay line of u(n)
-    A2 = [a2, A2(:,1:end-1)];                         % Update buffer
+    u2 = cat(1, D{1:end});
+    A2 = [u2(1:len), A2(:,1:end-1)];                         % Update buffer
    
        
     if (mod(n,2^level)==0)                               % Tap-weight adaptation at decimated rate
@@ -78,7 +80,7 @@ for n = 1:ITER
         
         dD = H'*d;                                 % Partitioning d(n) 
         
-        eD = dD - U1_tot'*w1- U2_tot'*w2;                         % Error estimation
+        eD = dD - U1_tot'*w1 - U2_tot'*w2;                         % Error estimation
         
         if n >= AdaptStart
             w1 = w1 + U1_tot*(eD./(sum(U1_tot.*U1_tot)+alpha)')*mu(1); % Tap-weight adaptation

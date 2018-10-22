@@ -3,24 +3,25 @@ close all;
 clear all; 
 
 
-fs = 512;
+fs = 1000;
 N = 2*fs;
 delta_w = 2/N;
 w_freq = (0:N-1)/2; 
 w_norm = (0:N-1)*delta_w;
-freq = 20;
-t = 0:1/fs:1-1/fs;
+freq = 1;
+t = 0:1/fs:10-1/fs;
 
-u = 1*sin(2*pi*freq*t);
+u=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+% u = 1*sin(2*pi*freq*t);
 
 figure; 
-subplot(3, 1, 1);
+subplot(2, 1, 1);
 plot(t,u);
 
 U = fft(u, N);
 
-subplot(3, 1, 2);
-plot(w_freq(1:N/2), abs(U(1:N/2)));
+subplot(2, 1, 2);
+plot(w_norm(1:N/2), abs(U(1:N/2)));
 xlabel('Normalized frequency \omega (\pi)'); ylabel('Amplitude');
 
 
@@ -45,10 +46,12 @@ yn = zeros(size(t,2), 1);
 U2_s = zeros(len,2); 
 U3_s = zeros(len,2); 
 
-lag =2;
+lag =4;
 
 Utap = zeros(len,2,lag);
 utap = zeros(lag,1); 
+
+
 
 % Analysis and synth
 for i=1:size(t,2)    
