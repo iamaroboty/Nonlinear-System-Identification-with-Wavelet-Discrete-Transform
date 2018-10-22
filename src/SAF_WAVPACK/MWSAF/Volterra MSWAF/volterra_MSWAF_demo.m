@@ -70,7 +70,7 @@ S = Volterra_Init(M, mu, level, filters);
 % S = MWSAFinit(M,mu,level,filters,Q);
 
 
-[en, S] = Volterra_2ord_adapt(un, dn, S);                
+[en, S] = Volterra_2ord_adapt_matrix(un, dn, S);                
 
     
 
