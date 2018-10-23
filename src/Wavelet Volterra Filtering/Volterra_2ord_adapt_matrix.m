@@ -1,5 +1,5 @@
 
-function [en,S] = Volterra_2ord_adapt(un,dn,S)
+function [en,S] = Volterra_2ord_adapt_matrix(un,dn,S)
 % Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
 % 
 % Arguments:

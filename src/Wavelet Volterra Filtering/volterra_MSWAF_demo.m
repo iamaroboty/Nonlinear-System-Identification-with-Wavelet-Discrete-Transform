@@ -4,52 +4,88 @@
 
 addpath '../../../../Common';             % Functions in Common folder
 clear all;  
-close all;
+% close all;
 
 %% Unidentified System parameters
-
 order = 2; 
-M1 = 350; % length of first order volterra kernel
-M2 = 25; % length of second order volterra kernel
+M1 = 256; % length of first order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
+gains = [1 1];
 
-gains = [1, 1];
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
-ker1 = rand(M1,1)-0.5; 
-ker2 = (rand(M2,M2)-0.5); 
-% ker2(10,10) = 1;
+%% Just a Delta
+% ker1 = zeros(M1,1);
+% ker1(1) = 1;
+% % ker2 = diag(ones(M2,1));
+% ker2 = zeros(M2,M2);
+% ker2(1,1) = 2;
 
-NL_system.Responses = {ker1, ker2};
+%% Random Vector 
+rng('default'); % For reproducibility
+% ker1 = rand(M1,1) - abs(rand(1));
+% ker2 = diag(rand(M2,1) - abs(rand(1)));
+
+%% Simulated Kernel - random
+ker1 = rand(M1,1) - abs(rand(1));
+ker2 = second_order_kernel(M2);
+
+%% Simulated kernel - from h1 h2
+% b1 = load('h1.dat');
+% b1 = b1(1:M1);
+% ker1 = b1;
+% 
+% b2 = load('h2.dat');
+% b2 = b2(1:M2);
+% ker2 = second_order_kernel(b2);
+
+
+
+NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 
 % NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 
-%plot 2-D kernel 
-% if order ==2
-%     
-%     n_points = 1024;
-%     w = linspace(-1,1, n_points);
-%     res = fft2(NL_system.Responses{2}, n_points, n_points);
-%     surf(w, w, 20*log10(fftshift((abs(res)))), 'LineStyle', 'none');
-%     colormap(jet);
-% 
-%     % Create zlabel
-%     zlabel('Magnitude (dB)');
-% 
-%     % Create ylabel
-%     ylabel('Normalized Frequency (\times\pi rad/sample)');
-%  
-%      % Create xlabel
-%     xlabel('Normalized Frequency (\times\pi rad/sample)');
-%  
-% 
-%     grid on;
-%        
-% end
+%% Plot 2-D kernel
+figure; 
+subplot(221);   %linear time
+plot(NL_system.Responses{1});
+ylabel('Linear Kernel (Time)');
+xlabel('Sample (N)');
+grid on;
+
+subplot(222);   % linear freq
+n_points = 1024;
+w = linspace(-1,1, n_points);
+K1 = fft(NL_system.Responses{1}, n_points);
+plot(w, 20*log10(fftshift(abs(K1))));
+xlabel('Normalized Frequency (\times\pi rad/sample)');
+ylabel('Linear Kernel - Power (dB)');
+grid on;
+
+sub3 = subplot(223);   % quadratic time
+surf(NL_system.Responses{2});
+ylabel('Sample (N)');
+xlabel('Sample (N)');
+view([0 90]);
+colormap(sub3, parula);
+colorbar
+grid on;
+
+sub4 = subplot(224);   % quadratic freq
+title('Quadratic Kernel (Frequency)');
+K2 = fft2(NL_system.Responses{2}, n_points, n_points);
+surf(w, w, 20*log10(fftshift((abs(K2)))), 'LineStyle', 'none');
+zlabel('Power (dB)');
+ylabel('Normalized Frequency (\times\pi rad/sample)');
+xlabel('Normalized Frequency (\times\pi rad/sample)');
+view([0 90]);
+colormap(sub4, jet);
+colorbar
+grid on;
 
 
-% Adaptive filter parameters
-
+%% Adaptive filter parameters
 mu = [0.1, 0.1];                 % Step sizes for different kernels 
 
 level = [2];                  % Levels of Wavelet decomposition for different kernels
@@ -59,8 +95,6 @@ Q = 0;
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
-
-
 
 %%
 tic;
@@ -74,7 +108,9 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 S = Volterra_Init(NL_system.M, mu, level, filters); 
 % S = MWSAFinit(M,mu,level,filters,Q);
 
-[en, S] = Volterra_2ord_adapt_matrix(un, dn, S);                
+[en, S] = Volterra_2ord_adapt(un, dn, S);     
+% [en, S] = Volterra_2ord_adapt_matrix(un, dn, S);   
+% [en, S] = Volterra_2ord_adapt_v2(un, dn, S);  
     
 
 err_sqr = en.^2;

@@ -1,4 +1,3 @@
-
 function [en,S] = Volterra_2ord_adapt(un,dn,S)
 % Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
 % 
@@ -18,8 +17,6 @@ alpha = S.alpha;                  % Small constant (1e-6)
 H = S.analysis;                   % Analysis filter bank
 level = S.levels;                 % Wavelet Levels
 
-
-
 H = create_multilevel_bank(H, level);
 F = flip(H);
 
@@ -28,24 +25,14 @@ S.synthesis_bank = F;
 
 [len, ~] = size(H);               % Wavelet filter length
 
-
-<<<<<<< HEAD
 U1_tot = zeros(M(1),2^level); % output of analysis filters for 1st order signal 
 U2_tot = zeros(M(2),2^level); % output of analysis filters for 2nd order signal 
-=======
-U1_tot = zeros(S.length(1),2^level); % output of analysis filters for 1st order signal 
-
-
-U2_tot = zeros(S.length(2),2^level); % output of analysis filters for 2nd order signal 
->>>>>>> 3e7d2e3664a7d033fbda325e19f710ef342b88a4
 
 a1 = zeros(len,1);
 a2 = zeros(len, 1);
 d = zeros(len,1); 
 A1 = zeros(len,2^level);  
 A2 = zeros(len, 2^level);
-
-un2_tap = zeros(3, 1); 
 
 z = zeros(len,1);
 
@@ -64,13 +51,11 @@ en = zeros(1,ITER);     % Initialize error sequence to zero
 for n = 1:ITER
     
     d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
-    
-    un2_tap = [un(n); un2_tap(1:end-1) ]; %% NOT NEEDED 
-    
+           
     a1 = [un(n); a1(1:end-1)];                       % Update tapped-delay line of u(n)
     A1 = [a1, A1(:,1:end-1)];                        % Update buffer
     
-    a2 =  [un(n)*un2_tap(end); a2(1:end-1)];                % Update tapped-delay line of u(n)
+    a2 =  [un(n).^2; a2(1:end-1)];                % Update tapped-delay line of u(n)
     A2 =  [a2, A2(:,1:end-1)];                       % Update buffer
    
     
