@@ -71,13 +71,10 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 
 % nonlinear model 
 
-
 S = Volterra_Init(NL_system.M, mu, level, filters); 
 % S = MWSAFinit(M,mu,level,filters,Q);
 
-
-[en, S] = Volterra_2ord_adapt_v2(un, dn, S);                
-
+[en, S] = Volterra_2ord_adapt_matrix(un, dn, S);                
     
 
 err_sqr = en.^2;
