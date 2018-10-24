@@ -69,10 +69,11 @@ for n = 1:ITER
 %             S.iter = S.iter + 1;
         end
         z = F*eD + z;                                       
-        en(n-2^level+1:n) = z(1:2^level); 
-        z = [z(2^level+1:end); zeros(2^level,1)]; 
+%         en(n-2^level+1:n) = z(1:2^level); 
+%         z = [z(2^level+1:end); zeros(2^level,1)]; 
     end
-                          
+    en(n) = z(1);
+    z = [z(2:end); 0];                     
 end
 
 S.coeffs = w;

@@ -4,12 +4,12 @@
 
 addpath '../../../../Common';             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 256; % length of first order volterra kernel
-M2 = 32; % length of second order volterra kernel
+M1 = 1024; % length of first order volterra kernel
+M2 = 128; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 gains = [1 1];
@@ -24,21 +24,30 @@ gains = [1 1];
 
 %% Random Vector 
 rng('default'); % For reproducibility
-% ker1 = rand(M1,1) - abs(rand(1));
-% ker2 = diag(rand(M2,1) - abs(rand(1)));
+% ker1 = rand(M1,1) - rand(1);
+% shift = 0;      
+% ker2 = diag(rand(M2-shift,1)- rand(1) , shift); 
+% 
+% N = 5; %diagonals number, beyond the main one
+% for i = 1:N
+%     d = diag(ones(M2-i,1),i);
+%     ker2(d(:,:)==1) = rand(M2-i, 1) - rand(1);
+% end    
+
+% d = eye(M2); ker2(d(:,:)==1) = rand(M2,1)- rand(1) ;     % instert principal diagonal
 
 %% Simulated Kernel - random
-ker1 = rand(M1,1) - abs(rand(1));
-ker2 = second_order_kernel(M2);
+% ker1 = rand(M1,1) - 0.5;
+% ker2 = second_order_kernel(M2);
 
 %% Simulated kernel - from h1 h2
-% b1 = load('h1.dat');
-% b1 = b1(1:M1);
-% ker1 = b1;
-% 
-% b2 = load('h2.dat');
-% b2 = b2(1:M2);
-% ker2 = second_order_kernel(b2);
+b1 = load('h1.dat');
+b1 = b1(1:M1);
+ker1 = b1;
+
+b2 = load('h2.dat');
+b2 = b2(1:M2);
+ker2 = second_order_kernel(b2);
 
 
 
@@ -86,12 +95,10 @@ grid on;
 
 
 %% Adaptive filter parameters
-mu = [0.1, 0.1];                 % Step sizes for different kernels 
+mu = [0.1, 0.01];                 % Step sizes for different kernels 
 
-level = [2];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db4';               % Set wavelet type for different kernels
-DWT_flag = 0; 
-Q = 0; 
+level = [1];                  % Levels of Wavelet decomposition for different kernels
+filters = 'db1';               % Set wavelet type for different kernels
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -100,7 +107,7 @@ iter = 1.0*80000;                % Number of iterations
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
-[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
 % nonlinear model 
@@ -108,10 +115,10 @@ fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
 S = Volterra_Init(NL_system.M, mu, level, filters); 
 % S = MWSAFinit(M,mu,level,filters,Q);
 
-[en, S] = Volterra_2ord_adapt(un, dn, S);     
-% [en, S] = Volterra_2ord_adapt_matrix(un, dn, S);   
-% [en, S] = Volterra_2ord_adapt_v2(un, dn, S);  
-    
+% [en, S] = Volterra_2ord_adapt(un, dn, S);     
+% [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
+[en, S] = Volterra_2ord_adapt_v2(un, dn, S, 20);  
+
 
 err_sqr = en.^2;
     
@@ -126,16 +133,13 @@ ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
-
-
-% % linear model
+% %% linear model
 % 
-% M=256; 
-% level =2; 
-% filters = 'db2';
-% mu = 0.1;
+% fprintf('-----------------------------------------------------------\n');
+% fprintf('LINEAR MODEL\n');
 % 
-% S = SWAFinit(M, mu, level, filters); 
+% 
+% S = SWAFinit(M1, mu(1), level(1), filters); 
 % [en, S] = MWSAFadapt(un, dn, S); 
 % 
 % err_sqr = en.^2;
@@ -157,59 +161,3 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 % xlabel('Number of iterations (\times 1024 input samples)'); 
 % ylabel('Misalignment (dB)');
 % grid on;
-
-
-% %% time domain parameters
-% fs = 512; % samples per sec
-% freq = 100; % frequency
-% dt = 1/fs; 
-% 
-% %% impulse response
-% delta = [1; zeros(fs-2-1,1)];
-% figure; 
-% subplot(2,1,1)
-% stem(delta);
-% title('Input Signal'); 
-% % axis([0 10 -1.5 1.5])
-% out_resp = SWAFtest_WAVPACK_v2(delta, S, Ovr); 
-% subplot(2,1,2)
-% stem(out_resp);
-% title('Output Signal-Estimated System vs True');
-% hold on; 
-% real_resp = filter(b, 1, delta);
-% stem(real_resp); 
-% % axis([0 2*M -1.5 1.5])
-% 
-% %% sine test signal 
-% amplitude = 1; 
-% leng = 1;
-% input_sine = amplitude*sin(2*pi*freq*(0:dt:leng-dt));
-% 
-% figure; 
-% subplot(2,2,1)
-% plot(input_sine);
-% title('Input Signal'); 
-% out_sine = SWAFtest_WAVPACK_v2(input_sine, S, Ovr); 
-% subplot(2,2,2)
-% plot(out_sine);
-% title('Output Signal - Estimated System vs True');
-% hold on; 
-% real_sys = filter(b,1,input_sine);
-% plot(real_sys); legend('Estim', 'True');
-% 
-% %% FFT 
-% N = 2*fs;
-% faxis = linspace(-fs/2,fs/2,N);
-% 
-% subplot(2, 2, 3);
-% fft_true = abs(fft(input_sine, N)/N);
-% plot(faxis, fftshift(fft_true)); 
-% xlabel('Frequency');
-% 
-% subplot(2, 2, 4);
-% fft_out_est = abs(fft(out_sine, N)/N);
-% plot(faxis, fftshift(fft_out_est)); 
-% xlabel('Frequency');
-% hold on; 
-% fft_out_true = abs(fft(real_sys,N)/N);
-% plot(faxis, fftshift(fft_out_true));

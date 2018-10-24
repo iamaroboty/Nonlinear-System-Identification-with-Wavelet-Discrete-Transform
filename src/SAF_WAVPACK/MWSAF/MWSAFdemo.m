@@ -8,9 +8,9 @@ clear all;
 
 % Adaptive filter parameters
 mu = 0.3;                      % Step size
-M = 1024;                       % Length of unknown system response
-level = 1;                     % Levels of Wavelet decomposition
-filters = 'db22';               % Set wavelet type
+M = 64;                       % Length of unknown system response
+level = 2;                     % Levels of Wavelet decomposition
+filters = 'db4';               % Set wavelet type
 Q =1;   %useless
 DWT_flag = 0;
 
