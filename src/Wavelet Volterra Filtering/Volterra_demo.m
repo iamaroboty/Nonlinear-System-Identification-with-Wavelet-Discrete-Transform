@@ -56,57 +56,27 @@ NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 % NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 
 %% Plot 2-D kernel
-figure; 
-subplot(221);   %linear time
-stem(NL_system.Responses{1});
-ylabel('Linear Kernel (Time)');
-xlabel('Sample (N)');
-grid on;
-
-subplot(222);   % linear freq
-n_points = 1024;
-w = linspace(-1,1, n_points);
-K1 = fft(NL_system.Responses{1}, n_points);
-plot(w, 20*log10(fftshift(abs(K1))));
-xlabel('Normalized Frequency (\times\pi rad/sample)');
-ylabel('Linear Kernel - Power (dB)');
-grid on;
-
-sub3 = subplot(223);   % quadratic time
-surf(NL_system.Responses{2});
-ylabel('Sample (N)');
-xlabel('Sample (N)');
-view([0 90]);
-colormap(sub3, parula);
-colorbar
-grid on;
-
-sub4 = subplot(224);   % quadratic freq
-title('Quadratic Kernel (Frequency)');
-K2 = fft2(NL_system.Responses{2}, n_points, n_points);
-surf(w, w, 20*log10(fftshift((abs(K2)))), 'LineStyle', 'none');
-zlabel('Power (dB)');
-ylabel('Normalized Frequency (\times\pi rad/sample)');
-xlabel('Normalized Frequency (\times\pi rad/sample)');
-view([0 90]);
-colormap(sub4, jet);
-colorbar
-grid on;
+kernel_plot(NL_system.Responses);
 
 
 %% Adaptive filter parameters
 mu = [0.1, 0.1];                 % Step sizes for different kernels 
 
+<<<<<<< HEAD
 level = [4];                  % Levels of Wavelet decomposition for different kernels
 filters = 'db8';               % Set wavelet type for different kernels
+=======
+level = 2;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db2';               % Set wavelet type for different kernels
+>>>>>>> 56c48c4af279c0cad4cb7aa12189e5d5bb337f62
 
 % Run parameters
-iter = 2.0*80000;                % Number of iterations
+iter = 1.0*80000;                % Number of iterations
 
 %%
 tic;
 % Adaptation process
-fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
+fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, sprintf('%f ', mu));
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
@@ -124,7 +94,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 
 figure;         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'WavTerra');
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'Wavleterra');
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
@@ -132,7 +102,7 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
 %% Fullband Volterra NLMS
-fprintf('-------------------------------------------------------------\n');
+fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 mu = [0.3, 0.1];
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
@@ -153,31 +123,24 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE_full(end-2048:end))))
 legend('show');
 
 
-% %% linear model
-% 
-% fprintf('-----------------------------------------------------------\n');
-% fprintf('LINEAR MODEL\n');
-% 
-% 
-% S = SWAFinit(M1, mu(1), level(1), filters); 
-% [en, S] = MWSAFadapt(un, dn, S); 
-% 
-% err_sqr = en.^2;
-%     
-% fprintf('Total time = %.3f mins \n',toc/60);
-% 
-% figure;         % Plot MSE
-% q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-% hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
-% axis([0 iter/1024 -60 10]);
-% xlabel('Number of iterations (\times 1024 input samples)'); 
-% ylabel('Mean-square error (with delay)'); grid on;
-% fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
+%% linear model
+fprintf('--------------------------------------------------------------------\n');
+fprintf('LINEAR MODEL\n');
+mu = 0.05;
+level = 2;
+filters = 'db4';
 
+Slin = SWAFinit(M1, mu, level, filters); 
+[en, Slin] = MWSAFadapt(un, dn, Slin); 
 
+err_sqr_lin = en.^2;
+    
+fprintf('Total time = %.3f mins \n',toc/60);
 
-% figure;                          % Plot misalignment
-% hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
-% xlabel('Number of iterations (\times 1024 input samples)'); 
-% ylabel('Misalignment (dB)');
-% grid on;
+% Plot MSE
+q = 0.99; MSE_lin = filter((1-q),[1 -q],err_sqr_lin);
+hold on; plot((0:length(MSE_lin)-1)/1024,10*log10(MSE_lin), 'DisplayName', 'LWSAF');
+axis([0 iter/1024 -60 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Mean-square error (with delay)'); grid on;
+fprintf('MSE_lin = %.2f dB\n', mean(10*log10(MSE_lin(end-2048:end))))
