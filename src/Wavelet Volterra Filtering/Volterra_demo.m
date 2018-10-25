@@ -40,6 +40,7 @@ rng('default'); % For reproducibility
 % ker1 = rand(M1,1) - 0.5;
 % ker2 = second_order_kernel(M2);
 
+
 %% Simulated kernel - from h1 h2
 b1 = load('h1.dat');
 b1 = b1(1:M1);
@@ -63,7 +64,7 @@ kernel_plot(NL_system.Responses);
 mu = [0.1, 0.1];                 %Step sizes for different kernels 
 
 level = 4;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db2';               % Set wavelet type for different kernels
+filters = 'db4';               % Set wavelet type for different kernels
 
 
 % Run parameters
@@ -72,7 +73,7 @@ iter = 1.0*80000;            % Number of iterations
 %%
 % Adaptation process
 disp('Creating desired and input signals. . .');
-[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
 %% Nonlinear model 
@@ -110,8 +111,8 @@ mu = [0.1, 0.1];
 tic;
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
-% [en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);  
-[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
+[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);  
+% [en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
 
 err_sqr_full = en.^2;
     

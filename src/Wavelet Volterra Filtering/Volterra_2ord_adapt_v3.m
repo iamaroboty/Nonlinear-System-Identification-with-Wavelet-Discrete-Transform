@@ -1,4 +1,4 @@
-function [en,S] = Volterra_2ord_adapt_v2(un,dn,S,C)
+function [en,S] = Volterra_2ord_adapt_v3(un,dn,S,C)
 % Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
 % 
 % Arguments:
@@ -92,12 +92,11 @@ for n = 1:ITER
             
             norm = norm + sum(U2_tot{i}(1:size(w2{i},1),:).*U2_tot{i}(1:size(w2{i},1),:));
         end
-        norm = norm + sum(U1_tot.*U1_tot);
         
         eD = dD - U1_tot'*w1 - e2;                         % Error estimation
         
         if n >= AdaptStart
-            w1 = w1 + U1_tot*(eD./(norm+alpha)')*mu(1); % Tap-weight adaptation
+            w1 = w1 + U1_tot*(eD./(sum(U1_tot.*U1_tot)+alpha)')*mu(1); % Tap-weight adaptation
             for i= 1:C
                 w2{i} = w2{i} + U2_tot{i}(1:size(w2{i},1),:)*(eD./(norm +alpha)')*mu(2);
             end
