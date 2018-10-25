@@ -1,4 +1,4 @@
-function [en,S] = Volterra_NLMS_adapt_2(un,dn,S,C)
+function [en,S] = Volterra_NLMS_adapt_mfilters(un,dn,S,C)
 % Fullband Volterra filtering adapt, 2nd order              
 % 
 % Arguments:

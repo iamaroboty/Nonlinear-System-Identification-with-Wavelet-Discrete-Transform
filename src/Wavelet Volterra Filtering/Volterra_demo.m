@@ -64,6 +64,10 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];                 %Step sizes for different kernels 
 
+<<<<<<< HEAD
+level = 2;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db2';               % Set wavelet type for different kernels
+=======
 
 level = [3];                  % Levels of Wavelet decomposition for different kernels
 filters = 'db1';              % Set wavelet type for different kernels
@@ -71,6 +75,15 @@ filters = 'db1';              % Set wavelet type for different kernels
 level = 3;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db1';            % Set wavelet type for different kernels
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+level = 4;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db4';               % Set wavelet type for different kernels
+>>>>>>> 71f0adbf97018cf6b081622238c2e50bb8007a9d
+>>>>>>> 0e6137557dabdf3c364c4435cb01c8d995a29431
+>>>>>>> 344037903e98debedc7780d33aa1957ac179348c
 
 % Run parameters
 iter = 1.0*80000;            % Number of iterations
@@ -109,7 +122,7 @@ fprintf('FULLBAND VOLTERRA NLMS\n');
 mu = [0.1, 0.1];
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
-[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);     
+[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);     
 
 err_sqr_full = en.^2;
     
@@ -129,8 +142,8 @@ legend('show');
 fprintf('--------------------------------------------------------------------\n');
 fprintf('LINEAR MODEL\n');
 mu = 0.01;
-level = 4;
-filters = 'db4';
+level = 2;
+filters = 'db2';
 
 Slin = SWAFinit(M1, mu, level, filters); 
 [en, Slin] = MWSAFadapt(un, dn, Slin); 
