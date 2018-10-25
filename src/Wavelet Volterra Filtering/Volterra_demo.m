@@ -9,14 +9,10 @@ close all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 64; % length of second order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-<<<<<<< HEAD
-gains = [1 1];
-=======
-gains = [1 0.3];
->>>>>>> 71f0adbf97018cf6b081622238c2e50bb8007a9d
+gains = [1 0.1];
 
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 %% Just a Delta
@@ -66,23 +62,9 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];                 %Step sizes for different kernels 
 
-<<<<<<< HEAD
 level = 2;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db2';               % Set wavelet type for different kernels
-=======
 
-level = [1];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db2';              % Set wavelet type for different kernels
-
-level = 1;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db1';            % Set wavelet type for different kernels
-
-<<<<<<< HEAD
-=======
-level = 4;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db4';               % Set wavelet type for different kernels
->>>>>>> 71f0adbf97018cf6b081622238c2e50bb8007a9d
->>>>>>> 0e6137557dabdf3c364c4435cb01c8d995a29431
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations
@@ -90,7 +72,7 @@ iter = 1.0*80000;                % Number of iterations
 %%
 tic;
 % Adaptation process
-fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, sprintf('%f ', mu));
+fprintf('Wavelet type: %s, levels: %d, step size = %s \n', filters, level, sprintf('%f ', mu));
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
@@ -100,6 +82,7 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 % [en, S] = Volterra_2ord_adapt(un, dn, S);     
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
 [en, S] = Volterra_2ord_adapt_v2(un, dn, S);
+% [en, S] = Volterra_2ord_adapt_oldadapt(un, dn, S,10);
 
 
 err_sqr = en.^2;
@@ -121,7 +104,8 @@ fprintf('FULLBAND VOLTERRA NLMS\n');
 mu = [0.1, 0.1];
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
-[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);     
+% [en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);  
+[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
 
 err_sqr_full = en.^2;
     
@@ -142,9 +126,10 @@ fprintf('--------------------------------------------------------------------\n'
 fprintf('LINEAR MODEL\n');
 mu = 0.01;
 level = 2;
-filters = 'db2';
+filters = 'db4';
+M = M1;
 
-Slin = SWAFinit(M1, mu, level, filters); 
+Slin = SWAFinit(M, mu, level, filters); 
 [en, Slin] = MWSAFadapt(un, dn, Slin); 
 
 err_sqr_lin = en.^2;
