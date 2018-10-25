@@ -26,7 +26,7 @@ S.synthesis_bank = F;
 [len, ~] = size(H);               % Wavelet filter length
 
 if nargin == 3
-    C = K(2) - len;                 % Number of nonlinear channel
+    C = K(2);                 % Number of nonlinear channel
 end
 
 taplen = max(C,len);
@@ -87,8 +87,10 @@ for n = 1:ITER
         e2 = 0;
         norm = 0;
         for i = 1:C
-            e2 = e2 + U2_tot{i}'*w2{i};
-            norm = norm + sum(U2_tot{i}.*U2_tot{i});
+            
+            e2 = e2 +U2_tot{i}(1:size(w2{i},1),:)'*w2{i};
+            
+            norm = norm + sum(U2_tot{i}(1:size(w2{i},1),:).*U2_tot{i}(1:size(w2{i},1),:));
         end
         norm = norm + sum(U1_tot.*U1_tot);
         
@@ -97,7 +99,7 @@ for n = 1:ITER
         if n >= AdaptStart
             w1 = w1 + U1_tot*(eD./(norm+alpha)')*mu(1); % Tap-weight adaptation
             for i= 1:C
-                w2{i} = w2{i} + U2_tot{i}*(eD./(norm +alpha)')*mu(2);
+                w2{i} = w2{i} + U2_tot{i}(1:size(w2{i},1),:)*(eD./(norm +alpha)')*mu(2);
             end
             
         end
