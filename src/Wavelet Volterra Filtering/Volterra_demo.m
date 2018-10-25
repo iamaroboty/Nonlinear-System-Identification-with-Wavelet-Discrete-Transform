@@ -60,7 +60,7 @@ kernel_plot(NL_system.Responses);
 
 
 %% Adaptive filter parameters
-mu = [0.1, 0.01];                 % Step sizes for different kernels 
+mu = [0.1, 0.1];                 % Step sizes for different kernels 
 
 level = 4;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db4';               % Set wavelet type for different kernels
@@ -80,7 +80,7 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 
 % [en, S] = Volterra_2ord_adapt(un, dn, S);     
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
-[en, S] = Volterra_2ord_adapt_v2(un, dn, S, 10);
+[en, S] = Volterra_2ord_adapt_v2(un, dn, S);
 
 
 err_sqr = en.^2;
