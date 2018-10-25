@@ -107,7 +107,7 @@ C=1;
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40);
 
-[en, Sfull] = Volterra_NLMS_adapt_2(un, dn, Sfull, C);     
+[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull, C);     
 
 err_sqr_full = en.^2;
     
