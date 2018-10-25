@@ -9,7 +9,7 @@ close all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 8; % length of second order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 gains = [1 1];
@@ -101,13 +101,13 @@ fprintf('FULLBAND VOLTERRA NLMS\n');
 % Run parameters
 iter = 2.0*80000;                % Number of iterations
 mu = [0.1, 0.1];
-C=5;
+%C=5;
 
 
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40);
 
-[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull, C);     
+[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);     
 
 err_sqr_full = en.^2;
     
