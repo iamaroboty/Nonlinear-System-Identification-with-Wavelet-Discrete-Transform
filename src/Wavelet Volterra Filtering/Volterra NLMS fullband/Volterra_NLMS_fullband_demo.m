@@ -101,7 +101,7 @@ fprintf('FULLBAND VOLTERRA NLMS\n');
 % Run parameters
 iter = 2.0*80000;                % Number of iterations
 mu = [0.1, 0.1];
-C=1;
+C=5;
 
 
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
