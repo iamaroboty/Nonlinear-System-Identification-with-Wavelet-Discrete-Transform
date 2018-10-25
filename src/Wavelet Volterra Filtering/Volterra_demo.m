@@ -12,7 +12,7 @@ M1 = 256; % length of first order volterra kernel
 M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-gains = [1 0.5];
+gains = [1 1];
 
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 %% Just a Delta
@@ -60,14 +60,14 @@ kernel_plot(NL_system.Responses);
 
 
 %% Adaptive filter parameters
-mu = [0.1, 0.1];                 % Step sizes for different kernels 
+mu = [0.1, 0.1];                 %Step sizes for different kernels 
 
 
-level = [4];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db1';               % Set wavelet type for different kernels
+level = [1];                  % Levels of Wavelet decomposition for different kernels
+filters = 'db2';              % Set wavelet type for different kernels
 
-level = 2;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db2';               % Set wavelet type for different kernels
+level = 1;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db1';            % Set wavelet type for different kernels
 
 
 % Run parameters
@@ -104,7 +104,7 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 %% Fullband Volterra NLMS
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
-mu = [0.3, 0.1];
+mu = [0.1, 0.1];
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
 [en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);     
