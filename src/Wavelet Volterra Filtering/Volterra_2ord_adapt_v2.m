@@ -90,11 +90,12 @@ for n = 1:ITER
             e2 = e2 + U2_tot{i}'*w2{i};
             norm = norm + sum(U2_tot{i}.*U2_tot{i});
         end
+        norm = norm + sum(U1_tot.*U1_tot);
         
         eD = dD - U1_tot'*w1 - e2;                         % Error estimation
         
         if n >= AdaptStart
-            w1 = w1 + U1_tot*(eD./(sum(U1_tot.*U1_tot)+alpha)')*mu(1); % Tap-weight adaptation
+            w1 = w1 + U1_tot*(eD./(norm+alpha)')*mu(1); % Tap-weight adaptation
             for i= 1:C
                 w2{i} = w2{i} + U2_tot{i}*(eD./(norm +alpha)')*mu(2);
             end

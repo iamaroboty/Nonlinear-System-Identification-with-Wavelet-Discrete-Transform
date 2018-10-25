@@ -62,13 +62,13 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];                 % Step sizes for different kernels 
 
-<<<<<<< HEAD
+
 level = [4];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db8';               % Set wavelet type for different kernels
-=======
+filters = 'db1';               % Set wavelet type for different kernels
+
 level = 2;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db2';               % Set wavelet type for different kernels
->>>>>>> 56c48c4af279c0cad4cb7aa12189e5d5bb337f62
+
 
 % Run parameters
 iter = 1.0*80000;                % Number of iterations

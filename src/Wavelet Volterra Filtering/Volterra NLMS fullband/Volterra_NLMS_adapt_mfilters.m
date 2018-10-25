@@ -49,12 +49,13 @@ for n = 1:ITER
         sum = sum + w2{i}'*u2{i};
         norm = norm + u2{i}'*u2{i};
         
-    end     
+    end  
+    norm = norm + u'*u;
     
     en(n) = dn(n) - w1'*u(1:M(1)) - sum;
     
     if n >= AdaptStart
-        w1 = (1-mu(1)*leak)*w1 + (mu(1)*en(n)/(u'*u + alpha))*u; 
+        w1 = (1-mu(1)*leak)*w1 + (mu(1)*en(n)/(norm + alpha))*u; 
     for i = 1:C
         w2{i} = (1-mu(2)*leak)*w2{i} + (mu(2)*en(n)/(norm + alpha))*u2{i}; 
     end
