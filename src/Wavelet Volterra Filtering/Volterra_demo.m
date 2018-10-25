@@ -62,7 +62,7 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];                 %Step sizes for different kernels 
 
-level = 2;                  % Levels of Wavelet decomposition for different kernels
+level = 4;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db2';               % Set wavelet type for different kernels
 
 
@@ -71,14 +71,14 @@ iter = 1.0*80000;            % Number of iterations
 
 %%
 % Adaptation process
-disp('Creating desired and input signals...');
+disp('Creating desired and input signals. . .');
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
 %% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
-fprintf('Wavleterra\n');
-fprintf('Wavelet type: %s, levels: %d, step size = %s \n', filters, level, sprintf('%f ', mu));
+fprintf('WAVTERRA\n');
+fprintf('Wavelet type: %s, levels: %d, step size = %s \n', filters, level, sprintf('%s ', mu));
 
 tic;
 S = Volterra_Init(NL_system.M, mu, level, filters); 
@@ -104,7 +104,7 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 %% Fullband Volterra NLMS
 fprintf('--------------------------------------------------------------------\n');
-fprintf('FULLBAND VOLTERRA NLMS\n');
+fprintf('FULLBAND NLMS\n');
 mu = [0.1, 0.1];
 
 tic;
@@ -129,10 +129,10 @@ legend('show');
 
 %% linear model
 fprintf('--------------------------------------------------------------------\n');
-fprintf('LINEAR MODEL\n');
-mu = 0.01;
-level = 2;
-filters = 'db4';
+fprintf('LINEAR WMSAF\n');
+mu = 0.1;
+level = 4;
+filters = 'db2';
 M = M1;
 fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', filters, level, mu, M);
 
