@@ -95,10 +95,10 @@ grid on;
 
 
 %% Adaptive filter parameters
-mu = [0.1, 0.01];                 % Step sizes for different kernels 
+mu = [0.1, 0.1];                 % Step sizes for different kernels 
 
-level = [2];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db2';               % Set wavelet type for different kernels
+level = [4];                  % Levels of Wavelet decomposition for different kernels
+filters = 'db8';               % Set wavelet type for different kernels
 
 % Run parameters
 iter = 2.0*80000;                % Number of iterations
@@ -115,7 +115,7 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 
 % [en, S] = Volterra_2ord_adapt(un, dn, S);     
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
-[en, S] = Volterra_2ord_adapt_v2(un, dn, S, 10);
+[en, S] = Volterra_2ord_adapt_v2(un, dn, S);
 
 
 err_sqr = en.^2;
@@ -137,7 +137,7 @@ fprintf('FULLBAND VOLTERRA NLMS\n');
 mu = [0.3, 0.1];
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
-[en, Sfull] = Volterra_NLMS_adapt_2(un, dn, Sfull);     
+[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);     
 
 err_sqr_full = en.^2;
     
