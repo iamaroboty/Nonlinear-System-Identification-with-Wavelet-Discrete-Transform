@@ -137,7 +137,7 @@ fprintf('FULLBAND VOLTERRA NLMS\n');
 mu = [0.3, 0.1];
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
-[en, Sfull] = Volterra_NLMS_adapt_2(un, dn, Sfull);     
+[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);     
 
 err_sqr_full = en.^2;
     
