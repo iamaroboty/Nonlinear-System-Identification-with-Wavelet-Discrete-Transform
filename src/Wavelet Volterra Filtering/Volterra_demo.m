@@ -9,14 +9,12 @@ close all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 64; % length of second order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-<<<<<<< HEAD
+
 gains = [1 1];
-=======
-gains = [1 0.3];
->>>>>>> 71f0adbf97018cf6b081622238c2e50bb8007a9d
+
 
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 %% Just a Delta
@@ -67,20 +65,15 @@ kernel_plot(NL_system.Responses);
 mu = [0.1, 0.1];                 %Step sizes for different kernels 
 
 
-level = [1];                  % Levels of Wavelet decomposition for different kernels
-filters = 'db2';              % Set wavelet type for different kernels
+level = [3];                  % Levels of Wavelet decomposition for different kernels
+filters = 'db1';              % Set wavelet type for different kernels
 
-level = 1;                  % Levels of Wavelet decomposition for different kernels
+level = 3;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db1';            % Set wavelet type for different kernels
 
-<<<<<<< HEAD
-=======
-level = 4;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db4';               % Set wavelet type for different kernels
->>>>>>> 71f0adbf97018cf6b081622238c2e50bb8007a9d
 
 % Run parameters
-iter = 1.0*80000;                % Number of iterations
+iter = 1.0*80000;            % Number of iterations
 
 %%
 tic;
