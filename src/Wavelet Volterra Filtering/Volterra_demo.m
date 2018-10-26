@@ -2,9 +2,9 @@
 % 
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
-addpath '../../../../Common';             % Functions in Common folder
+addpath '../Common';             % Functions in Common folder
 clear all;  
-close all;
+% close all;
 
 %% Unidentified System parameters
 order = 2; 
@@ -37,7 +37,11 @@ rng('default'); % For reproducibility
 % d = eye(M2); ker2(d(:,:)==1) = rand(M2,1)- rand(1) ;     % instert principal diagonal
 
 %% Simulated Kernel - random
+<<<<<<< HEAD
+ker1 = rand(M1,1)-rand(1);
+=======
 ker1 = rand(M1,1) - 0.5;
+>>>>>>> 2746209af97220143b5bc9c62df790ae82de875c
 ker2 = second_order_kernel(M2);
 
 
@@ -49,6 +53,10 @@ ker2 = second_order_kernel(M2);
 % b2 = load('h2.dat');
 % b2 = b2(1:M2);
 % ker2 = second_order_kernel(b2);
+<<<<<<< HEAD
+
+=======
+>>>>>>> 2746209af97220143b5bc9c62df790ae82de875c
 
 
 NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
@@ -60,12 +68,19 @@ kernel_plot(NL_system.Responses);
 
 
 %% Adaptive filter parameters
+<<<<<<< HEAD
+mu = [0.5, 0.2];                 %Step sizes for different kernels 
+
+level = 4;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db8';               % Set wavelet type for different kernels
+=======
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
 
 level = 4;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db1';            % Set wavelet type for different kernels
 
+>>>>>>> 2746209af97220143b5bc9c62df790ae82de875c
 
 
 % Run parameters
@@ -75,9 +90,15 @@ iter = 1.0*80000;            % Number of iterations
 % Adaptation process
 
 disp('Creating desired and input signals. . .');
+<<<<<<< HEAD
+fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
+[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+% [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
+=======
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 
 %[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
+>>>>>>> 2746209af97220143b5bc9c62df790ae82de875c
 
 %% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
@@ -125,13 +146,18 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 %% Fullband Volterra NLMS
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
-mu = [0.1, 0.1];
+mu = [0.3, 0.3];
 
 tic;
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
+<<<<<<< HEAD
+% [en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);  
+[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
+=======
 [en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);     
 
+>>>>>>> 2746209af97220143b5bc9c62df790ae82de875c
 
 err_sqr_full = en.^2;
     
@@ -152,7 +178,7 @@ fprintf('--------------------------------------------------------------------\n'
 fprintf('LINEAR WMSAF\n');
 mu = 0.1;
 level = 4;
-filters = 'db2';
+filters = 'db8';
 M = M1;
 fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', filters, level, mu, M);
 
@@ -171,3 +197,4 @@ axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE_lin = %.2f dB\n', mean(10*log10(MSE_lin(end-2048:end))))
+fpritnf('\n');

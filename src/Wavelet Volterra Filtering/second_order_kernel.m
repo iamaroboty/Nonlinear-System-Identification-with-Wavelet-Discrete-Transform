@@ -6,7 +6,7 @@ function ker = second_order_kernel(input)
 
 if isscalar(input) == 1     % input scalar
     M = input;
-    k = rand(M,M) - 0.5;
+    k = rand(M,M)-rand(1);
     k = triu(k);
     flag = 1;
 elseif size(input,1) == size(input, 2)  % input symmetric matrix
@@ -24,13 +24,13 @@ end
 if flag == 1
     for i = 0:M-1
         d = diag(ones(M-i,1),i);
-        k(d(:,:)==1) = k(d(:,:)==1)./(i+1);
+        k(d(:,:)==1) = k(d(:,:)==1)./sqrt(i+1);
     end
 else
     for i = 0:M-1
         d = diag(ones(M-i,1),i);
         shift = floor(i*rand(1));        
-        k(d(:,:)==1) = v(shift+1:end-(i-shift))./(i+1);
+        k(d(:,:)==1) = v(shift+1:end-(i-shift))./sqrt(i+1);
     end
 end
 
