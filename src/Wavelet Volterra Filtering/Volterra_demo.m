@@ -62,14 +62,10 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
-<<<<<<< HEAD
 
 level = 4;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db1';            % Set wavelet type for different kernels
-=======
-level = 4;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db4';               % Set wavelet type for different kernels
->>>>>>> 704afc34472a499946f660df718a5a5bcc04a8f9
+
 
 
 % Run parameters
@@ -77,14 +73,11 @@ iter = 1.0*80000;            % Number of iterations
 
 %%
 % Adaptation process
-<<<<<<< HEAD
-fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, sprintf('%f ', mu));
-[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),6,40); %iter, b, seed, ARtype, SNR
-=======
+
 disp('Creating desired and input signals. . .');
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
->>>>>>> 704afc34472a499946f660df718a5a5bcc04a8f9
-% [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
+
+%[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
 %% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
@@ -96,16 +89,26 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 
 % [en, S] = Volterra_2ord_adapt(un, dn, S);     
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
-[en, S] = Volterra_2ord_adapt_v3(un, dn, S);
-<<<<<<< HEAD
-=======
-% [en, S] = Volterra_2ord_adapt_oldadapt(un, dn, S,10);
->>>>>>> 704afc34472a499946f660df718a5a5bcc04a8f9
 
+S.true = NL_system.Responses; 
+[en, misalignment, S] = Volterra_2ord_adapt_v3(un, dn, S);
+
+% [en, S] = Volterra_2ord_adapt_oldadapt(un, dn, S,10);
 
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
+
+
+%plot norm misalignment
+figure;         
+q = 0.99; nmis = filter((1-q),[1 -q],misalignment);
+hold on; plot((0:length(nmis)-1)/1024,10*log10(nmis), 'DisplayName', 'Wavleterra');
+axis([0 iter/1024 -60 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Normalized Misalignment (with delay)'); grid on;
+fprintf('NMIS = %.2f dB\n', mean(10*log10(nmis(end-2048:end))))
+
 
 figure;         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
@@ -116,6 +119,9 @@ ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
+
+
+
 %% Fullband Volterra NLMS
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
@@ -124,12 +130,8 @@ mu = [0.1, 0.1];
 tic;
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 
-<<<<<<< HEAD
 [en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);     
-=======
-[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);  
-% [en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
->>>>>>> 704afc34472a499946f660df718a5a5bcc04a8f9
+
 
 err_sqr_full = en.^2;
     

@@ -1,4 +1,4 @@
-function [en,S] = Volterra_2ord_adapt_v3(un,dn,S,C)
+function [en,misalignment,S] = Volterra_2ord_adapt_v3(un,dn,S,C)
 % Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
 % 
 % Arguments:
@@ -37,6 +37,7 @@ for i = 1:C
     u2{i} = zeros(taplen, 1);      % Nonlinear input delay line
     A2{i} = zeros(len,2^level);
     w2{i} = zeros(K(2)-i+1,1);
+    
     U2_tot{i} = zeros(K(2)-i+1,2^level); % output of analysis filters for 2nd order signal 
 end
 
@@ -57,7 +58,14 @@ en = zeros(1,ITER);               % Initialize error sequence to zero
 %  dn = un;
 %  tot_delay = (2^level - 1)*(len-1) +1 ;
 
-	
+misalignment = zeros(1,ITER); 
+norm_1kernel = sum(abs(S.true{1}).^2);
+nmis = 1; 
+for i = 1:C
+norm_tot_ker = norm_1kernel + sum(abs(diag(S.true{2}, i-1)).^2);
+end
+norm_tot_ker = norm_tot_ker^(1/2);
+
 for n = 1:ITER
     
     d = [dn(n); d(1:end-1)];                        % Update tapped-delay line of d(n)
@@ -92,19 +100,23 @@ for n = 1:ITER
             
             norm = norm + sum(U2_tot{i}(1:size(w2{i},1),:).*U2_tot{i}(1:size(w2{i},1),:));
         end
-<<<<<<< HEAD
-        %norm = norm + sum(U1_tot.*U1_tot);
-=======
->>>>>>> 704afc34472a499946f660df718a5a5bcc04a8f9
         
         eD = dD - U1_tot'*w1 - e2;                         % Error estimation
         
         if n >= AdaptStart
+             
             w1 = w1 + U1_tot*(eD./(sum(U1_tot.*U1_tot)+alpha)')*mu(1); % Tap-weight adaptation
+            nmis = sum(abs(w1-S.true{1}).^2);
+            
+            
+          
             for i= 1:C
                 w2{i} = w2{i} + U2_tot{i}(1:size(w2{i},1),:)*(eD./(norm +alpha)')*mu(2);
+                nmis = nmis + sum(abs(w2{i}-diag(S.true{2}, i-1)).^2);
+                
             end
-            
+            nmis = (nmis^(1/2))/norm_tot_ker;
+           
         end
         z = F*eD + z;                                       
 %         en(n-2^level+1:n) = z(1:2^level); 
@@ -112,8 +124,10 @@ for n = 1:ITER
     end
     en(n) = z(1);
     z = [z(2:end); 0];
+    misalignment(n) = nmis; 
                           
 end
+
 
 S.coeffs{1}=w1; 
 S.coeffs{2}=w2;
