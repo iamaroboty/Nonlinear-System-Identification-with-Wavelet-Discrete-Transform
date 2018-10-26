@@ -48,7 +48,7 @@ A1 = zeros(len,2^level);
 z = zeros(len,1);
 
 w1 = zeros(M(1),1);
-h0 = 0;
+
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
@@ -66,10 +66,14 @@ norm_tot_ker = norm_1kernel + sum(abs(diag(S.true{2}, i-1)).^2);
 end
 norm_tot_ker = norm_tot_ker^(1/2);
 
-for n = 1:ITER
-    
+
+for n = 1:ITER    
+  
     d = [dn(n); d(1:end-1)];                        % Update tapped-delay line of d(n)
     u = [un(n); u(1:end-1)];                        % Update tapped-delay line of u(n)
+    
+
+    
     A1 = [u(1:len), A1(:,1:end-1)];                 % Update buffer linear signal
     
     % Building delay line for quadratic adaptive filter

@@ -12,7 +12,7 @@ M1 = 256; % length of first order volterra kernel
 M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-gains = [1 0.1];
+gains = [1 1];
 
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 %% Just a Delta
@@ -75,9 +75,9 @@ iter = 1.0*80000;            % Number of iterations
 % Adaptation process
 
 disp('Creating desired and input signals. . .');
-[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
+%%[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 
-%[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
+[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
 %% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
@@ -95,6 +95,8 @@ S.true = NL_system.Responses;
 
 % [en, S] = Volterra_2ord_adapt_oldadapt(un, dn, S,10);
 
+
+
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
@@ -102,12 +104,12 @@ fprintf('Total time = %.3f mins \n',toc/60);
 
 %plot norm misalignment
 figure;         
-q = 0.99; nmis = filter((1-q),[1 -q],misalignment);
-hold on; plot((0:length(nmis)-1)/1024,10*log10(nmis), 'DisplayName', 'Wavleterra');
+q = 0.9; nmis = filter((1-q),[1 -q],misalignment);
+hold on; plot((0:length(nmis)-1)/1024,20*log10(nmis), 'DisplayName', 'Wavleterra');
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Normalized Misalignment (with delay)'); grid on;
-fprintf('NMIS = %.2f dB\n', mean(10*log10(nmis(end-2048:end))))
+fprintf('NMIS = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
 figure;         % Plot MSE

@@ -61,8 +61,8 @@ un = un(max_len+1:end);
 
 % Normalization of u(n) and d(n)
 
-un = un/std(dn);
-dn = dn/std(dn);
+un = (un-mean(un))/std(dn);
+dn = (dn-mean(dn))/std(dn);
 
 % Add white noise with given SNR
 
