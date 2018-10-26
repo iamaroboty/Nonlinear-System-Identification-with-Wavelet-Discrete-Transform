@@ -6,7 +6,7 @@ function ker = second_order_kernel(input)
 
 if isscalar(input) == 1     % input scalar
     M = input;
-    k = rand(M,M)-0.5;
+    k = rand(M,M) - 0.5;
     k = triu(k);
     flag = 1;
 elseif size(input,1) == size(input, 2)  % input symmetric matrix
