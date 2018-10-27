@@ -12,7 +12,7 @@ M1 = 256; % length of first order volterra kernel
 M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-gains = [1 1];
+gains = [1 0.1];
 
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 %% Just a Delta
@@ -87,13 +87,26 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 
 % [en, S] = Volterra_2ord_adapt(un, dn, S);     
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
-[en, S] = Volterra_2ord_adapt_v3(un, dn, S);
-% [en, S] = Volterra_2ord_adapt_oldadapt(un, dn, S,10);
 
+S.true = NL_system.Responses; 
+[en, misalignment, S] = Volterra_2ord_adapt_v3(un, dn, S);
+
+% [en, S] = Volterra_2ord_adapt_oldadapt(un, dn, S,10);
 
 err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
+
+
+%plot norm misalignment
+figure;         
+q = 0.99; nmis = filter((1-q),[1 -q],misalignment);
+hold on; plot((0:length(nmis)-1)/1024,10*log10(nmis), 'DisplayName', 'Wavleterra');
+axis([0 iter/1024 -60 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Normalized Misalignment (with delay)'); grid on;
+fprintf('NMIS = %.2f dB\n', mean(10*log10(nmis(end-2048:end))))
+
 
 figure;         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
@@ -102,6 +115,9 @@ axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
+
+
+
 
 
 %% Fullband Volterra NLMS
