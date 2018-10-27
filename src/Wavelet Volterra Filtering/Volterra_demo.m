@@ -75,7 +75,7 @@ iter = 1.0*80000;            % Number of iterations
 disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-% [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
+%[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
 %% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
@@ -89,7 +89,7 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
 
 S.true = NL_system.Responses; 
-[en, misalignment, S] = Volterra_2ord_adapt_v3(un, dn, S);
+[en, S] = Volterra_2ord_adapt_v3(un, dn, S);
 
 % [en, S] = Volterra_2ord_adapt_oldadapt(un, dn, S,10);
 
@@ -99,23 +99,52 @@ fprintf('Total time = %.3f mins \n',toc/60);
 
 
 %plot norm misalignment
-figure;         
-q = 0.99; nmis = filter((1-q),[1 -q],misalignment);
-hold on; plot((0:length(nmis)-1)/1024,10*log10(nmis), 'DisplayName', 'Wavleterra');
-axis([0 iter/1024 -60 10]);
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Normalized Misalignment (with delay)'); grid on;
-fprintf('NMIS = %.2f dB\n', mean(10*log10(nmis(end-2048:end))))
+% figure;         
+% q = 0.99; nmis = filter((1-q),[1 -q],misalignment);
+% hold on; plot((0:length(nmis)-1)/1024,10*log10(nmis), 'DisplayName', 'Wavleterra');
+% axis([0 iter/1024 -60 10]);
+% xlabel('Number of iterations (\times 1024 input samples)'); 
+% ylabel('Normalized Misalignment (with delay)'); grid on;
+% fprintf('NMIS = %.2f dB\n', mean(10*log10(nmis(end-2048:end))))
 
 
 figure;         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'Wavleterra');
-axis([0 iter/1024 -60 10]);
+axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
+% Nonlinear model 
+fprintf('--------------------------------------------------------------------\n');
+fprintf('MSAFTERRA\n');
+
+mu = [0.1, 0.1];                   % Step size (0<mu<2)
+M = [M1, M2];                    % Length of adaptive weight vector
+N = 4;                      % Number of subbands, 4
+D = N/2;                    % Decimation factor for 2x oversampling
+L = 8*N;                    % Length of analysis filters, M=2KN, 
+                            %   overlapping factor K=4
+
+
+
+disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
+
+S = MSAFTERRA_Init(M,mu,N,L);
+tic;
+[en,S] = MSAFTERRA_adapt(un,dn,S);
+err_sqr = en.^2;
+
+disp(sprintf('Total time = %.3f mins',toc/60));
+
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MSAFterra');;
+axis([0 iter/1024 -90 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Mean-square error (with delay)');
+grid on;
+fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
 
@@ -138,7 +167,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % Plot MSE
 q = 0.99; MSE_full = filter((1-q),[1 -q],err_sqr_full);
 hold on; plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', 'FB NLMS');
-axis([0 iter/1024 -60 10]);
+axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE_full(end-2048:end))))
@@ -165,7 +194,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % Plot MSE
 q = 0.99; MSE_lin = filter((1-q),[1 -q],err_sqr_lin);
 hold on; plot((0:length(MSE_lin)-1)/1024,10*log10(MSE_lin), 'DisplayName', 'LWSAF');
-axis([0 iter/1024 -60 10]);
+axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE_lin = %.2f dB\n', mean(10*log10(MSE_lin(end-2048:end))))

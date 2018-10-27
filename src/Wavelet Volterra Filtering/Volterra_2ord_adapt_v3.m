@@ -1,4 +1,4 @@
-function [en,misalignment,S] = Volterra_2ord_adapt_v3(un,dn,S,C)
+function [en,S] = Volterra_2ord_adapt_v3(un,dn,S,C)
 % Wavelet-Decomposition Subband Adaptive Filter (WAF)                 
 % 
 % Arguments:
