@@ -49,7 +49,7 @@ for n = 1:ITER
     y = [dn(n); y(1:end-1)];  % Fullband desired response vector for band partitioning
     
     for i = 1:size(S.coeffs{2},1)
-    u2{i} = [un(n)*x(i); u2{i}(1:end-1)]; %input vectors for second order term 
+        u2{i} = [un(n)*x(i); u2{i}(1:end-1)]; %input vectors for second order term 
     end
     
     if (mod(n-1,D)==0)              % Tap-weight adaptation at lowest sampling rate
@@ -59,9 +59,9 @@ for n = 1:ITER
         ker2 = 0; 
         norm = 0; 
         for i = 1:size(S.coeffs{2},1)
-        U2{i} = [u2{i}(1:L)'*H; U2{i}(1:end-1,:)];  
-        ker2 = ker2 + sum(U2{i}(1:size(w2{i},1),:).*w2{i});
-        norm = norm + sum(U2{i}(1:size(w2{i},1),:).*conj(U2{i}(1:size(w2{i},1),:)));
+            U2{i} = [u2{i}(1:L)'*H; U2{i}(1:end-1,:)];  
+            ker2 = ker2 + sum(U2{i}(1:size(w2{i},1),:).*w2{i});
+            norm = norm + sum(U2{i}(1:size(w2{i},1),:).*conj(U2{i}(1:size(w2{i},1),:)));
         end
         
         dD = y'*H;                  % Row vector, each element is decimated desired signal

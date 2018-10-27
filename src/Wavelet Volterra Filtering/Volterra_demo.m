@@ -12,7 +12,7 @@ M1 = 256; % length of first order volterra kernel
 M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-gains = [1 0.1];
+gains = [1 1];
 
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 %% Just a Delta
@@ -51,7 +51,6 @@ ker2 = second_order_kernel(M2);
 % ker2 = second_order_kernel(b2);
 
 
-
 NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 
 % NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
@@ -61,10 +60,10 @@ kernel_plot(NL_system.Responses);
 
 
 %% Adaptive filter parameters
-mu = [0.5, 0.2];                 %Step sizes for different kernels 
+mu = [0.1, 0.1];            %Step sizes for different kernels 
 
-level = 4;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db8';               % Set wavelet type for different kernels
+level = 2;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db2';            % Set wavelet type for different kernels
 
 
 % Run parameters
@@ -72,9 +71,10 @@ iter = 1.0*80000;            % Number of iterations
 
 %%
 % Adaptation process
+
 disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
-[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'SpeechSample.mat');
 
 %% Nonlinear model 
@@ -123,7 +123,7 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 %% Fullband Volterra NLMS
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
-mu = [0.3, 0.3];
+mu = [0.1, 0.1];
 
 tic;
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
@@ -149,8 +149,8 @@ legend('show');
 fprintf('--------------------------------------------------------------------\n');
 fprintf('LINEAR WMSAF\n');
 mu = 0.1;
-level = 4;
-filters = 'db8';
+level = 2;
+filters = 'db2';
 M = M1;
 fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', filters, level, mu, M);
 
@@ -169,4 +169,4 @@ axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE_lin = %.2f dB\n', mean(10*log10(MSE_lin(end-2048:end))))
-fpritnf('\n');
+

@@ -58,13 +58,13 @@ en = zeros(1,ITER);               % Initialize error sequence to zero
 %  dn = un;
 %  tot_delay = (2^level - 1)*(len-1) +1 ;
 
-misalignment = zeros(1,ITER); 
-norm_1kernel = sum(abs(S.true{1}).^2);
-nmis = 1; 
-for i = 1:C
-norm_tot_ker = norm_1kernel + sum(abs(diag(S.true{2}, i-1)).^2);
-end
-norm_tot_ker = norm_tot_ker^(1/2);
+% misalignment = zeros(1,ITER); 
+% norm_1kernel = sum(abs(S.true{1}).^2);
+% nmis = 1; 
+% for i = 1:C
+% norm_tot_ker = norm_1kernel + sum(abs(diag(S.true{2}, i-1)).^2);
+% end
+% norm_tot_ker = norm_tot_ker^(1/2);
 
 
 for n = 1:ITER    
@@ -110,16 +110,16 @@ for n = 1:ITER
         if n >= AdaptStart
              
             w1 = w1 + U1_tot*(eD./(sum(U1_tot.*U1_tot)+alpha)')*mu(1); % Tap-weight adaptation
-            nmis = sum(abs(w1-S.true{1}).^2);
+%             nmis = sum(abs(w1-S.true{1}).^2);
             
             
           
             for i= 1:C
                 w2{i} = w2{i} + U2_tot{i}(1:size(w2{i},1),:)*(eD./(norm +alpha)')*mu(2);
-                nmis = nmis + sum(abs(w2{i}-diag(S.true{2}, i-1)).^2);
+%                 nmis = nmis + sum(abs(w2{i}-diag(S.true{2}, i-1)).^2);
                 
             end
-            nmis = (nmis^(1/2))/norm_tot_ker;
+%             nmis = (nmis^(1/2))/norm_tot_ker;
            
         end
         z = F*eD + z;                                       
@@ -128,7 +128,7 @@ for n = 1:ITER
     end
     en(n) = z(1);
     z = [z(2:end); 0];
-    misalignment(n) = nmis; 
+%     misalignment(n) = nmis; 
                           
 end
 

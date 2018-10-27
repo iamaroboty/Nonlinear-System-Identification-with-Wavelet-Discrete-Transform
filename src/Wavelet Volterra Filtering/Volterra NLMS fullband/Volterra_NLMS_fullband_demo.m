@@ -4,7 +4,7 @@
 
 addpath '../../../../Common';             % Functions in Common folder
 clear all;  
-close all;
+% close all;
 
 %% Unidentified System parameters
 order = 2; 
@@ -12,7 +12,7 @@ M1 = 256; % length of first order volterra kernel
 M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-gains = [1 1];
+gains = [1 2];
 
 %NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 %% Just a Delta
@@ -28,7 +28,7 @@ rng('default'); % For reproducibility
 % shift = 0;      
 % ker2 = diag(rand(M2-shift,1)- rand(1) , shift); 
 % 
-% N = 5; %diagonals number, beyond the main one
+% N = 0; %diagonals number, beyond the main one
 % for i = 1:N
 %     d = diag(ones(M2-i,1),i);
 %     ker2(d(:,:)==1) = rand(M2-i, 1) - rand(1);
@@ -37,17 +37,17 @@ rng('default'); % For reproducibility
 % d = eye(M2); ker2(d(:,:)==1) = rand(M2,1)- rand(1) ;     % instert principal diagonal
 
 %% Simulated Kernel - random
-% ker1 = rand(M1,1) - 0.5;
-% ker2 = second_order_kernel(M2);
+ker1 = rand(M1,1) - rand(1);
+ker2 = second_order_kernel(M2);
 
 %% Simulated kernel - from h1 h2
-b1 = load('h1.dat');
-b1 = b1(1:M1);
-ker1 = b1;
-
-b2 = load('h2.dat');
-b2 = b2(1:M2);
-ker2 = second_order_kernel(b2);
+% b1 = load('h1.dat');
+% b1 = b1(1:M1);
+% ker1 = b1;
+% 
+% b2 = load('h2.dat');
+% b2 = b2(1:M2);
+% ker2 = second_order_kernel(b2);
 
 
 
@@ -56,58 +56,21 @@ NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 % NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 
 %% Plot 2-D kernel
-figure; 
-subplot(221);   %linear time
-stem(NL_system.Responses{1});
-ylabel('Linear Kernel (Time)');
-xlabel('Sample (N)');
-grid on;
-
-subplot(222);   % linear freq
-n_points = 1024;
-w = linspace(-1,1, n_points);
-K1 = fft(NL_system.Responses{1}, n_points);
-plot(w, 20*log10(fftshift(abs(K1))));
-xlabel('Normalized Frequency (\times\pi rad/sample)');
-ylabel('Linear Kernel - Power (dB)');
-grid on;
-
-sub3 = subplot(223);   % quadratic time
-surf(NL_system.Responses{2});
-ylabel('Sample (N)');
-xlabel('Sample (N)');
-view([0 90]);
-colormap(sub3, parula);
-colorbar
-grid on;
-
-sub4 = subplot(224);   % quadratic freq
-title('Quadratic Kernel (Frequency)');
-K2 = fft2(NL_system.Responses{2}, n_points, n_points);
-surf(w, w, 20*log10(fftshift((abs(K2)))), 'LineStyle', 'none');
-zlabel('Power (dB)');
-ylabel('Normalized Frequency (\times\pi rad/sample)');
-xlabel('Normalized Frequency (\times\pi rad/sample)');
-view([0 90]);
-colormap(sub4, jet);
-colorbar
-grid on;
-
+kernel_plot(NL_system.Responses);
 
 %% Fullband Volterra NLMS
 fprintf('-------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 
 % Run parameters
-iter = 2.0*80000;                % Number of iterations
+iter = 1.0*80000;                % Number of iterations
 mu = [0.1, 0.1];
 %C=5;
-
 
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40);
 
-[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);     
+[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);     
 
 err_sqr_full = en.^2;
     
