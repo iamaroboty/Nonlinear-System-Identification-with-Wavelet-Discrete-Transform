@@ -9,7 +9,7 @@ clear all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 32; % length of second order volterra kernel
+M2 = 8; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 gains = [1 1];
@@ -53,6 +53,7 @@ ker2 = second_order_kernel(M2);
 
 NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 
+
 % NL_system = create_volterra_sys(order, M, gains, 'nlsys1'); 
 
 %% Plot 2-D kernel
@@ -62,8 +63,8 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
-level = 2;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db2';            % Set wavelet type for different kernels
+level = 3;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db1';            % Set wavelet type for different kernels
 
 
 % Run parameters
@@ -77,7 +78,10 @@ fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
 %[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
 [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard.mat');
 
-%% Nonlinear model 
+
+%% WAVTERRA
+
+% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
 fprintf('WAVTERRA\n');
 fprintf('Wavelet type: %s, levels: %d, step size = %s \n', filters, level, sprintf('%s ', mu));
@@ -108,6 +112,8 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % fprintf('NMIS = %.2f dB\n', mean(10*log10(nmis(end-2048:end))))
 
 
+
+
 figure;         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'Wavleterra');
@@ -115,6 +121,10 @@ axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
+fprintf('ERLE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 
+
+
+%% MSAFTERRA
 
 % Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
@@ -122,7 +132,7 @@ fprintf('MSAFTERRA\n');
 
 mu = [0.1, 0.1];                   % Step size (0<mu<2)
 M = [M1, M2];                    % Length of adaptive weight vector
-N = 4;                      % Number of subbands, 4
+N = 8;                      % Number of subbands, 4
 D = N/2;                    % Decimation factor for 2x oversampling
 L = 8*N;                    % Length of analysis filters, M=2KN, 
                             %   overlapping factor K=4
@@ -145,33 +155,9 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)');
 grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
+fprintf('ERLE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 
 
-
-
-
-%% Fullband Volterra NLMS
-fprintf('--------------------------------------------------------------------\n');
-fprintf('FULLBAND NLMS\n');
-mu = [0.1, 0.1];
-
-tic;
-Sfull = Volterra_NLMS_init(NL_system.M, mu); 
-
-% [en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull);  
-[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
-
-err_sqr_full = en.^2;
-    
-fprintf('Total time = %.3f mins \n',toc/60);
-
-% Plot MSE
-q = 0.99; MSE_full = filter((1-q),[1 -q],err_sqr_full);
-hold on; plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', 'FB NLMS');
-axis([0 iter/1024 -90 10]);
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Mean-square error (with delay)'); grid on;
-fprintf('MSE = %.2f dB\n', mean(10*log10(MSE_full(end-2048:end))))
-legend('show');
+%% SAFTERRA
 
 % Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
@@ -179,7 +165,7 @@ fprintf('SAFTERRA\n');
 
 mu = [0.1, 0.1];                   % Step size (0<mu<2)
 M = [M1, M2];                    % Length of adaptive weight vector
-N = 4;                      % Number of subbands, 4
+N = 8;                      % Number of subbands, 4
 D = N/2;                    % Decimation factor for 2x oversampling
 L = 8*N;                    % Length of analysis filters, M=2KN, 
                             %   overlapping factor K=4
@@ -202,11 +188,12 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)');
 grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
-
-
+fprintf('ERLE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 
 
 
 %% Fullband Volterra NLMS
+
+
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
 mu = [0.1, 0.1];
@@ -228,6 +215,7 @@ axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE_full(end-2048:end))))
+fprintf('ERLE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 
 legend('show');
 
 
@@ -256,4 +244,4 @@ axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE_lin = %.2f dB\n', mean(10*log10(MSE_lin(end-2048:end))))
-
+fprintf('ERLE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 

@@ -22,9 +22,11 @@ else % input vector, build the kernel with it on main diagonal.
 end
 
 if flag == 1
+
     for i = 0:M-1
         d = diag(ones(M-i,1),i);
         k(d(:,:)==1) = k(d(:,:)==1)./sqrt(i+1);
+        
     end
 else
     for i = 0:M-1
@@ -35,5 +37,6 @@ else
 end
 
 ker = (k+k') - eye(M).*diag(k);
+
 end
 
