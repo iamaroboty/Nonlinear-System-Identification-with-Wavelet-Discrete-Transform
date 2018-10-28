@@ -58,6 +58,8 @@ en = zeros(1,ITER);               % Initialize error sequence to zero
 %  dn = un;
 %  tot_delay = (2^level - 1)*(len-1) +1 ;
 
+%MISALIGNMENT
+
 % misalignment = zeros(1,ITER); 
 % norm_1kernel = sum(abs(S.true{1}).^2);
 % nmis = 1; 
