@@ -68,8 +68,8 @@ nmse_n_points = 1000;
 
 disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
-%[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard.mat');
+[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+%[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard.mat');
 
 
 
@@ -100,6 +100,7 @@ q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 %MSE 
 figure(MSE_fig); 
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'Wavleterra');
+hold on; 
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
@@ -110,14 +111,14 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 NMSE_fig = figure('Name', 'NMSE'); 
 
 %NMSE
-figure(NMSE_fig); 
+figure(NMSE_fig);  
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
+hold on; 
 plot(indx, NMSE,'DisplayName', 'Wavleterra');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
 ylabel('NMSE'); grid on;
 fprintf('NMSE = %.2f dB\n', NMSE(end))
-
 
 
 %% MSAFTERRA
@@ -133,19 +134,27 @@ disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
 %MSE
+<<<<<<< HEAD
 figure(MSE_fig); 
 hold on; 
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+=======
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+
+figure(MSE_fig);  
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'MSAFTERRA');
+hold on; 
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 % NMSE
+
 figure(NMSE_fig); 
-hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
+hold on; 
 plot(indx, NMSE,'DisplayName', 'MSAFTERRA');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
@@ -166,10 +175,17 @@ disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
 % MSE 
+
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+
 figure(MSE_fig);  
+<<<<<<< HEAD
 hold on; 
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+=======
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'SAFTERRA');
+hold on; 
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
@@ -178,8 +194,8 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 % NMSE
 figure(NMSE_fig); 
-hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
+hold on; 
 plot(indx, NMSE,'DisplayName', 'SAFTERRA');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
@@ -190,28 +206,34 @@ fprintf('NMSE = %.2f dB\n', NMSE(end))
 %% Fullband Volterra NLMS
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
-mu = [0.1, 0.1];
 
 tic;
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
 [en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
 fprintf('Total time = %.3f mins \n',toc/60);
-err_sqr_full = en.^2;
+err_sqr = en.^2;
 
 %MSE
+
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+
 figure(MSE_fig);  
+<<<<<<< HEAD
 hold on; 
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+=======
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'FBAND');
+hold on; 
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 %NMSE
-figure(NMSE_fig); 
-hold on; 
+figure(NMSE_fig);  
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
+hold on;
 plot(indx, NMSE,'DisplayName', 'FBAND');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
@@ -228,13 +250,20 @@ tic;
 Slin = SWAFinit(M(1), mu(1), level, filters); 
 [en, Slin] = MWSAFadapt(un, dn, Slin); 
 fprintf('Total time = %.3f mins \n',toc/60);
-err_sqr_lin = en.^2;
+err_sqr = en.^2;
 
 %MSE
+
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+
 figure(MSE_fig);  
+plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
 hold on; 
+<<<<<<< HEAD
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 plot( (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
+=======
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
@@ -243,8 +272,8 @@ legend('show');
 
 %NMSE
 figure(NMSE_fig); 
-hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
+hold on; 
 plot(indx, NMSE,'DisplayName', 'WMSAFLIN');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
