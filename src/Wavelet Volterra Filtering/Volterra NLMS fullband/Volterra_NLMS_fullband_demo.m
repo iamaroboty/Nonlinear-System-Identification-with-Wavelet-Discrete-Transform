@@ -85,3 +85,16 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE_full(end-2048:end))))
 legend('show');
+
+% ERLE 
+n_points = 
+
+figure;
+q = 0.99; ERLE = filter((1-q),[1 -q],err_sqr_full);
+plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', 'FB NLMS');
+axis([0 iter/1024 -60 10]);
+xlabel('Number of iterations (\times 1024 input samples)'); 
+ylabel('Mean-square error (with delay)'); grid on;
+fprintf('MSE = %.2f dB\n', mean(10*log10(MSE_full(end-2048:end))))
+legend('show');
+

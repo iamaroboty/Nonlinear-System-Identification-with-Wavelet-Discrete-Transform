@@ -121,7 +121,7 @@ axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
-fprintf('ERLE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 
+fprintf('NMSE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 
 
 
 %% MSAFTERRA
