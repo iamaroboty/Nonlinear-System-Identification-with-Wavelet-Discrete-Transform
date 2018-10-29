@@ -4,7 +4,7 @@
 
 addpath '../Common';             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 
 %% Unidentified System parameters
 order = 2; 
@@ -44,7 +44,11 @@ iter = 1*80000;            % Number of iterations
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
 level = 4;                  % Levels of Wavelet decomposition for different kernels
+<<<<<<< HEAD
 filters = 'db1';            % Set wavelet type for different kernels
+=======
+filters = 'db4';            % Set wavelet type for different kernels
+>>>>>>> 046e5a65070836abdf2c7e5f9c4b313eac6859e2
 
 %%
 % FOR MSAFTERRA AND SAFTERRA: 
@@ -61,7 +65,6 @@ L = 8*N;                    % Length of analysis filters, M=2KN,
 
 %% plot parameters
 nmse_n_points = 1000; 
-
 
 %%
 % CREATE DESIRED RESPONSE 
@@ -92,8 +95,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
     
 % create figure handler for MSE
-
-MSE_fig = figure(2);         
+MSE_fig = figure('Name', 'MSE');         
 
 % plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
@@ -109,7 +111,7 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
 %create figure handler for NMSE
-NMSE_fig = figure(3); 
+NMSE_fig = figure('Name', 'NMSE'); 
 
 %NMSE
 figure(NMSE_fig);  
@@ -135,9 +137,15 @@ disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
 %MSE
+<<<<<<< HEAD
+figure(MSE_fig); 
+hold on; 
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+=======
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 
 figure(MSE_fig);  
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'MSAFTERRA');
 hold on; 
 axis([0 iter/1024 -120 10]);
@@ -174,6 +182,11 @@ err_sqr = en.^2;
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 
 figure(MSE_fig);  
+<<<<<<< HEAD
+hold on; 
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+=======
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'SAFTERRA');
 hold on; 
 axis([0 iter/1024 -120 10]);
@@ -194,8 +207,6 @@ fprintf('NMSE = %.2f dB\n', NMSE(end))
 
 
 %% Fullband Volterra NLMS
-
-
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
 
@@ -210,6 +221,11 @@ err_sqr = en.^2;
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 
 figure(MSE_fig);  
+<<<<<<< HEAD
+hold on; 
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+=======
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'FBAND');
 hold on; 
 axis([0 iter/1024 -120 10]);
@@ -246,6 +262,11 @@ q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 figure(MSE_fig);  
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
 hold on; 
+<<<<<<< HEAD
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+plot( (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
+=======
+>>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
