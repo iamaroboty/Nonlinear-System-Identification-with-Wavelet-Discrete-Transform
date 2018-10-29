@@ -50,13 +50,30 @@ xlabel('\omega (\pi)');
 M1 = 256; % length of first order volterra kernel
 M2 = 32; % length of second order volterra kernel
 
-ker1 = rand(M1,1)-rand(1);
-ker2 = second_order_kernel(M2);
+b1 = load('h1.dat');
+b1 = b1(1:M1);
+ker1 = b1;
+
+b2 = load('h2.dat');
+b2 = b2(1:M2);
+ker2 = second_order_kernel(b2);
+
+% ker1 = rand(M1,1)-rand(1);
+% ker2 = second_order_kernel(M2);
 
 NL_system.M = [M1, M2];
 NL_system.Responses = {ker1, ker2};
 
-dn = fastVMcell(un, Volterra_sys.Responses , Volterra_sys.M);
+kernel_plot(NL_system.Responses);
+
+fs = DFTpoint/2;
+freq_w = pi/4;
+freq = fs*freq_w / (2*pi);
+dt = 1/fs;
+un = 1*sin(2*pi*freq*(0:dt:5-dt));
+
+max_len= max(NL_system.M); 
+dn = fastVMcell(un, NL_system.Responses , NL_system.M);
 dn = sum(dn,1);
 
 % Adjusting starting index of signals
@@ -69,6 +86,21 @@ un = un(max_len+1:end);
 
 un = un/std(dn);
 dn = dn/std(dn);
+
+UN = fft(un, DFTpoint);
+DN = fft(dn, DFTpoint);
+
+
+figure;
+subplot(211);
+plot(w2/pi, 20*log10(abs(UN(1:DFTpoint/2)+eps)), 'DisplayName', 'Power of un');
+ylabel('Power (dB)');
+subplot(212);
+plot(w2/pi, 20*log10(abs(DN(1:DFTpoint/2)+eps)), 'DisplayName', 'Power of dn');
+ylabel('Power (dB)');
+xlabel('\omega (\pi)');
+legend('show');
+
 
 %%
 % figure;

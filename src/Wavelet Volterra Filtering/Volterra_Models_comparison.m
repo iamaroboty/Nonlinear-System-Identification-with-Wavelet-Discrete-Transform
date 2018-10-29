@@ -4,7 +4,7 @@
 
 addpath '../Common';             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 
 %% Unidentified System parameters
 order = 2; 
@@ -44,8 +44,8 @@ iter = 1*80000;            % Number of iterations
 
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
-level = 1;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db1';            % Set wavelet type for different kernels
+level = 4;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db4';            % Set wavelet type for different kernels
 
 %%
 % FOR MSAFTERRA AND SAFTERRA: 
@@ -62,7 +62,6 @@ L = 8*N;                    % Length of analysis filters, M=2KN,
 
 %% plot parameters
 nmse_n_points = 1000; 
-
 
 %%
 % CREATE DESIRED RESPONSE 
@@ -93,8 +92,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
     
 % create figure handler for MSE
-
-MSE_fig = figure(2);         
+MSE_fig = figure('Name', 'MSE');         
 
 % plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
@@ -109,7 +107,7 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
 %create figure handler for NMSE
-NMSE_fig = figure(3); 
+NMSE_fig = figure('Name', 'NMSE'); 
 
 %NMSE
 figure(NMSE_fig); 
@@ -137,6 +135,7 @@ err_sqr = en.^2;
 %MSE
 figure(MSE_fig); 
 hold on; 
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'MSAFTERRA');
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
@@ -169,6 +168,7 @@ err_sqr = en.^2;
 % MSE 
 figure(MSE_fig);  
 hold on; 
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'SAFTERRA');
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
@@ -188,8 +188,6 @@ fprintf('NMSE = %.2f dB\n', NMSE(end))
 
 
 %% Fullband Volterra NLMS
-
-
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
 mu = [0.1, 0.1];
@@ -203,6 +201,7 @@ err_sqr_full = en.^2;
 %MSE
 figure(MSE_fig);  
 hold on; 
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'FBAND');
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
@@ -234,6 +233,7 @@ err_sqr_lin = en.^2;
 %MSE
 figure(MSE_fig);  
 hold on; 
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 plot( (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
