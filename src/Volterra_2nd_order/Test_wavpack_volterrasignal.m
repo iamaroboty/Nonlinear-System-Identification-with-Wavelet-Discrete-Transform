@@ -7,6 +7,7 @@ M = 4;
 wtype = 'db2';
 t=0:0.001:10;
 un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
+% un = 1:d;
 un = un(1:d)';
 
 [low_d,high_d,low_r,high_r] = wfilters(wtype);

@@ -9,7 +9,7 @@ clear all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 8; % length of second order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 gains = [1 1];
@@ -63,12 +63,12 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
-level = 3;                  % Levels of Wavelet decomposition for different kernels
-filters = 'db1';            % Set wavelet type for different kernels
+level = 4;                  % Levels of Wavelet decomposition for different kernels
+filters = 'db4';            % Set wavelet type for different kernels
 
 
 % Run parameters
-iter = 1.5*80000;            % Number of iterations
+iter = 1*80000;            % Number of iterations
 
 %%
 % Adaptation process
@@ -224,8 +224,8 @@ legend('show');
 fprintf('--------------------------------------------------------------------\n');
 fprintf('LINEAR WMSAF\n');
 mu = 0.1;
-level = 2;
-filters = 'db2';
+level = 4;
+filters = 'db4';
 M = M1;
 fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', filters, level, mu, M);
 
