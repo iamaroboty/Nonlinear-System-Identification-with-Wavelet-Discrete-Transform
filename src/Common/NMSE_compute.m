@@ -4,6 +4,7 @@ function [ NMSE, indx ] = NMSE_compute( dn , en, n_points )
 
 lendn = max(size(dn)); 
 
+
 indx = floor(linspace(1000, lendn, n_points)); 
     
 NMSE = zeros(n_points,1);
