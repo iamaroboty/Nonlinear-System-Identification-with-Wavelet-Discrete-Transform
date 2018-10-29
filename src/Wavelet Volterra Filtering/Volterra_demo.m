@@ -112,8 +112,6 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % fprintf('NMIS = %.2f dB\n', mean(10*log10(nmis(end-2048:end))))
 
 
-
-
 figure;         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'Wavleterra');
