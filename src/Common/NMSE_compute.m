@@ -2,7 +2,6 @@ function [ NMSE, indx ] = NMSE_compute( dn , en, n_points )
 % plot erle and return fig object 
 
 
-
 lendn = max(size(dn)); 
 
 indx = floor(linspace(1000, lendn, n_points)); 

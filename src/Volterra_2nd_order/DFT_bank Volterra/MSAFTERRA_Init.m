@@ -21,8 +21,8 @@ S.analysis      = H;                % Analysis filter bank
 S.synthesis     = F;                % Synthesis filter bank
 S.iter          = 0;                % Iteration count
 S.alpha         = 1e-6;             % Small positive constant
-S.kernel_length  = M;              % Kernel dimensions
-S.AdaptStart    = L + max(M);            % Running effect of the analysis and adaptive 
+S.kernel_length  = M;               % Kernel dimensions
+S.AdaptStart    = L + max(M);       % Running effect of the analysis and adaptive 
                                     %   filter, minimum L + M
 
 end

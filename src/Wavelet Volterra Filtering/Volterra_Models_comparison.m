@@ -39,7 +39,7 @@ kernel_plot(NL_system.Responses);
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
 % Run parameters
-iter = 1.5*80000;            % Number of iterations
+iter = 1*80000;            % Number of iterations
 
 
 
@@ -61,7 +61,7 @@ D = N/2;                    % Decimation factor for 2x oversampling
 L = 8*N;                    % Length of analysis filters, M=2KN, 
 
 %% plot parameters
-nmse_n_points = 20; 
+nmse_n_points = 1000; 
 
 
 %%
@@ -93,27 +93,31 @@ fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
     
 % create figure handler for MSE
-MSE_fig = figure;         
+figure(2);
+MSE_fig = axes('Parent', );         
 
 % plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 
 %MSE
-set(0, 'currentfigure', MSE_fig); 
-plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'Wavleterra');
-axis([0 iter/1024 -50 10]);
+%set(0, 'currentfigure', MSE_fig); 
+hold on; 
+plot(MSE_fig, (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'Wavleterra');
+axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
 %create figure handler for NMSE
-NMSE_fig = figure; 
+figure(3);
+NMSE_fig = axes; 
 
 %NMSE
-set(0, 'currentfigure', NMSE_fig); 
+%set(0, 'currentfigure', NMSE_fig); 
+hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
-plot(indx, NMSE,'DisplayName', 'Wavleterra');
+plot(NMSE_fig, indx, NMSE,'DisplayName', 'Wavleterra');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
 ylabel('NMSE'); grid on;
@@ -121,11 +125,8 @@ fprintf('NMSE = %.2f dB\n', NMSE(end))
 
 
 
-
-
 %% MSAFTERRA
-% Nonlinear model 
-fprintf('--------------------------------------------------------------------\n');
+% Nonlinear model fehprintf('--------------------------------------------------------------------\n');
 fprintf('MSAFTERRA\n');
 
 disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
@@ -137,19 +138,19 @@ disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
 %MSE
-set(0, 'currentfigure', MSE_fig); 
+%set(0, 'currentfigure', MSE_fig); 
 hold on; 
-plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'MSAFTERRA');
+plot(MSE_fig, (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'MSAFTERRA');
 axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 % NMSE
-set(0, 'currentfigure', NMSE_fig); 
+%set(0, 'currentfigure', NMSE_fig); 
 hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
-plot(indx, NMSE,'DisplayName', 'MSAFTERRA');
+plot(NMSE_fig, indx, NMSE,'DisplayName', 'MSAFTERRA');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
 ylabel('NMSE'); grid on;
@@ -169,9 +170,9 @@ disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
 % MSE 
-set(0, 'currentfigure', MSE_fig); 
+%set(0, 'currentfigure', MSE_fig); 
 hold on; 
-plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'SAFTERRA');
+plot(MSE_fig, (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'SAFTERRA');
 axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
@@ -179,10 +180,10 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 
 % NMSE
-set(0, 'currentfigure', NMSE_fig); 
+%set(0, 'currentfigure', NMSE_fig); 
 hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
-plot(indx, NMSE,'DisplayName', 'SAFTERRA');
+plot(NMSE_fig, indx, NMSE,'DisplayName', 'SAFTERRA');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
 ylabel('NMSE'); grid on;
@@ -203,19 +204,19 @@ fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr_full = en.^2;
 
 %MSE
-set(0, 'currentfigure', MSE_fig); 
+%set(0, 'currentfigure', MSE_fig); 
 hold on; 
-plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'FBAND');
+plot(MSE_fig, (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'FBAND');
 axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 %NMSE
-set(0, 'currentfigure', NMSE_fig); 
+%set(0, 'currentfigure', NMSE_fig); 
 hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
-plot(indx, NMSE,'DisplayName', 'FBAND');
+plot(NMSE_fig, indx, NMSE,'DisplayName', 'FBAND');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
 ylabel('NMSE'); grid on;
@@ -234,9 +235,9 @@ fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr_lin = en.^2;
 
 %MSE
-set(0, 'currentfigure', MSE_fig); 
+%set(0, 'currentfigure', MSE_fig); 
 hold on; 
-plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
+plot(MSE_fig, (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
 axis([0 iter/1024 -90 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
@@ -244,10 +245,10 @@ fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 legend('show');
 
 %NMSE
-set(0, 'currentfigure', NMSE_fig); 
+%set(0, 'currentfigure', NMSE_fig); 
 hold on; 
 [NMSE, indx] = NMSE_compute(dn, en, nmse_n_points);
-plot(indx, NMSE,'DisplayName', 'WMSAFLIN');
+plot(NMSE_fig, indx, NMSE,'DisplayName', 'WMSAFLIN');
 axis([indx(1) indx(end) -50 10]);
 xlabel('Iteration number'); 
 ylabel('NMSE'); grid on;
