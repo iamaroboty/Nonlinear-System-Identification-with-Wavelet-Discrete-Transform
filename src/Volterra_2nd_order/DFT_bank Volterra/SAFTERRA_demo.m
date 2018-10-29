@@ -4,7 +4,7 @@
 % Subband Adaptive Filtering: Theory and Implementation
 % Publisher: John Wiley and Sons, Ltd
 
-addpath '..\Common';        % Functions in Common folder
+addpath '..\..\Common';        % Functions in Common folder
 clear all;
 
 
@@ -19,7 +19,7 @@ gains = [1 1];
 % Random Vector 
 rng('default'); % For reproducibility
 
-%% Simulated Kernel - random
+% Simulated Kernel - random
 ker1 = rand(M1,1) - rand(1);
 ker2 = second_order_kernel(M2);
 
@@ -45,45 +45,46 @@ disp('Creating desired and input signals. . .');
 
 %%
 % Adaptation process
-% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
 fprintf('SAFTERRA\n');
-disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
+fprintf('Number of subbands: N = %d, Dec factor: D = %d, step size = %s \n', N, D , sprintf('%.2f ', mu));
 
 S = SAFTERRA_Init(M,mu,N,D,L);
 tic;
 [en,S] = SAFTERRA_adapt(un,dn,S);
 err_sqr = en.^2;
 
-disp(sprintf('Total time = %.3f mins',toc/60));
+fprintf('Total time = %.2f s \n',toc);
 
 figure;
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'SAFTERRA');
 axis([0 iter/1024 -80 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)');
 grid on;
+fprintf('NMSE = %.2f dB\n', 10*log10(sum(err_sqr)/sum(dn.^2)));
 
 %%
-% Nonlinear model 
 fprintf('--------------------------------------------------------------------\n');
 fprintf('MSAFTERRA\n');
-disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
+fprintf('Number of subbands: N = %d, step size = %s \n', N, sprintf('%.2f ', mu));
 
 S = MSAFTERRA_Init(M,mu,N,L);
 tic;
 [en,S] = MSAFTERRA_adapt(un,dn,S);
 err_sqr = en.^2;
 
-disp(sprintf('Total time = %.3f mins',toc/60));
+fprintf('Total time = %.2f s \n',toc);
 
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MSAFTERRA');
 axis([0 iter/1024 -80 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)');
 grid on;
+legend('show');
+fprintf('NMSE = %.2f dB\n', 10*log10(sum(err_sqr)/sum(dn.^2)));
 
 
 

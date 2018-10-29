@@ -2,7 +2,11 @@
 % 
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
-addpath '../Common';             % Functions in Common folder
+diary log_Volterra_TB.txt
+fprintf('%s \n', datestr(datetime('now')));
+addpath(genpath('../Common'));             % Functions in Common folder
+addpath('DFT_bank Volterra'); 
+addpath('../MWSAF'); 
 clear all;  
 % close all;
 
@@ -63,20 +67,20 @@ kernel_plot(NL_system.Responses);
 %% Adaptive filter parameters
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
-level = 4;                  % Levels of Wavelet decomposition for different kernels
+level = 3;                  % Levels of Wavelet decomposition for different kernels
 filters = 'db4';            % Set wavelet type for different kernels
 
 
 % Run parameters
-iter = 1*80000;            % Number of iterations
+iter = 0.7*80000;            % Number of iterations
 
 %%
 % Adaptation process
 
 disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
-%[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard.mat');
+[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+% [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
 
 
 %% WAVTERRA
@@ -224,7 +228,7 @@ legend('show');
 fprintf('--------------------------------------------------------------------\n');
 fprintf('LINEAR WMSAF\n');
 mu = 0.1;
-level = 4;
+level = 3;
 filters = 'db4';
 M = M1;
 fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', filters, level, mu, M);
@@ -245,3 +249,6 @@ xlabel('Number of iterations (\times 1024 input samples)');
 ylabel('Mean-square error (with delay)'); grid on;
 fprintf('MSE_lin = %.2f dB\n', mean(10*log10(MSE_lin(end-2048:end))))
 fprintf('ERLE = %.2f dB\n', 10*log10((dn*dn')./(en*en'))); 
+
+fprintf('\n');
+diary off
