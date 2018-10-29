@@ -12,7 +12,8 @@ ARcoeffs(5).a = [1.0000; -1.3193;  0.8610; -0.4541;...
                 -0.6191;  0.9800; -0.6530;  0.5424;...
                  0.3694; -0.5102;  0.3673; -0.4017;...
                  0.0649; -0.1499;  0.1212;  0.1978]; % AR(15), c.f. Figure 3.3(a)
-ARcoeffs(6).a = [1; 0.9];  
+ARcoeffs(6).a = [1; -0.9];  
+ARcoeffs(7).a = [1; 0.9]; 
 
 %%
 DFTpoint = 4096;
@@ -22,12 +23,12 @@ w2 = w(1:DFTpoint/2);
 
 randn('state',sum(100*clock));  % Reset random generator to diffrent state
 wn = randn(4*80000,1);          % white Gaussian random signal, unit variance
-ar = 1:6;
+ar = 1:7;
 
 
 %% Spectrum of colored signal
 figure;
-for i=1:6
+for i=1:7
     un = filter(1,ARcoeffs(i).a,wn);            % IIR filtering
 
     HzSig = fft(ARcoeffs(i).a, DFTpoint);
@@ -35,7 +36,7 @@ for i=1:6
     HzSig = 1./(abs(HzSig).^2); 
     HzSig = HzSig/var(un);          % Normalized to unit variance
 
-    subplot(6,1,i);
+    subplot(7,1,i);
     plot(w2/pi, 10*log10(HzSig(1:DFTpoint/2)+eps), 'DisplayName', ['AR = ', num2str(i)], ...
             'LineWidth', 1.5);
     ylabel('Power (dB)');
@@ -50,16 +51,23 @@ xlabel('\omega (\pi)');
 M1 = 256; % length of first order volterra kernel
 M2 = 32; % length of second order volterra kernel
 
-b1 = load('h1.dat');
-b1 = b1(1:M1);
-ker1 = b1;
-
-b2 = load('h2.dat');
-b2 = b2(1:M2);
-ker2 = second_order_kernel(b2);
+% b1 = load('h1.dat');
+% b1 = b1(1:M1);
+% ker1 = b1;
+% 
+% b2 = load('h2.dat');
+% b2 = b2(1:M2);
+% ker2 = second_order_kernel(b2);
 
 % ker1 = rand(M1,1)-rand(1);
 % ker2 = second_order_kernel(M2);
+
+norm_freq = 0.39;
+samples = [M1 M2]/2-1;
+b1 = norm_freq*sinc(norm_freq*(-samples(1)-1:samples(1)));
+b2 = norm_freq*sinc(norm_freq*(-samples(2)-1:samples(2)));
+ker1 = b1;
+ker2 = second_order_kernel(b2);
 
 NL_system.M = [M1, M2];
 NL_system.Responses = {ker1, ker2};
@@ -67,10 +75,10 @@ NL_system.Responses = {ker1, ker2};
 kernel_plot(NL_system.Responses);
 
 fs = DFTpoint/2;
-freq_w = pi/4;
+freq_w = [pi/4, pi/3];
 freq = fs*freq_w / (2*pi);
 dt = 1/fs;
-un = 1*sin(2*pi*freq*(0:dt:5-dt));
+un = 1*sin(2*pi*freq(1)*(0:dt:5-dt)) + 1*sin(2*pi*freq(2)*(0:dt:5-dt));
 
 max_len= max(NL_system.M); 
 dn = fastVMcell(un, NL_system.Responses , NL_system.M);

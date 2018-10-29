@@ -8,7 +8,7 @@ addpath(genpath('../Common'));             % Functions in Common folder
 addpath('DFT_bank Volterra'); 
 addpath('../MWSAF'); 
 clear all;  
-% close all;
+close all;
 
 %% Unidentified System parameters
 order = 2; 
@@ -79,7 +79,7 @@ iter = 0.7*80000;            % Number of iterations
 
 disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
-[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),6,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
 
 
