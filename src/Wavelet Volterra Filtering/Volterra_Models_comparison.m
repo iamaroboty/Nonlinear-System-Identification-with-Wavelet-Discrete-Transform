@@ -9,22 +9,24 @@ close all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 8; % length of second order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
-gains = [1 0.5];
+gains = [1 1];
 
 
 %% Random Vector 
 rng('default'); % For reproducibility
 
+%NL_system = create_volterra_sys(order, [M1 M2], gains, 'nlsys1'); 
 
-%% Simulated Kernel - random
-ker1 = rand(M1,1)-rand(1);
-ker2 = second_order_kernel(M2);
+% %% Simulated Kernel - random
+ ker1 = rand(M1,1)-rand(1);
+ ker2 = second_order_kernel(M2);
+% 
+% % Non-linear System 
+ NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 
-% Non-linear System 
-NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 
 
 %% Plot 2-D kernel
@@ -43,12 +45,10 @@ iter = 1*80000;            % Number of iterations
 
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
-level = 4;                  % Levels of Wavelet decomposition for different kernels
-<<<<<<< HEAD
+level = 3;                  % Levels of Wavelet decomposition for different kernels
+
 filters = 'db1';            % Set wavelet type for different kernels
-=======
-filters = 'db4';            % Set wavelet type for different kernels
->>>>>>> 046e5a65070836abdf2c7e5f9c4b313eac6859e2
+
 
 %%
 % FOR MSAFTERRA AND SAFTERRA: 
@@ -137,15 +137,8 @@ disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
 %MSE
-<<<<<<< HEAD
 figure(MSE_fig); 
-hold on; 
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-=======
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-
-figure(MSE_fig);  
->>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'MSAFTERRA');
 hold on; 
 axis([0 iter/1024 -120 10]);
@@ -182,11 +175,7 @@ err_sqr = en.^2;
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 
 figure(MSE_fig);  
-<<<<<<< HEAD
 hold on; 
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-=======
->>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'SAFTERRA');
 hold on; 
 axis([0 iter/1024 -120 10]);
@@ -221,11 +210,7 @@ err_sqr = en.^2;
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 
 figure(MSE_fig);  
-<<<<<<< HEAD
 hold on; 
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-=======
->>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'FBAND');
 hold on; 
 axis([0 iter/1024 -120 10]);
@@ -262,11 +247,6 @@ q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 figure(MSE_fig);  
 plot((0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
 hold on; 
-<<<<<<< HEAD
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-plot( (0:length(MSE)-1)/1024,10*log10(MSE),'DisplayName', 'WMSAFLIN');
-=======
->>>>>>> ff622d95f7fa08db7e1f3144d0f7ee051e189cbc
 axis([0 iter/1024 -120 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;

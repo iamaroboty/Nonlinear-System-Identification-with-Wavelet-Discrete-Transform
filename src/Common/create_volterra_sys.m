@@ -21,14 +21,30 @@ for i = 1:order
     
     if i ==1
         
-    Sys_obj.Responses{i} = gains(i).*rand(1,lengths(i));
+    
+    randFIR = randIR(lengths(i)) ;    
+        
+    Sys_obj.Responses{i} = (gains(i).*randFIR);
     
     elseif i ==2
         
+    tmp = triu(ones(lengths(i))); 
         
-     tmp = rand(lengths(i),lengths(i));
+    for j = 0:lengths(i)-1
+        
+        
+       
+            
+        randFIR = randIR(lengths(i)-j); 
+        
+        d = diag(ones(lengths(i)-j,1),j);
+        tmp(d(:,:)==1) = tmp(d(:,:)==1).*randFIR;
+
+    end
+    
+     
                            
-    Sys_obj.Responses{i} =   gains(i).*(tmp + tmp')/2  ; % if matrix is square this is symmetric 
+    Sys_obj.Responses{i} =   (tmp+tmp')' ; % if matrix is square this is symmetric 
     
     
     end
