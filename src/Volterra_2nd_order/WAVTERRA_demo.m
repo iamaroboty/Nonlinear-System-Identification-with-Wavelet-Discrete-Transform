@@ -25,7 +25,7 @@ gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
 speech = 1;                     % Choose either 1 or 0, for using speech sample or noise 
-speech_sample = 'speech_harvard.mat'; 
+speech_sample = 'speech_harvard_f.mat'; 
 AR = 4;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
 iter = 1*80000;                 % Number of iterations, NON speech
 SNR = 40;
@@ -64,7 +64,7 @@ kernel_plot(NL_system.Responses);
 disp('Creating desired and input signals. . .');
 if speech == 1
     fprintf('Kernel Memory: [%d, %d], Input signal: (%s) \n', M1, M2, speech_sample);
-    [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard.mat');
+    [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,speech_sample);
     figure('Name', 'SpeechSpectrum');
     spectrogram(un, 1024, 256, 1024, 'yaxis');
 else
