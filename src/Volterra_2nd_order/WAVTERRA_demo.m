@@ -25,24 +25,24 @@ gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
 speech = 1;                     % Choose either 1 or 0, for using speech sample or noise 
-speech_sample = 'speech_harvard_f.mat'; 
+speech_sample = 'speech_harvard_m.mat'; 
 AR = 4;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
 iter = 1*80000;                 % Number of iterations, NON speech
 SNR = 40;
 
 % Structure Hyperpar            (This can be modified to allow comparison)
 runs = 4;                       % Number of runs for different wtype or levels
-par_level = [1, 2, 3, 5];
-par_filters = 'db8';
+par_level = [3];
+par_filters = 'db1';
 
 par_C = M2;                     % Channels, #diagonal of kernel (max: M2)
-par_SB = 1:2^par_level(end);             % Nonlinear subband (max: 1:2^level)
+par_SB = 1:2^par_level(end);    % Nonlinear subband (max: 1:2^level)
 mu = [0.1, 0.1];                % Stepsize for different kernels 
 
 
 %% Create and plot kernel
 % Create Kernel mode
-kermode = 'simulated';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
+kermode = 'simulated';     %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
 
 % Create Kernel parameters
 deltapos = [5, 3];
