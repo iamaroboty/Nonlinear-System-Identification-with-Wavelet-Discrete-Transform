@@ -142,6 +142,7 @@ err_sqr = en.^2;
 
 fprintf('Total time = %.2f s \n',toc);
 
+figure(MSEfig);
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:er_len-1)/1024,10*log10(MSE), 'DisplayName', 'MSAFTERRA');
 
@@ -166,6 +167,7 @@ err_sqr = en.^2;
 
 fprintf('Total time = %.2f s \n',toc);
 
+figure(MSEfig);
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:er_len-1)/1024,10*log10(MSE), 'DisplayName', 'SAFTERRA');
 
@@ -218,6 +220,7 @@ err_sqr = en.^2;
 
 fprintf('Total time = %.2f s \n',toc);
 
+figure(MSEfig);
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:er_len-1)/1024,10*log10(MSE), 'DisplayName', 'Linear WMSAF');
 
