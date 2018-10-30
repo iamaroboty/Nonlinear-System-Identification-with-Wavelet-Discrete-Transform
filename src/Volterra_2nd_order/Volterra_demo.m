@@ -17,6 +17,7 @@ close all;
 order = 2;                      % Order of volterra filter (just 2 atm)
 M1 = 256;                       % length of first order volterra kernel
 M2 = 32;                        % length of second order volterra kernel
+M = [M1, M2];
 gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
@@ -45,6 +46,7 @@ L = 8*N;                    % Length of analysis filters, M=2KN, overlapping fac
 l_mu = 0.1;
 l_level = 3;
 l_filters = 'db4';
+Ml = M1;
 
 
 % Create combination for Wavterra searchgrid
@@ -133,7 +135,7 @@ fprintf('MSAFTERRA\n');
 fprintf('--------------------------------------------------------------------\n');
 fprintf('Number of subbands, N = %d, step size = %s \n', N, sprintf('%.2f ', mu));
 
-S = MSAFTERRA_Init(M,mu,N,L);
+S = MSAFTERRA_Init(NL_system.M,mu,N,L);
 tic;
 [en,S] = MSAFTERRA_adapt(un,dn,S);
 err_sqr = en.^2;
@@ -157,7 +159,7 @@ fprintf('SAFTERRA\n');
 fprintf('--------------------------------------------------------------------\n');
 fprintf('Number of subbands, N = %d, Decimation factor, D = %d, step size = %s \n', N, D, sprintf('%.2f ', mu));
 
-S = SAFTERRA_Init(M,mu,N,D,L);
+S = SAFTERRA_Init(NL_system.M,mu,N,D,L);
 tic;
 [en,S] = SAFTERRA_adapt(un,dn,S);
 err_sqr = en.^2;
@@ -206,10 +208,10 @@ fprintf('\n');
 %% LINEAR MODEL
 fprintf('LINEAR WMSAF\n');
 fprintf('--------------------------------------------------------------------\n');
-fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', l_filters, l_level, l_mu, M1);
+fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', l_filters, l_level, l_mu, Ml);
 
 tic;
-Slin = SWAFinit(M, mu, level, filters); 
+Slin = SWAFinit(Ml, l_mu, l_level, l_filters); 
 [en, Slin] = MWSAFadapt(un, dn, Slin); 
 
 err_sqr = en.^2;
