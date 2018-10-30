@@ -145,9 +145,6 @@ fprintf('NMSE = %.2f dB\n', NMSE_FB);
 
 figure(NMSEfig);
 hold on; plot((0:er_len-1)/1024, 10*log10(cumsum(err_sqr_full)./(cumsum(dn.^2))), 'DisplayName', 'FB NLMS');
-axis([0 er_len/1024 -60 10]);
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Normalized Mean-square error'); grid on;
 
 %% Adding title and labels to plots
 figure(MSEfig);
