@@ -9,7 +9,7 @@ close all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 256; % length of first order volterra kernel
-M2 = 32; % length of second order volterra kernel
+M2 = 8; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 gains = [1 1];
@@ -17,6 +17,8 @@ gains = [1 1];
 
 %% Random Vector 
 rng('default'); % For reproducibility
+rand('seed', 32);
+
 
 %NL_system = create_volterra_sys(order, [M1 M2], gains, 'nlsys1'); 
 

@@ -108,7 +108,7 @@ for n = 1:ITER
         
         eD = dD - U1_tot'*w1 - e2;                         % Error estimation
         
-        if n >= AdaptStart
+        if n >= AdaptStart 
              
             w1 = w1 + U1_tot*(eD./(sum(U1_tot.*U1_tot)+alpha)')*mu(1); % Tap-weight adaptation
 %             nmis = sum(abs(w1-S.true{1}).^2);                        
