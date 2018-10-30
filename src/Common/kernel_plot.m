@@ -8,7 +8,7 @@ function kernel_plot(ker)
 
 assert(iscell(ker), 'Input argument must be a cell array 2x1');
 
-figure(); 
+figure('Name', 'Volterra Kernels'); 
 subplot(221);   %linear time
 plot(ker{1});
 ylabel('Linear Kernel (Time)');
