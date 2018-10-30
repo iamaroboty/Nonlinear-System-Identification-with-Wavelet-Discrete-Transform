@@ -24,22 +24,26 @@ M2 = 32;                        % length of second order volterra kernel
 gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
-speech = 1;                     % Choose either 1 or 0, for using speech sample or noise 
+speech = 0;                     % Choose either 1 or 0, for using speech sample or noise 
 % Choose ['speech_harvard_f.mat' ; 'speech_harvard_m.mat' ; 'SpeechSample.mat' ; 'speech.mat'] 
 speech_sample = 'speech_harvard_m.mat';  
 AR = 4;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
-iter = 1*80000;                 % Number of iterations, NON speech
+iter = 0.1*80000;                 % Number of iterations, NON speech
 SNR = 40;
 
 % Structure Hyperpar            (This can be modified to allow comparison)
-runs = 1;                       % Number of runs for different wtype or levels
-par_level = 3;
-par_filters = 'db16';
+par_level = [1 2 3];
+par_filters = {'db1', 'db4', 'db16'};
 
 par_C = M2;                     % Channels, #diagonal of kernel (max: M2)
-par_SB = 1:2^par_level(end);             % Nonlinear subband (max: 1:2^level)
+% par_SB = 1:2^par_level(end);    % Nonlinear subband (max: 1:2^level) NOT NEEDED
+
 mu = [0.1, 0.1];                % Stepsize for different kernels 
 
+
+% Create combination
+runs = length(par_level)*length(par_filters);
+par_comb = combvec(1:length(par_level), 1:length(par_filters));
 
 %% Create and plot kernel
 % Create Kernel mode
@@ -83,8 +87,8 @@ NMSEfig = figure('Name', 'NMSE');
 fprintf('WAVTERRA\n');
 for i = 1:runs  
     fprintf('--------------------------------------------------------------------\n'); 
-    level = par_level(i);
-    filters = par_filters;
+    level = par_level(par_comb(1,i));
+    filters = par_filters{par_comb(2,i)};
     SB = 1:2^level;
     C = par_C;
     
