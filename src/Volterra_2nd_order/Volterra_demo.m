@@ -22,8 +22,8 @@ gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
 speech = 1;                     % Choose either 1 or 0, for using speech sample or noise 
-% Choose ['speech_harvard_f.mat' ; 'speech_harvard_m.mat' ; 'SpeechSample.mat' ; 'speech.mat'] 
-speech_sample = 'speech_harvard_m.mat';  
+% Choose ['speech_harvard_f.mat' ; 'speech_harvard_m.mat' ; 'SpeechSample.mat' ; 'speech.mat' ; 'Timit_m.mat' ; 'Timit_f_16k.mat' ] 
+speech_sample = 'Timit_m.mat';  
 AR = 4;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
 iter = 1*80000;                 % Number of iterations, NON speech
 SNR = 40;
