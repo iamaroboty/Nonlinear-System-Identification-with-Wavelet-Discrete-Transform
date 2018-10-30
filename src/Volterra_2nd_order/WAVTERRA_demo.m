@@ -93,7 +93,7 @@ for i = 1:runs
     C = par_C;
     
     fprintf('Running iter (%d) of (%d), level = %d , wtype = %s\n', i, runs, level, filters);           
-    fprintf('step size = %s \n', sprintf('%s ', mu));
+    fprintf('step size = %s \n', sprintf('%.2f ', mu));
 
     tic;
     S = Volterra_Init(NL_system.M, mu, level, filters); 
