@@ -42,7 +42,7 @@ mu = [0.1, 0.1];                % Stepsize for different kernels
 
 %% Create and plot kernel
 % Create Kernel mode
-kermode = 'simulated';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
+kermode = 'random';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
 
 % Create Kernel parameters
 deltapos = [5, 3];
@@ -60,11 +60,10 @@ NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 kernel_plot(NL_system.Responses);
 
 %% Create Signals
-
 disp('Creating desired and input signals. . .');
 if speech == 1
     fprintf('Kernel Memory: [%d, %d], Input signal: (%s) \n', M1, M2, speech_sample);
-    [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard.mat');
+    [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system, speech_sample);
     figure('Name', 'SpeechSpectrum');
     spectrogram(un, 1024, 256, 1024, 'yaxis');
 else
