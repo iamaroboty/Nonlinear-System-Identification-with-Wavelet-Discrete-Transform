@@ -4,7 +4,7 @@ close all;
 
 d = 256;        %Total signal length
 M = 4;
-wtype = 'db2';
+wtype = 'db1';
 t=0:0.001:10;
 un=20*(t.^2).*(1-t).^4.*cos(12*t.*pi)+sin(2*pi*t*5000)+sin(2*pi*t*150);
 % un = 1:d;
@@ -29,6 +29,8 @@ end
 utmp = zeros(M^2-M+1,1);
 cA = zeros(floor((M^2-M+1)/2));
 cD = zeros(floor((M^2-M+1)/2));
+cA1 = zeros(floor((M^2-M+1)/2));
+cD1 = zeros(floor((M^2-M+1)/2));
 u = zeros(M,1);
 
 for n = 1:length(un)
