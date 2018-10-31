@@ -16,8 +16,8 @@ M = 256; %% hammerstein filters lens
 gains = ones(5,1);
 
 %algorithm parameters
-mu = 0.1;
-leak = 0; 
+mu = [0.1 0.05];
+leak = [0 0]; 
 
 %% Random Vector 
 rng('default'); %
@@ -33,7 +33,7 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 
 % Run parameters
-iter = 1.0*80000;   % Number of iterations
+iter = 2.0*80000;   % Number of iterations
 
 
 [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_system ,gains, order,sum(100*clock),1,40);
