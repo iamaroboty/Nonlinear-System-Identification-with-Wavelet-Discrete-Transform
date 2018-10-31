@@ -1,4 +1,4 @@
-function S = Hammerstein_NLMS_init(order, M, mu, leaks)
+function S = Hammerstein_NLMS_init(M, mu, leaks)
 
 % SWAFinit          Initialize Parameter Structure for Wavelet Transform
 %                   Adaptive Filter
@@ -16,7 +16,6 @@ S.step          = mu;             % Step saize
 S.alpha         = 1e-6;           % Small positive constant
 S.leaks = leaks; 
 S.iter = 0; 
-S.AdaptStart = M;
-S.order = order; 
+S.AdaptStart = max(M);
 
 end
