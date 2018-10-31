@@ -8,11 +8,11 @@ close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 256; % length of first order volterra kernel
-M2 = 64; % length of second order volterra kernel
-
-NL_system.M = [M1, M2];
-gains = [1 1];
+M1 = 16; % length of first order volterra kernel
+M2 = 16; % length of second order volterra kernel
+M = [M1, M2]; % model parameters
+NL_system.M = [16, 8]; % true parameters
+gains = [0.5 0.5];
 
 
 %% Random Vector 
@@ -24,16 +24,12 @@ rand('seed', 32);
 
 % %% Simulated Kernel - random
  ker1 = rand(M1,1)-rand(1);
- ker2 = second_order_kernel(M2);
+ non_linearity = 'pow'; %pow 
+
+
 % 
 % % Non-linear System 
- NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
-
-
-
-%% Plot 2-D kernel
-kernel_plot(NL_system.Responses);
-
+ NL_system.Responses = {ker1};
 
 
 %% Adaptive filter parameters
@@ -47,7 +43,7 @@ iter = 1*80000;            % Number of iterations
 
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
-level = 3;                  % Levels of Wavelet decomposition for different kernels
+level = 1;                  % Levels of Wavelet decomposition for different kernels
 
 filters = 'db1';            % Set wavelet type for different kernels
 
@@ -75,12 +71,7 @@ disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
 
 b=NL_system.Responses{1}; 
-[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, 'tanh', 0.2); %iter, b, seed, ARtype, SNR
-
-
-%[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
-%[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard_m.mat');
-
+[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, non_linearity, gains); %iter, b, seed, ARtype, SNR
 
 
 %% WAVTERRA
@@ -91,7 +82,7 @@ fprintf('WAVTERRA\n');
 fprintf('Wavelet type: %s, levels: %d, step size = %s \n', filters, level, sprintf('%s ', mu));
 
 tic;
-S = Volterra_Init(NL_system.M, mu, level, filters); 
+S = Volterra_Init(M, mu, level, filters); 
 
 % [en, S] = Volterra_2ord_adapt(un, dn, S);     
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
@@ -207,7 +198,7 @@ fprintf('--------------------------------------------------------------------\n'
 fprintf('FULLBAND NLMS\n');
 
 tic;
-Sfull = Volterra_NLMS_init(NL_system.M, mu); 
+Sfull = Volterra_NLMS_init(M, mu); 
 [en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
 fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;

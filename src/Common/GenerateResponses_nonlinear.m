@@ -1,4 +1,4 @@
-function [un,dn,vn] = GenerateResponses(iter,b,seed,ARtype,SNR)
+function [un,dn,vn] = GenerateResponses_nonlinear(iter,b,seed,ARtype,SNR, non_linearity, gain)
 
 % GenerateResponses     Generate Input and Desired Responses
 %
@@ -37,13 +37,17 @@ ARcoeffs(6).a = [1; 0.9];
 
 un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
-dn = filter(b,1,un);                                 % Generate desired response d(n)
+non_linearity = str2func(non_linearity); 
+dn = gain(2)*non_linearity(un) + (gain(1)).*un;
+
+dn = filter(b,1,dn);                                 % Generate desired response d(n)
 dn = dn(length(b)+1:end);                            % Adjusting starting index of signals
 un = un(length(b)+1:end);
 
 % Normalization of u(n) and d(n)
 
-un = 
+
+ 
 
 un = un/std(dn);
 dn = dn/std(dn);
