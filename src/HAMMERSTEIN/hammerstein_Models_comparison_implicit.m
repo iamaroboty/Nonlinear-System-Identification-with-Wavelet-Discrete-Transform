@@ -24,7 +24,7 @@ rand('seed', 32);
 % %% Simulated Kernel - random
  ker1 = rand(NL_system.M(1),1)-rand(1);
  ker2 = rand(NL_system.M(2),1)-rand(1);
- non_linearity = 'logsig'; %pow %tanh %relu %logsig
+ non_linearity = 'tanh'; %pow %tanh %relu %logsig
 
 
 % 
@@ -71,7 +71,7 @@ disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
 
 b=NL_system.Responses{1}; 
-[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
 
 
 %% WAVTERRA
@@ -82,13 +82,13 @@ fprintf('WAVTERRA\n');
 fprintf('Wavelet type: %s, levels: %d, step size = %s \n', filters, level, sprintf('%s ', mu));
 
 tic;
-S = Volterra_Init(M, mu, level, filters); 
+S = Hammerstein_Init(M, mu, level, filters); 
 
 % [en, S] = Volterra_2ord_adapt(un, dn, S);     
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
 
 S.true = NL_system.Responses; 
-[en, S] = Volterra_2ord_adapt_v3(un, dn, S);
+[en, S] = Hammerstein_2ord_adapt_v3(un, dn, S);
 fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
     
