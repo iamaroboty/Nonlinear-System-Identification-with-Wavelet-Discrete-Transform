@@ -3,7 +3,6 @@
 % 
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
-diary log_VNLMS.txt
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
@@ -12,17 +11,15 @@ close all;
 %% Unidentified System parameters
 
 
-NL_system.M = [256 32]; %% hammerstein filters lens
-gains = [1 1];
+NL_system.M = [256 32 ]; %% hammerstein filters lens
+gains = [1 1 1];
 
 %algorithm parameters
-mu = [0.1, 0.1];
-leaks = [0 0]; 
+mu = [0.1, 0.1, 0.1];
+leaks = [0 0 0]; 
 
 %% Random Vector 
 rng('default'); %
-
-
 
 NL_system = create_hammerstein_sys(NL_system.M, gains); 
 
@@ -32,7 +29,7 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 
 % Run parameters
-iter = 3.0*80000;   % Number of iterations
+iter = 10.0*80000;   % Number of iterations
 
 
 [un,dn,vn] = GenerateResponses_Hammerstein(iter, NL_system ,sum(100*clock),1,40);
@@ -58,4 +55,3 @@ legend('show');
 fprintf('NMSE = %.2f dB\n', 10*log10(sum(err_sqr_full)/sum(dn.^2)));
 
 fprintf('\n');  % Empty line in logfile
-diary off

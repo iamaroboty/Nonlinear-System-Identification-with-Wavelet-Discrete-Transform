@@ -1,4 +1,4 @@
-function [un,dn,vn] = GenerateResponses_nonlinear(iter,kernels,seed,ARtype,SNR, non_lin, varargin)
+function [un,dn,vn] = GenerateResponses_nonlinear(iter,kernels,seed,ARtype,SNR, non_lin)
 
 % GenerateResponses     Generate Input and Desired Responses
 %
@@ -44,11 +44,7 @@ dn_lin = filter(kernels(1),1,un) ;
 
 non_linearity = str2func(non_lin); 
 
-if non_lin == 'pow'
-    dn_non_lin = filter(kernels(2),1,non_linearity(un, varargin{1}));
-else
-    dn_non_lin = filter(kernels(2),1,non_linearity(un));
-end
+dn_non_lin = filter(kernels(2),1,non_linearity(un));
 
 dn_lin = dn_lin(max([M1, M2])+1:end);   % Adjusting starting index of signals
 dn_non_lin = dn_non_lin(max([M1, M2])+1:end); 

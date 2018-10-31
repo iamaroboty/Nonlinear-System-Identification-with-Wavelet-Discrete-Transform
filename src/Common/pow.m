@@ -1,11 +1,10 @@
-function [ out ] = pow(a,n )
+function [ out ] = pow(a)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-if nargin == 1
-    n =2;
-end
 
-out = a.^n; 
+
+out = a.^2; 
+
 
 end
 
