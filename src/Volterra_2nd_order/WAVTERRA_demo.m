@@ -14,7 +14,7 @@ addpath(genpath('../Common'));             % Functions in Common folder
 addpath('DFT_bank Volterra'); 
 addpath('../MWSAF'); 
 clear all;  
-close all;
+% close all;
 
 %% Hyperparameters
 % Kernel Hyperpar
@@ -24,23 +24,20 @@ M2 = 32;                        % length of second order volterra kernel
 gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
-
-speech = 1;                     % Choose either 1 or 0, for using speech sample or noise 
+speech = 0;                     % Choose either 1 or 0, for using speech sample or noise 
+% Choose ['speech_harvard_f.mat' ; 'speech_harvard_m.mat' ; 'SpeechSample.mat' ; 'speech.mat' ; 'Timit_m.mat' ; 'Timit_f_16k.mat' ] 
 speech_sample = 'speech_harvard_m.mat'; 
 
-
-AR = 4;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
-iter = 0.1*80000;                 % Number of iterations, NON speech
+AR = 6;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
+iter = 1*80000;                 % Number of iterations, NON speech
 SNR = 40;
 
 % Structure Hyperpar            (This can be modified to allow comparison)
-
-runs = 4;                       % Number of runs for different wtype or levels
 par_level = [3];
-par_filters = 'db1';
+par_filters = {'db16'};
 
 par_C = M2;                     % Channels, #diagonal of kernel (max: M2)
-par_SB = 1:2^par_level(end);    % Nonlinear subband (max: 1:2^level)
+% par_SB = 1:2^level;                   % Nonlinear subband (max: 1:2^level)
 
 mu = [0.1, 0.1];                % Stepsize for different kernels 
 
@@ -51,9 +48,7 @@ par_comb = combvec(1:length(par_level), 1:length(par_filters));
 
 %% Create and plot kernel
 % Create Kernel mode
-
-kermode = 'simulated';     %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
-
+kermode = 'random';     %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
 
 % Create Kernel parameters
 deltapos = [5, 3];
@@ -88,6 +83,13 @@ fprintf('\n');
 % figures handlers
 MSEfig = figure('Name', 'MSE');
 NMSEfig = figure('Name', 'NMSE');
+
+%% Testing Simplest VAD
+% Emin = sum(un(1:160).^2)/160;
+% Ecoef = 80;
+% VAD = un.^2 > Ecoef*Emin;
+% t = 1:length(un);
+% figure; plot(t, un); hold on; plot(t(VAD), un(VAD), 'r');
 
 %% WAVTERRA
 fprintf('WAVTERRA\n');

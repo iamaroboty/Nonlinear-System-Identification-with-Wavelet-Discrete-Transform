@@ -8,10 +8,10 @@ close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 32; % length of first order volterra kernel
-M2 = 8; % length of second order volterra kernel
+M1 = 128; % length of first order volterra kernel
+M2 = 32; % length of second order volterra kernel
 M = [M1, M2]; % model parameters
-NL_system.M = [32, 8]; % true parameters
+NL_system.M = M; % true parameters
 gains = [1 1];
 
 
@@ -24,7 +24,8 @@ rand('seed', 32);
 % %% Simulated Kernel - random
  ker1 = rand(NL_system.M(1),1)-rand(1);
  ker2 = rand(NL_system.M(2),1)-rand(1);
- non_linearity = 'logsig'; %pow %tanh %relu %logsig
+ non_linearity = 'pow'; %pow %tanh %relu %logsig
+ power = 2; 
 
 
 % 
@@ -39,13 +40,15 @@ rand('seed', 32);
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
 % Run parameters
-iter = 1*80000;            % Number of iterations
+iter = 0.5*80000;            % Number of iterations
 
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
-level = 1;                  % Levels of Wavelet decomposition for different kernels
+level = 3;                  % Levels of Wavelet decomposition for different kernels
 
-filters = 'db1';            % Set wavelet type for different kernels
+filters = 'db4';            % Set wavelet type for different kernels
+C = M2;
+SB = 1:2^level;
 
 
 %%
@@ -71,7 +74,7 @@ disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
 
 b=NL_system.Responses{1}; 
-[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, non_linearity, power); %iter, b, seed, ARtype, SNR
 
 
 %% WAVTERRA
@@ -88,7 +91,7 @@ S = Volterra_Init(M, mu, level, filters);
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
 
 S.true = NL_system.Responses; 
-[en, S] = Volterra_2ord_adapt_v3(un, dn, S);
+[en, S] = Volterra_2ord_adapt_v3(un, dn, S, C, SB);
 fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
     

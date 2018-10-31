@@ -1,4 +1,5 @@
 src/**/*.txt
-
+*.txt
 *.asv
 *.m~
+src/**/*.jpg

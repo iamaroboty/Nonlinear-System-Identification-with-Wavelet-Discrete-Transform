@@ -11,7 +11,9 @@ len_h1 = size(S.coeffs{1},1);                     % Adaptive filters length
 Nc = size(S.coeffs{2},1); 
 Nw = size(S.coeffs{3},1); 
 
-mu = S.step;                      % Step Size here is an array 
+mu1 = S.mu1;
+muc = S.muc;
+muw = S.muw;
 AdaptStart = S.AdaptStart;        % Transient
 alpha = S.alpha;                  % Small constant (1e-6)
 %leak = S.leakage;                 % Leaky factor 
@@ -45,15 +47,17 @@ for n = 1:ITER
     
     
     if n >= AdaptStart
-        w1 = w1 + (mu(1)*en(n)/(x'*x + alpha))*x; 
+        w1 = w1 + (mu1*en(n)/(x'*x + alpha))*x; 
+        
         norm_grade = (2*X'*diag(v)*w2)'*(2*X'*diag(v)*w2);
-        c = c + mu(2)*(en(n)/(norm_grade+ alpha))*(2*X'*diag(v)*w2);
-        w2 = w2 + (mu(2)*en(n)/(u'*u + alpha))*u; 
+        c = c + muc*(en(n)/(norm_grade+ alpha))*(2*X'*diag(v)*w2);
+        
+        w2 = w2 + (muw*en(n)/(u'*u + alpha))*u; 
         S.iter = S.iter + 1;
     end
 end
 
-S.coeffs = [w1; w2];                     % Coefficient values at final iteration                 
+S.coeffs = [w1; c; w2];                     % Coefficient values at final iteration                 
 end
 
 

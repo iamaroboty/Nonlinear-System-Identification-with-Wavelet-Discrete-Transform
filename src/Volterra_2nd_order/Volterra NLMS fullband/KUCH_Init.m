@@ -1,4 +1,4 @@
-function S = KUCH_NLMS_init(M, Nc, mu)
+function S = KUCH_Init(M, Nc, mu, posdelta)
 
 % Volterra_NLMS_init          Initialize Parameter Structure Volterra
 %                               Fullband filtering
@@ -12,7 +12,9 @@ end
 
 % Assign structure fields
 S.kernel_length  = M;               % Kernel dimensions
-S.step          = mu;               % Step size 
+S.mu1          = mu(1);               % Step size 
+S.muc        = mu(2);
+S.muw         = mu(3);
 S.iter          = 0;                % Itertion count 
          % Leaky factor for the leaky LMS algorithm
 S.alpha         = 1e-6;             % Small positive constant
@@ -20,9 +22,9 @@ S.alpha         = 1e-6;             % Small positive constant
 
 S.coeffs{1} = zeros(M(1),1);        % Adaptive filters length
 dirac_shifted = zeros(Nc, 1); 
-dirac_shifted(1) = 0.5;
+dirac_shifted(posdelta) = 1;
 S.coeffs{2} = dirac_shifted; 
-S.coeffs{3} = zeros(M(2)-Nc+1,1);
+S.coeffs{3} = zeros(M(2)-Nc+1,1);   % Nw
 
 S.AdaptStart = max(S.kernel_length);
 
