@@ -24,34 +24,24 @@ M2 = 32;                        % length of second order volterra kernel
 gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
-<<<<<<< HEAD
+
 speech = 1;                     % Choose either 1 or 0, for using speech sample or noise 
 speech_sample = 'speech_harvard_m.mat'; 
-=======
-speech = 0;                     % Choose either 1 or 0, for using speech sample or noise 
-% Choose ['speech_harvard_f.mat' ; 'speech_harvard_m.mat' ; 'SpeechSample.mat' ; 'speech.mat'] 
-speech_sample = 'speech_harvard_m.mat';  
->>>>>>> b1addd0764f43957a81e4672fceb6d3a7be823be
+
+
 AR = 4;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
 iter = 0.1*80000;                 % Number of iterations, NON speech
 SNR = 40;
 
 % Structure Hyperpar            (This can be modified to allow comparison)
-<<<<<<< HEAD
+
 runs = 4;                       % Number of runs for different wtype or levels
 par_level = [3];
 par_filters = 'db1';
 
 par_C = M2;                     % Channels, #diagonal of kernel (max: M2)
 par_SB = 1:2^par_level(end);    % Nonlinear subband (max: 1:2^level)
-=======
-par_level = [1 2 3];
-par_filters = {'db1', 'db4', 'db16'};
 
-par_C = M2;                     % Channels, #diagonal of kernel (max: M2)
-% par_SB = 1:2^par_level(end);    % Nonlinear subband (max: 1:2^level) NOT NEEDED
-
->>>>>>> b1addd0764f43957a81e4672fceb6d3a7be823be
 mu = [0.1, 0.1];                % Stepsize for different kernels 
 
 
@@ -61,11 +51,9 @@ par_comb = combvec(1:length(par_level), 1:length(par_filters));
 
 %% Create and plot kernel
 % Create Kernel mode
-<<<<<<< HEAD
+
 kermode = 'simulated';     %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
-=======
-kermode = 'random';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
->>>>>>> b1addd0764f43957a81e4672fceb6d3a7be823be
+
 
 % Create Kernel parameters
 deltapos = [5, 3];
