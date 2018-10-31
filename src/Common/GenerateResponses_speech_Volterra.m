@@ -12,6 +12,7 @@ function [un,dn,vn] = GenerateResponses_speech_Volterra(Volterra_sys, filename)
 % Publisher: John Wiley and Sons, Ltd
 
 load(filename,'un');
+un = un./max(un);                           % Normalize speech input
 rand('state',sum(100*clock));
 vn = (rand(1,length(un))-0.5)*sqrt(12*1e-6); % white noise with variance -60 dB
 a = abs(max(un))/sqrt(2); un = un/a;         % Normalize speech to unit variance
@@ -19,11 +20,9 @@ un = un + vn;                                % Add noise to speech
 
 max_len= max(Volterra_sys.M); 
 
-% Fast volterra filtering from {Morhac, M., 1991 - A Fast Algorithm of
-%                               Nonlinear Volterra Filtering}
-
-%Volterra_sys.Responses{} are kernels
-%Volterra_sys.M is the size of kernels
+% Fast volterra filtering from {Morhac, M., 1991 - A Fast Algorithm of Nonlinear Volterra Filtering}
+% Volterra_sys.Responses{} are kernels
+% Volterra_sys.M is the size of kernels
 
 dn = fastVMcell(un, Volterra_sys.Responses , Volterra_sys.M);
 dn = sum(dn,1);
