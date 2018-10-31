@@ -23,15 +23,15 @@ switch mode
         shift = 0;      
         ker2 = diag(rand(M2-shift,1)- rand(1) , shift); 
 
-        N = param{2}; %diagonals number, beyond the main one
+        N = param{2}-1; %diagonals number, beyond the main one
         for i = 1:N
             d = diag(ones(M2-i,1),i);
             ker2(d(:,:)==1) = rand(M2-i, 1) - rand(1);
         end    
 
         d = eye(M2); ker2(d(:,:)==1) = rand(M2,1)- rand(1) ;     % instert principal diagonal
-        fprintf('Number of diagonals: \n');
-        disp(N);
+        fprintf('Number of diagonals: ');
+        disp(N+1);
     
         
     case 'random'
