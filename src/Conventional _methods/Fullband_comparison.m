@@ -29,9 +29,10 @@ fprintf('\n');
 %% Wavelet Adaptive Filtering
 fprintf('WAF \n');
 fprintf('--------------------------------------------------------------------\n');
-level = 1;                       % Levels of Wavelet decomposition
-wtype = 'db1';                   % Mother Wavelet type
-fprintf('Wavelet type: %s, levels: %d, step size = %.2f \n', wtype, level, mu);
+level = 3;                       % Levels of Wavelet decomposition
+wtype = 'db4';                   % Mother Wavelet type
+mu = 0.001;
+fprintf('Wavelet type: %s, levels: %d, step size = %.4f \n', wtype, level, mu);
 
 S = WAFinit(zeros(M,1), mu, level, wtype);     % Initialization
 S.unknownsys = b; 
@@ -59,7 +60,8 @@ fprintf('\n');
 %% SOAF-DCT
 fprintf('SOAF-DCT \n');
 fprintf('--------------------------------------------------------------------\n');
-fprintf('Step size: %.3f \n', mu);
+mu = 0.001;
+fprintf('Step size: %.4f \n', mu);
 
 S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
 S.unknownsys = b; 
@@ -87,8 +89,8 @@ fprintf('\n');
 %% SOAF-DFT
 fprintf('SOAF-DFT \n');
 fprintf('--------------------------------------------------------------------\n');
-mu = 0.01;
-fprintf('Step size: %.3f \n', mu);
+mu = 0.001;
+fprintf('Step size: %.4f \n', mu);
 
 S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
 S.unknownsys = b; 
@@ -117,7 +119,7 @@ fprintf('\n');
 fprintf('Constrained FDAF \n');
 fprintf('--------------------------------------------------------------------\n');
 select = 1;
-mu = 0.1;
+mu = 0.005;
 mu_unconst = 0.001;
 fprintf('Step size: %.3f \n', mu);
 
@@ -209,10 +211,11 @@ figure(MSEfig);
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Mean-square error (with delay)'); grid on;
+title(sprintf('Input signal, colored with AR(%d)', AR));
 legend('show');
 
 figure(Misfig);  
 xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Misalignment (dB)');
+ylabel('Misalignment (dB)'); title(sprintf('Input signal, colored with AR(%d)', AR));
 grid on;
 legend('show');
