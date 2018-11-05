@@ -7,7 +7,7 @@ close all;
 %% Generate Response
 M = 256;
 mu = 0.001;
-AR = 1;
+AR = 4;
 SNR = 40;
 iter = 1.0*80000;
 b = load('h1.dat');              % Unknown system (select h1 or h2)
@@ -31,7 +31,7 @@ fprintf('WAF \n');
 fprintf('--------------------------------------------------------------------\n');
 level = 1;                       % Levels of Wavelet decomposition
 wtype = 'db1';                   % Mother Wavelet type
-fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
+fprintf('Wavelet type: %s, levels: %d, step size = %.2f \n', wtype, level, mu);
 
 S = WAFinit(zeros(M,1), mu, level, wtype);     % Initialization
 S.unknownsys = b; 
@@ -53,6 +53,8 @@ hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'WAF');
 
 figure(Misfig);                          % Plot misalignment
 hold on; plot((0:length(EML)-1)/1024,10*log10(EML),  'DisplayName', 'WAF');
+
+fprintf('\n');
 
 %% SOAF-DCT
 fprintf('SOAF-DCT \n');
@@ -95,8 +97,8 @@ tic;
 
 fprintf('Total time = %.2f s \n',toc);
 
-EML = S.eml.^2;                  % System error norm (normalized)
-err_sqr = en.^2;
+EML = abs(S.eml).^2;                  % System error norm (normalized)
+err_sqr = abs(en).^2;
     
 
 NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
@@ -202,7 +204,7 @@ hold on; plot((0:length(EML)-1)/1024,10*log10(EML), 'DisplayName', 'NLMS');
 
 fprintf('\n');
 
-%% Plots
+%% Fixing plots...
 figure(MSEfig);
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
