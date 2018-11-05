@@ -87,33 +87,33 @@ hold on; plot((0:length(EML)-1)/1024,10*log10(EML), 'DisplayName', 'SOAF-DCT');
 fprintf('\n');
 
 %% SOAF-DFT
-fprintf('SOAF-DFT \n');
-fprintf('--------------------------------------------------------------------\n');
-mu = 0.001;
-fprintf('Step size: %.4f \n', mu);
-
-S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
-S.unknownsys = b; 
-tic;
-[yn,en,S] = SOAFadapt_DFT(un,dn,S);     % Perform algorithm
-
-fprintf('Total time = %.2f s \n',toc);
-
-EML = abs(S.eml.^2);                  % System error norm (normalized)
-err_sqr = abs(en.^2);
-    
-
-NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
-fprintf('NMSE = %.2f dB\n', NMSE);
-
-figure(MSEfig);                          % Plot MSE
-q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'SOAF-DFT');
-
-figure(Misfig);                          % Plot misalignment
-hold on; plot((0:length(EML)-1)/1024,10*log10(EML), 'DisplayName', 'SOAF-DFT');
-
-fprintf('\n');
+% fprintf('SOAF-DFT \n');
+% fprintf('--------------------------------------------------------------------\n');
+% mu = 0.001;
+% fprintf('Step size: %.4f \n', mu);
+% 
+% S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
+% S.unknownsys = b; 
+% tic;
+% [yn,en,S] = SOAFadapt_DFT(un,dn,S);     % Perform algorithm
+% 
+% fprintf('Total time = %.2f s \n',toc);
+% 
+% EML = abs(S.eml.^2);                  % System error norm (normalized)
+% err_sqr = abs(en.^2);
+%     
+% 
+% NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
+% fprintf('NMSE = %.2f dB\n', NMSE);
+% 
+% figure(MSEfig);                          % Plot MSE
+% q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+% hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'SOAF-DFT');
+% 
+% figure(Misfig);                          % Plot misalignment
+% hold on; plot((0:length(EML)-1)/1024,10*log10(EML), 'DisplayName', 'SOAF-DFT');
+% 
+% fprintf('\n');
 
 %% Constrained FDAF
 fprintf('Constrained FDAF \n');
@@ -180,7 +180,7 @@ fprintf('\n');
 %% NLMS
 fprintf('NLMS \n');
 fprintf('--------------------------------------------------------------------\n');
-mu = 0.1;
+mu = 0.001;
 fprintf('Step size: %.3f \n', mu);
 
 S = NLMSinit(zeros(M,1),mu);        % Initialization
