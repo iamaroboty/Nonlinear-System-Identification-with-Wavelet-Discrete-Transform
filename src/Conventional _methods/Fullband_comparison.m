@@ -116,6 +116,7 @@ fprintf('Constrained FDAF \n');
 fprintf('--------------------------------------------------------------------\n');
 select = 1;
 mu = 0.1;
+mu_unconst = 0.001;
 fprintf('Step size: %.3f \n', mu);
 
 S = FDAFinit(zeros(M,1),mu,mu_unconst,iter);
@@ -145,7 +146,6 @@ fprintf('\n');
 fprintf('Constrained FDAF \n');
 fprintf('--------------------------------------------------------------------\n');
 select = 2;
-mu = 0.001;
 fprintf('Step size: %.3f \n', mu);
 
 S = FDAFinit(zeros(M,1),mu,mu_unconst,iter);
