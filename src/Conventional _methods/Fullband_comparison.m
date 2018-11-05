@@ -99,8 +99,8 @@ tic;
 
 fprintf('Total time = %.2f s \n',toc);
 
-EML = abs(S.eml).^2;                  % System error norm (normalized)
-err_sqr = abs(en).^2;
+EML = abs(S.eml.^2);                  % System error norm (normalized)
+err_sqr = abs(en.^2);
     
 
 NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
@@ -215,6 +215,7 @@ title(sprintf('Input signal, colored with AR(%d)', AR));
 legend('show');
 
 figure(Misfig);  
+axis([0 iter/1024 -50 5]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
 ylabel('Misalignment (dB)'); title(sprintf('Input signal, colored with AR(%d)', AR));
 grid on;
