@@ -46,7 +46,7 @@ for n = 1:ITER
         eml(n) = norm(b-w)/norm_b;% System error norm (normalized)
     end
     if n >= AdaptStart
-        power_vec= beta*power_vec+(1-beta)*(u.*u);	% Estimated power                                    
+        power_vec= (1-beta)*power_vec+beta*(u.*u);	% Estimated power                                    
         inv_sqrt_power = 1./(sqrt(power_vec+alpha));
 
         w = w + (mu*en(n)*inv_sqrt_power).*u; % Tap-weight adaptation   

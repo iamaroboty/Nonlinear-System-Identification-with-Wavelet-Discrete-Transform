@@ -45,7 +45,7 @@ EN = fft([zeros(1,M),error']');   % Insert zero block to form 2M block before FF
 
 % Update the signal power estimates
 
-power = (power_alpha.*power) + (1 - power_alpha).*(abs(UN).^2); 
+power = ((1 - power_alpha).*power) + (power_alpha).*(abs(UN).^2); 
 
 % Compute the gradient and weight update in frequency domain 
 

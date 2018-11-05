@@ -28,7 +28,7 @@ S.step_unconst  = mu_unconst; % Step size of unconstrained FDAF
 S.iter          = 0;          % Iteration count
 S.AdaptStart    = length(w0); % Running effect of adaptive filter
 S.weight        = WEIGHT;     % FFT of zero-padded weight vector
-S.palpha        = 0.5;        % Constant to update the power in each frequency bin
+S.palpha        = 1/M;        % Constant to update the power in each frequency bin
 S.ref           = un_blocks;  % 2M-sample block of input signal   
 
 
