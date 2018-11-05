@@ -21,7 +21,7 @@ clear all;
 order = 2;                      % Order of volterra filter (just 2 atm)
 M1 = 256;                       % length of first order volterra kernel
 M2 = 32;                        % length of second order volterra kernel
-gains = [1 1];                  % Kernel gains
+gains = [1 0.1];                  % Kernel gains
 
 % Signal Hyperpar
 speech = 0;                     % Choose either 1 or 0, for using speech sample or noise 
@@ -38,6 +38,7 @@ par_filters = {'db16'};
 
 par_C = M2;                     % Channels, #diagonal of kernel (max: M2)
 % par_SB = 1:2^level;                   % Nonlinear subband (max: 1:2^level)
+W = 50;
 
 mu = [0.1, 0.1];                % Stepsize for different kernels 
 

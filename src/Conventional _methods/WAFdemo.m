@@ -3,7 +3,8 @@
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
 addpath 'Common';             % Functions in Common folder
-clear all; close all;
+clear all; 
+close all;
 
 % Adaptive filter parameters
 
@@ -20,16 +21,16 @@ b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
 % TESTING, a = delay.
-a = 1;
-b = zeros(M,1);
-b(a+1) = 1;
+% a = 1;
+% b = zeros(M,1);
+% b(a+1) = 1;
 
 tic;
 
 % Adaptation process
 
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', wtype, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),6,40); %iter, b, seed, ARtype, SNR
 S = WAFinit(zeros(M,1), mu, level, wtype);     % Initialization
 S.unknownsys = b; 
 [en, S] = WAFadapt(un, dn, S);                 % Perform WSAF Algorithm
@@ -37,7 +38,10 @@ S.unknownsys = b;
 EML = S.eml.^2;                  % System error norm (normalized)
 err_sqr = en.^2;
     
-fprintf('Total time = %.3f mins \n',toc/60);
+fprintf('Total time = %.2f s \n',toc);
+
+NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
+fprintf('NMSE = %.2f dB\n', NMSE);
 
 figure;
 B = S.W*b;

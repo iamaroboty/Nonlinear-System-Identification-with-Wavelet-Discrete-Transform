@@ -41,15 +41,12 @@ un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
 dn = 0; 
 
-
-for i = 1:order
-    
-    dn = dn + gains(i).*un.^i; 
+for i = 1:order    
+    tmp = filter(mem_tap{i},1,un.^i);
+    dn = dn + gains(i).*filter(mem_tap,1,un.^i); 
 end
 
-dn = filter(b,1 ,un); 
-
-dn = dn(size(b,1)+1:end);   % Adjusting starting index of signals 
+dn = dn(size(b,1)+1:end);   % Adjusting starting index of signals
 un = un(size(b,1)+1:end);
 
 % Normalization of u(n) and d(n)

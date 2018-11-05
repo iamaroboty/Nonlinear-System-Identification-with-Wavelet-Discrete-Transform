@@ -7,10 +7,10 @@ clear all;
 % close all;
 
 % Adaptive filter parameters
-mu = 0.3;                      % Step size
-M = 64;                       % Length of unknown system response
-level = 2;                     % Levels of Wavelet decomposition
-filters = 'db4';               % Set wavelet type
+mu = 0.1;                      % Step size
+M = 256;                       % Length of unknown system response
+level = 3;                     % Levels of Wavelet decomposition
+filters = 'db16';               % Set wavelet type
 Q =1;   %useless
 DWT_flag = 0;
 
@@ -48,7 +48,7 @@ b = b(1:M);                      % Truncate to length M
 tic;
 % Adaptation process
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
 
 S = SWAFinit(M, mu, level, filters); 
@@ -58,7 +58,9 @@ S.unknownsys = b;
 if DWT_flag == 1
     [en, S] = MWSAFadapt_DWT(un, dn, S); 
 else
-    [en, S] = MWSAFadapt(un, dn, S);                
+    [en, Snormal] = MWSAFadapt(un, dn, S);    
+    [en_cllp, S_cllp] = MWSAFadapt_cllp(un, dn, S);  
+    [en_oplp, S_oplp] = MWSAFadapt_oplp(un, dn, S);  
 end
     
 %EML = S.eml.^2;                  % System error norm (normalized)
@@ -66,13 +68,20 @@ err_sqr = en.^2;
     
 fprintf('Total time = %.3f mins \n',toc/60);
 
-figure;         % Plot MSE
+MSEfig = figure('Name', 'MSE');         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF');
+
+q = 0.99; MSE = filter((1-q),[1 -q],en_cllp.^2);
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF_ cllp');
+
+q = 0.99; MSE = filter((1-q),[1 -q],en_oplp.^2);
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF_ oplp');
+
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Mean-square error (with delay)'); grid on;
-fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
+ylabel('Mean-square error (with delay)'); grid on; legend('show');
+% fprintf('MSE = %.2f dB\n', mean(10*log10(MSE(end-2048:end))))
 
 % figure;                          % Plot misalignment
 % hold on; plot((0:length(EML)-1)/1024,10*log10(EML));

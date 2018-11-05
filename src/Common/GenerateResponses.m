@@ -42,9 +42,6 @@ dn = dn(length(b)+1:end);                            % Adjusting starting index 
 un = un(length(b)+1:end);
 
 % Normalization of u(n) and d(n)
-
-un = 
-
 un = un/std(dn);
 dn = dn/std(dn);
 
