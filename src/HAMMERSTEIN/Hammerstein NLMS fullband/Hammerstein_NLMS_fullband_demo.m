@@ -9,20 +9,19 @@ clear all;
 close all;
 
 %% Unidentified System parameters
-order = 2; 
+order = 5; 
 M = 256; %% hammerstein filters lens
-gains = {rand(1,1)+0.5 , ;
+gains = ones(5,1);
 
 %algorithm parameters
-mu = [0.2 0.1]; %ap aw
-leak = [0 0];
+mu = [0.1 0.5];
+leak = [0 0]; 
 
 %% Random Vector 
 rng('default'); %
 
 lin_system = load('h2.dat');
 lin_system = lin_system(1:M); 
-
 
 
 %% Fullband Volterra NLMS

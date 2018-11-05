@@ -7,7 +7,7 @@ close all;
 %% Generate Response
 M = 256;
 mu = 0.001;
-AR = 4;
+AR = 1;
 SNR = 40;
 iter = 1.0*80000;
 b = load('h1.dat');              % Unknown system (select h1 or h2)
