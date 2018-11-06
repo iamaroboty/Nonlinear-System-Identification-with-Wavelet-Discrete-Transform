@@ -48,7 +48,6 @@ for n = 1:ITER
     if n >= AdaptStart
         power_vec= (1-beta)*power_vec+beta*(u.*u);	% Estimated power                                    
         inv_sqrt_power = 1./(sqrt(power_vec+alpha));
-
         w = w + (mu*en(n)*inv_sqrt_power).*u; % Tap-weight adaptation   
 %         w = (1-mu*leak)*w + (mu*en(n)/(u'*u + alpha))*u;  
                                   % Tap-weight adaptation

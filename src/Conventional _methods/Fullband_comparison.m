@@ -32,7 +32,7 @@ fprintf('--------------------------------------------------------------------\n'
 level = 3;                       % Levels of Wavelet decomposition
 wtype = 'db4';                   % Mother Wavelet type
 mu = 0.001;
-fprintf('Wavelet type: %s, levels: %d, step size = %.4f \n', wtype, level, mu);
+fprintf('Wavelet type: %s, levels: %d, step size = %.3f \n', wtype, level, mu);
 
 S = WAFinit(zeros(M,1), mu, level, wtype);     % Initialization
 S.unknownsys = b; 
@@ -61,7 +61,7 @@ fprintf('\n');
 fprintf('SOAF-DCT \n');
 fprintf('--------------------------------------------------------------------\n');
 mu = 0.001;
-fprintf('Step size: %.4f \n', mu);
+fprintf('Step size: %.3f \n', mu);
 
 S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
 S.unknownsys = b; 
@@ -119,7 +119,7 @@ fprintf('\n');
 fprintf('Constrained FDAF \n');
 fprintf('--------------------------------------------------------------------\n');
 select = 1;
-mu = 0.005;
+mu = 0.001;
 mu_unconst = 0.001;
 fprintf('Step size: %.3f \n', mu);
 
