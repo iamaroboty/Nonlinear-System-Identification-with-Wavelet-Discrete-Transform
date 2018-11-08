@@ -20,12 +20,11 @@ mu = [0.02 0.02]; %ap aw
 leak = [0 0]; 
 
 
-
-un = load('ref_low_pass'); 
+un = load('ref_white'); 
 un = un.un;
-dn = load('horn_low_pass'); 
+dn = load('horn_white'); 
 dn = dn.dn;
- latency = 2880; 
+ latency = 2800; 
  dn = dn(latency:end); 
  un = un(1:end-latency); 
 max_iter = size(un,2); 
