@@ -11,21 +11,25 @@ close all;
 
 %% Unidentified System parameters
 
-order = 3; 
-M = 32; %% hammerstein filters lens
-gains = ones(3,1);
+order = 5; 
+M = 256; %% hammerstein filters lens
+%gains = ones(8,1);
 
 %algorithm parameters
 mu = [0.02 0.02]; %ap aw
 leak = [0 0]; 
 
-%% Random Vector 
-rng('default'); %
 
 
+un = load('ref_low_pass'); 
+un = un.un;
+dn = load('horn_low_pass'); 
+dn = dn.dn;
+ latency = 2880; 
+ dn = dn(latency:end); 
+ un = un(1:end-latency); 
+max_iter = size(un,2); 
 
-lin_system = load('h1.dat');
-lin_system = lin_system(1:M); 
 
 
 %% Fullband Volterra NLMS
@@ -33,9 +37,20 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 
 % Run parameters
-iter = 4.0*80000;   % Number of iterations
+iter = 2.0*80000;   % Number of iterations
 
-[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, 'tanh', 0.2); %iter, b, seed, ARtype, SNR
+if iter > max_iter
+   
+    disp("WARNING: iter must be < max iter"); 
+    iter = max_iter; 
+    
+end
+
+un = un(1,1:iter); 
+dn = dn(1,1:iter); 
+
+
+%[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, 'tanh', 0.2); %iter, b, seed, ARtype, SNR
 
 
 %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_system ,gains, order,sum(100*clock),1,40);
