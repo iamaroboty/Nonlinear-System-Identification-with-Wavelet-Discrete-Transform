@@ -11,8 +11,8 @@ close all;
 
 %% Unidentified System parameters
 
-order = 5; 
-M = 256; %% hammerstein filters lens
+order = 3; 
+M = 512; %% hammerstein filters lens
 %gains = ones(8,1);
 
 %algorithm parameters
@@ -20,11 +20,11 @@ mu = [0.02 0.02]; %ap aw
 leak = [0 0]; 
 
 
-un = load('ref_white'); 
+un = load('behr_ref_color'); 
 un = un.un;
-dn = load('horn_white'); 
+dn = load('behr_resp_color'); 
 dn = dn.dn;
- latency = 2800; 
+ latency = 2855; 
  dn = dn(latency:end); 
  un = un(1:end-latency); 
 max_iter = size(un,2); 
@@ -36,7 +36,7 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 
 % Run parameters
-iter = 2.0*80000;   % Number of iterations
+iter = 5.0*80000;   % Number of iterations
 
 if iter > max_iter
    

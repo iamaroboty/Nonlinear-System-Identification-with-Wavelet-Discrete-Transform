@@ -8,16 +8,16 @@ close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 128; % length of first order volterra kernel
-M2 = 80;% length of second order volterra kernel
+M1 = 512; % length of first order volterra kernel
+M2 = 64; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
-un = load('ref_white'); 
+un = load('behr_ref_color'); 
 un = un.un;
-dn = load('horn_white'); 
+dn = load('behr_resp_color'); 
 dn = dn.dn;
-latency = 2800; 
+latency = 2855; %horn 2800 behr 2855  
 dn = dn(latency:end); 
 un = un(1:end-latency); 
 

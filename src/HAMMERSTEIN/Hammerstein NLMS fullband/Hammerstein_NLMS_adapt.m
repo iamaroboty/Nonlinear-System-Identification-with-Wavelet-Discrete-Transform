@@ -50,7 +50,8 @@ for n = 1:ITER
     end
 end
 
-S.coeffs = w;           
+S.coeffs{1} = w;
+S.coeffs{2} = p; 
 end
 
 
