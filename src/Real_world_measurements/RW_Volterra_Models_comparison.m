@@ -13,9 +13,9 @@ M2 = 64; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
-un = load('behr_ref_color'); 
+un = load('behr_ref_speech_f'); 
 un = un.un;
-dn = load('behr_resp_color'); 
+dn = load('behr_resp_speech_f'); 
 dn = dn.dn;
 latency = 2855; %horn 2800 behr 2855  
 dn = dn(latency:end); 
@@ -25,19 +25,16 @@ un = un(1:end-latency);
 %un = un/std(dn);
 %dn = dn/std(dn);
 
-
 max_iter = size(un,2); 
-
-
 
 %% Adaptive filter parameters
 
 % GENERAL FOR ALL MODELS: 
 
-mu = [0.1, 0.1];            %Step sizes for different kernels 
+mu = [0.01, 0.01];            %Step sizes for different kernels 
 
 % Run parameters
-iter = 1*80000;            % Number of iterations
+iter = 3*80000;            % Number of iterations
 
 if iter > max_iter
    
@@ -51,7 +48,7 @@ dn = dn(1,1:iter);
 
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
-level = 2;                  % Levels of Wavelet decomposition for different kernels
+level = 3;                  % Levels of Wavelet decomposition for different kernels
 
 filters = 'db1';            % Set wavelet type for different kernels
 

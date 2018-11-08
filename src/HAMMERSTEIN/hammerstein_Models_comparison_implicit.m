@@ -23,9 +23,9 @@ rand('seed', 32);
 
 % %% Simulated Kernel - random
  ker1 = rand(NL_system.M(1),1)-rand(1);
- ker2 = rand(NL_system.M(2),1)-rand(1);
+ ker2 = ker1; 
  non_linearity = 'pow'; %pow %tanh %relu %logsig
- power = 4; 
+ power = 2; 
 
 
 
@@ -48,7 +48,7 @@ iter = 1*80000;            % Number of iterations
 level = 1;                  % Levels of Wavelet decomposition for different kernels
 
 filters = 'db4';            % Set wavelet type for different kernels
-C = 2
+C = 2;
 SB = 1:2^level;
 
 
@@ -74,8 +74,8 @@ nmse_n_points = 1000;
 disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
 
-b=NL_system.Responses{1}; 
-[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
+
+[un,dn,vn] = GenerateResponses_nonlinear(iter,NL_system.Responses,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
 %% WAVTERRA
 

@@ -11,7 +11,7 @@ close all;
 
 %% Unidentified System parameters
 
-
+order = 4; 
 NL_system.M = [256 16 2 4]; %% hammerstein filters lens
 gains = [1 1 1 0];
 
@@ -24,7 +24,7 @@ rng('default'); %
 
 
 
-NL_system = create_hammerstein_sys(NL_system.M, gains); 
+NL_system = create_Phammerstein_sys(NL_system.M, gains); 
 
 
 %% Fullband Volterra NLMS
@@ -35,7 +35,7 @@ fprintf('FULLBAND VOLTERRA NLMS\n');
 iter = 3.0*80000;   % Number of iterations
 
 
-[un,dn,vn] = GenerateResponses_Hammerstein(iter, NL_system ,sum(100*clock),1,40);
+%[un,dn,vn] = GenerateResponses_Hammerstein(iter, NL_system, order, gains ,sum(100*clock),1,40);
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
 
 tic;

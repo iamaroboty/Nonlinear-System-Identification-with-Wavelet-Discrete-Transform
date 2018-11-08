@@ -1,4 +1,4 @@
-function [un,dn,vn] = GenerateResponses_nonlinear(iter,kernels,seed,ARtype,SNR, non_lin)
+function [un,dn,vn] = GenerateResponses_nonlinear_hammerstein(iter,kernels,seed,ARtype,SNR, non_lin)
 
 % GenerateResponses     Generate Input and Desired Responses
 %
@@ -35,16 +35,16 @@ ARcoeffs(5).a = [1.0000; -1.3193;  0.8610; -0.4541;...
                  0.0649; -0.1499;  0.1212;  0.1978]; % AR(15), c.f. Figure 3.3(a)
 ARcoeffs(6).a = [1; 0.9];              
 
-M1 = size(kernels(1), 1); 
-M2 = size(kernels(2), 1);
+M1 = size(kernels{1}, 1); 
+M2 = size(kernels{2}, 1);
 
 un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
-dn_lin = filter(kernels(1),1,un) ;
+dn_lin = filter(kernels{1},1,un) ;
 
 non_linearity = str2func(non_lin); 
 
-dn_non_lin = filter(kernels(2),1,non_linearity(un));
+dn_non_lin = filter(kernels{2},1,non_linearity(un));
 
 dn_lin = dn_lin(max([M1, M2])+1:end);   % Adjusting starting index of signals
 dn_non_lin = dn_non_lin(max([M1, M2])+1:end); 

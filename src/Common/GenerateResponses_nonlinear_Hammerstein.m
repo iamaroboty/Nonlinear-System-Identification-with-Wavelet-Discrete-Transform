@@ -1,4 +1,4 @@
-function [un,dn,vn] = GenerateResponses_Hammerstein(iter, b, order, gains, seed,ARtype,SNR)
+function [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,b,seed,ARtype,SNR, non_lin)
 
 % GenerateResponses     Generate Input and Desired Responses
 %
@@ -10,7 +10,7 @@ function [un,dn,vn] = GenerateResponses_Hammerstein(iter, b, order, gains, seed,
 % SNR                   Set SNR = inf for noiseless signal
 %
 % by Lee, Gan, and Kuo, 2008
-% Subband Adaptive Filtering: Theory and Implementation
+% Subband Adaptive bing: Theory and Implementation
 % Publisher: John Wiley and Sons, Ltd
 
 if nargin < 3
@@ -35,22 +35,19 @@ ARcoeffs(5).a = [1.0000; -1.3193;  0.8610; -0.4541;...
                  0.0649; -0.1499;  0.1212;  0.1978]; % AR(15), c.f. Figure 3.3(a)
 ARcoeffs(6).a = [1; 0.9];              
 
-
 un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
+maxsize = max(size(b)); 
 
-dn = 0; 
 
+non_lin = str2func(non_lin);
 
-for i = 1:order
-    
-    dn = dn + gains(i).*un.^i; 
-end
+tmp = non_lin(un); 
 
-dn = filter(b,1 ,dn); 
+dn  = filter(b,1, tmp); 
 
-dn = dn(size(b,1)+1:end);   % Adjusting starting index of signals 
-un = un(size(b,1)+1:end);
+dn = dn(maxsize+1:end);   % Adjusting starting index of signals 
+un = un(maxsize+1:end);
 
 % Normalization of u(n) and d(n)
 
@@ -58,6 +55,7 @@ un = un(size(b,1)+1:end);
 un = un/std(dn);
 dn = dn/std(dn);
 
+% Add white noise with given SNR
 % Add white noise with given SNR
 
 rand('state',sum(100*clock));                        % Generate additive noise
