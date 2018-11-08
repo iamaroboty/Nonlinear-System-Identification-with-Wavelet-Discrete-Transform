@@ -7,6 +7,7 @@ diary log_Volterra_TB.txt
 fprintf('%s \n', datestr(datetime('now')));
 
 addpath(genpath('../Common'));             % Functions in Common folder
+addpath('Volterra NLMS fullband');
 addpath('DFT_bank Volterra'); 
 addpath('../MWSAF'); 
 clear all;  
@@ -15,37 +16,37 @@ close all;
 %% Hyperparameters
 % Kernel Hyperpar
 order = 2;                      % Order of volterra filter (just 2 atm)
-M1 = 256;                       % length of first order volterra kernel
-M2 = 32;                        % length of second order volterra kernel
+M1 = 128;                       % length of first order volterra kernel
+M2 = 16;                        % length of second order volterra kernel
 M = [M1, M2];
 gains = [1 1];                  % Kernel gains
 
 % Signal Hyperpar
-speech = 1;                     % Choose either 1 or 0, for using speech sample or noise 
+speech = 0;                     % Choose either 1 or 0, for using speech sample or noise 
 % Choose ['speech_harvard_f.mat' ; 'speech_harvard_m.mat' ; 'SpeechSample.mat' ; 'speech.mat' ; 'Timit_m.mat' ; 'Timit_f_16k.mat' ] 
-speech_sample = 'Timit_m.mat';  
+speech_sample = 'speech_harvard_m.mat';  
 AR = 4;                         % AutoRegressive filter for white noise shaping, choose either 1 to 4, 1 is white noise
 iter = 1*80000;                 % Number of iterations, NON speech
 SNR = 40;
 
 % WAVTERRA Hyperpar            (This can be modified to allow comparison)
 par_level = [3];
-par_filters = {'db4'};
+par_filters = {'db16'};
 
 par_C = M2;                     % Channels, #diagonal of kernel (max: M2)
-% par_SB = 1:2^par_level(end);    % Nonlinear subband (max: 1:2^level) NOT NEEDED
+par_SB = 1:2^par_level(end);    % Nonlinear subband (max: 1:2^level) NOT NEEDED
 
 mu = [0.1, 0.1];                % Stepsize for different kernels 
 
 % SAF & MSAF Hyperpar
-N = 8;                      % Number of subbands, 4
+N = 8;
 D = N/2;                    % Decimation factor for 2x oversampling
-L = 8*N;                    % Length of analysis filters, M=2KN, overlapping factor K=4
+L = 8*N;                    % Length of analysis filters, M=2KN, 
 
 % Linear model hyperpar
 l_mu = 0.1;
 l_level = 3;
-l_filters = 'db4';
+l_filters = 'db16';
 Ml = M1;
 
 
@@ -97,7 +98,7 @@ for i = 1:runs
     fprintf('--------------------------------------------------------------------\n'); 
     level = par_level(par_comb(1,i));
     filters = par_filters{par_comb(2,i)};
-    SB = 1:2^level;
+    SB = par_SB;
     C = par_C;
     
     fprintf('Running iter (%d) of (%d), level = %d , wtype = %s\n', i, runs, level, filters);           
@@ -144,14 +145,14 @@ fprintf('Total time = %.2f s \n',toc);
 
 figure(MSEfig);
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:er_len-1)/1024,10*log10(MSE), 'DisplayName', 'MSAFTERRA');
+hold on; plot((0:er_len-1)/1024,10*log10(MSE), 'DisplayName', ['MSAFTERRA, N: ', num2str(N), ' subband']);
 
 NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
 fprintf('NMSE = %.2f dB\n', NMSE);
 
 % Plot NMSE
 figure(NMSEfig);
-hold on; plot((0:er_len-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', 'MSAFTERRA' );
+hold on; plot((0:er_len-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['MSAFTERRA, N: ', num2str(N), ' subband'] );
 
 fprintf('\n');
 
@@ -169,14 +170,14 @@ fprintf('Total time = %.2f s \n',toc);
 
 figure(MSEfig);
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-hold on; plot((0:er_len-1)/1024,10*log10(MSE), 'DisplayName', 'SAFTERRA');
+hold on; plot((0:er_len-1)/1024,10*log10(MSE), 'DisplayName', ['SAFTERRA, N: ', num2str(N), ' subband']);
 
 NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
 fprintf('NMSE = %.2f dB\n', NMSE);
 
 % Plot NMSE
 figure(NMSEfig);
-hold on; plot((0:er_len-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', 'SAFTERRA' );
+hold on; plot((0:er_len-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['SAFTERRA, N: ', num2str(N), ' subband'] );
 
 fprintf('\n');
 
@@ -210,7 +211,7 @@ fprintf('\n');
 %% LINEAR MODEL
 fprintf('LINEAR WMSAF\n');
 fprintf('--------------------------------------------------------------------\n');
-fprintf('Wavelet type: %s, levels: %d, step size = %s, filter length = %d\n', l_filters, l_level, l_mu, Ml);
+fprintf('Wavelet type: %s, levels: %d, step size = %.2f, filter length = %d\n', l_filters, l_level, l_mu, Ml);
 
 tic;
 Slin = SWAFinit(Ml, l_mu, l_level, l_filters); 
@@ -252,7 +253,7 @@ xlabel('Number of iterations (\times 1024 input samples)');
 figure(NMSEfig);
 axis([0 er_len/1024 -20 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Normalized Mean-square error'); grid on;
+ylabel('Cumulative Normalized Mean-square error'); grid on;
 legend('show');
 
 

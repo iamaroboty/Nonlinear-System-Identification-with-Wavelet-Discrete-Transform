@@ -14,6 +14,7 @@ switch mode
         ker1(deltapos(1)) = 1;
         ker2 = zeros(M2,M2);
         ker2(deltapos(2),deltapos(2)) = 1;
+        ker2 = (ker2+ker2') - eye(M2).*diag(ker2);
         fprintf('Delta position: \n');
         disp(deltapos);
     
@@ -30,6 +31,7 @@ switch mode
         end    
 
         d = eye(M2); ker2(d(:,:)==1) = rand(M2,1)- rand(1) ;     % instert principal diagonal
+        ker2 = (ker2+ker2') - eye(M2).*diag(ker2);
         fprintf('Number of diagonals: ');
         disp(N+1);
     

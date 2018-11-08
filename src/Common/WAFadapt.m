@@ -43,13 +43,14 @@ for n = 1:ITER
     en(n) = dn(n) - yn(n);          % Estimation error
 
     eml(n) = norm(W*b-w)/norm_Wb;   % System error norm (normalized)
+    
+    power_vec= (1-beta)*power_vec+(beta)*(U.*U);	% Estimated power                                    
+    inv_sqrt_power = 1./(sqrt(power_vec+alpha));
         
     if n >= AdaptStart
 %         P = [ones(64,1)*norm(U(1:64)); ones(64,1)*norm(U(65:128)); ones(128,1)*norm(U(129:end))]; %Estimated power each subband
 %         power_vec =  beta*power_vec + (1-beta)*P;        
         
-        power_vec= beta*power_vec+(1-beta)*(U.*U);	% Estimated power                                    
-        inv_sqrt_power = 1./(sqrt(power_vec+alpha));
         
         w = w + (mu*en(n)*inv_sqrt_power).*U; % Tap-weight adaptation        
         S.iter = S.iter + 1;  

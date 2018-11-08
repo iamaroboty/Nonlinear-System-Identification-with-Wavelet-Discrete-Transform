@@ -25,5 +25,6 @@ S.leakage       = leak;          % Leaky factor for the leaky LMS algorithm
 S.iter          = 0;             % Iteration count
 S.alpha         = 1e-4;          % A small constant to avoid divide by zero
 S.AdaptStart    = length(w0);    % Running effect of adaptive filter, minimum M
+S.beta          = 1/numel(w0);  
 
                      

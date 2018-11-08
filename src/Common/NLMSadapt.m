@@ -17,11 +17,13 @@ function [yn,en,S] = NLMSadapt(un,dn,S)
 
 M = length(S.coeffs);             % Length of FIR filter
 mu = S.step;                      % Step size (between 0 and 2)
+beta = S.beta;
 leak = S.leakage;                 % Leaky factor 
 alpha = S.alpha;                  % A small constant
 AdaptStart = S.AdaptStart;
 w = S.coeffs;                     % Weight vector of FIR filter
 u = zeros(M,1);                   % Input signal vector
+power_vec = zeros(M,1);             % Initialize power in each bin
 
 ITER = length(un);                % Length of input sequence
 yn = zeros(1,ITER);               % Initialize output sequence to zero
@@ -44,7 +46,10 @@ for n = 1:ITER
         eml(n) = norm(b-w)/norm_b;% System error norm (normalized)
     end
     if n >= AdaptStart
-        w = (1-mu*leak)*w + (mu*en(n)/(u'*u + alpha))*u;  
+        power_vec= (1-beta)*power_vec+beta*(u.*u);	% Estimated power                                    
+        inv_sqrt_power = 1./(sqrt(power_vec+alpha));
+        w = w + (mu*en(n)*inv_sqrt_power).*u; % Tap-weight adaptation   
+%         w = (1-mu*leak)*w + (mu*en(n)/(u'*u + alpha))*u;  
                                   % Tap-weight adaptation
         S.iter = S.iter + 1;
     end

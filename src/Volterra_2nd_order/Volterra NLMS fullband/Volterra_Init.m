@@ -11,10 +11,10 @@ function S = Volterra_Init(M, mu, level, wtype)
 % wtype          Mother Wavelet filter type
 
 % Assign structure fields
-S.kernel_length  = M;              % Kernel dimensions
+S.kernel_length  = M;             % Kernel dimensions
 S.step          = mu;             % Step saize 
-S.iter          = cell(1,level);  % Itertion count per level
-S.levels        = level(1);          % DWT levels 
+S.iter          = 0;              % Itertion count
+S.levels        = level(1);       % DWT levels 
 S.wtype         = wtype;          % Filter type
 S.alpha         = 1e-6;           % Small positive constant
 

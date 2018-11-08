@@ -1,7 +1,10 @@
-function [ out ] = pow(a )
+function [ out ] = pow(a)
 %UNTITLED Summary of this function goes here
 %   Detailed explanation goes here
-out = a.^4; 
+
+
+out = a.^2; 
+
 
 end
 

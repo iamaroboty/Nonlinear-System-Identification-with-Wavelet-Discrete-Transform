@@ -46,9 +46,7 @@ dn = zeros(1, (size(un,2)));
 
 filters = hammerstein.filters; 
 
-for i = 1:size(filters,2)
-    
-    
+for i = 1:size(filters,2)        
     tmp  = filter(filters{i},1, un.^i); 
     dn = dn + tmp; 
 end
