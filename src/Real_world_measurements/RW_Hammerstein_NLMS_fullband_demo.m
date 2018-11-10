@@ -7,36 +7,52 @@ diary log_VNLMS.txt
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
-close all;
+%close all;
 
 %% Unidentified System parameters
 
-order = 3; 
-M = 512; %% hammerstein filters lens
-%gains = ones(8,1);
+order = 4; 
+M = 256; %% hammerstein filters lens
+gains = ones(2,1);
 
 %algorithm parameters
 mu = [0.02 0.02]; %ap aw
 leak = [0 0]; 
 
 
-un = load('behr_ref_color'); 
+un = load('xperia_ref_speech_f'); 
 un = un.un;
-dn = load('behr_resp_color'); 
+dn = load('xperia_resp_speech_f'); 
 dn = dn.dn;
- latency = 2855; 
- dn = dn(latency:end); 
- un = un(1:end-latency); 
+
+[corr, lag]= xcorr(un,dn); 
+[~, ind]= max(abs(corr)); 
+latency = abs(lag(ind))-50; 
+
+%latency = 3120; 
+ 
+dn = dn(latency:end); 
+un = un(1:end-latency); 
+
+ % normalization 
+
+% un = un/std(dn);
+% dn = dn/std(dn);
+
+%normalization speech 
+a = abs(max(dn))/sqrt(2); 
+un = un/a; 
+dn= dn/ a; 
+%  
+ 
 max_iter = size(un,2); 
-
-
 
 %% Fullband Volterra NLMS
 fprintf('-------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 
 % Run parameters
-iter = 5.0*80000;   % Number of iterations
+iter = 2.0*80000;   % Number of iterations
 
 if iter > max_iter
    
@@ -66,6 +82,7 @@ fprintf('Total time = %.3f mins \n',toc/60);
 % Plot MSE
 figure;
 q = 0.99; MSE_full = filter((1-q),[1 -q],err_sqr_full);
+subplot(2,1,1); 
 plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', 'FB NLMS');
 axis([0 length(MSE_full)/1024 -inf 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
@@ -76,3 +93,8 @@ fprintf('NMSE = %.2f dB\n', 10*log10(sum(err_sqr_full)/sum(dn.^2)));
 
 fprintf('\n');  % Empty line in logfile
 diary off
+
+subplot(2,1,2); 
+plot((0:length(dn)-1)/1024,dn, 'DisplayName', 'dn');
+axis([0 length(dn)/1024 -3  3]);
+

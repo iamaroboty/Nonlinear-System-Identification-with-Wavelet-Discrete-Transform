@@ -3,27 +3,40 @@
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
 addpath '../Common';             % Functions in Common folder
+
 clear all;  
-close all;
+%close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 512; % length of first order volterra kernel
-M2 = 64; % length of second order volterra kernel
+M1 = 256; % length of first order volterra kernel
+M2 = 32; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
-un = load('behr_ref_speech_f'); 
+un = load('xperia_ref_speech_f'); 
 un = un.un;
-dn = load('behr_resp_speech_f'); 
+dn = load('xperia_resp_speech_f'); 
 dn = dn.dn;
-latency = 2855; %horn 2800 behr 2855  
+
+%estimate latency with xcorr
+[corr, lag]= xcorr(un,dn); 
+[~, ind]= max(abs(corr)); 
+latency = abs(lag(ind))-50; 
+
+% latency = 3130; %horn 2800 behr 3130 xperia 
 dn = dn(latency:end); 
 un = un(1:end-latency); 
 
 % normalization 
-%un = un/std(dn);
-%dn = dn/std(dn);
+
+% un = un/std(dn);
+% dn = dn/std(dn);
+
+%normalization speech 
+a = abs(max(dn))/sqrt(2); 
+un = un/a; 
+dn= dn/ a; 
 
 max_iter = size(un,2); 
 
@@ -31,10 +44,10 @@ max_iter = size(un,2);
 
 % GENERAL FOR ALL MODELS: 
 
-mu = [0.01, 0.01];            %Step sizes for different kernels 
+mu = [0.02, 0.02];            %Step sizes for different kernels 
 
 % Run parameters
-iter = 3*80000;            % Number of iterations
+iter = 2*80000;            % Number of iterations
 
 if iter > max_iter
    
