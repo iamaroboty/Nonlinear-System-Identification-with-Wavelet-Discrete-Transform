@@ -3,7 +3,6 @@
 % 
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
-diary log_VNLMS.txt
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
@@ -32,15 +31,13 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('FULLBAND VOLTERRA NLMS\n');
 
 % Run parameters
-iter = 3.0*80000;   % Number of iterations
+iter = 1.0*80000;   % Number of iterations
 
-
-%[un,dn,vn] = GenerateResponses_Hammerstein(iter, NL_system, order, gains ,sum(100*clock),1,40);
-% [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
+[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),1,40);
 
 tic;
-Sfull = Hammerstein_NLMS_init(NL_system.M, mu, leaks); 
-[en, Sfull] = Hammerstein_NLMS_adapt(un, dn, Sfull);     
+Sfull = PHammerstein_NLMS_init(NL_system.M, mu, leaks); 
+[en, Sfull] = PHammerstein_NLMS_adapt(un, dn, Sfull);     
 
 err_sqr_full = en.^2;
     

@@ -37,7 +37,7 @@ for n = 1:ITER
     en(n) = dn(n) - w'*X*p;    
     
     if n >= AdaptStart        
-        p = (1-mu(1)*leak(1))*p + (mu(1)*en(n)*X'*w)/((X'*w)'*(X'*w) + alpha);        
+        p = (1-mu(1)*leak(1))*p + (mu(1)*en(n)*X'*w)/((X'*w)'*(X'*w) + alpha);     
         w = (1-mu(2)*leak(2))*w + (mu(2)*en(n)*X*p)/((X*p)'*(X*p) + alpha);  
 
         S.iter = S.iter + 1;

@@ -1,4 +1,4 @@
-function [en,S] = Hammerstein_NLMS_adapt(un,dn,S)
+function [en,S] = PHammerstein_NLMS_adapt(un,dn,S)
 % Fullband Volterra filtering adapt, 2nd order              
 % 
 % Arguments:
@@ -36,11 +36,10 @@ for n = 1:ITER
     end 
     en(n) = dn(n) - sum;    
     
-    if n >= AdaptStart
-       
-    for i = 1:n_filters
-        w{i} = (1-mu(i)*leak(i))*w{i} + (mu(i)*en(n)/(norm + alpha))*u{i}; 
-    end
+    if n >= AdaptStart       
+        for i = 1:n_filters
+            w{i} = (1-mu(i)*leak(i))*w{i} + (mu(i)*en(n)/(norm + alpha))*u{i}; 
+        end
         S.iter = S.iter + 1;
     end
 end

@@ -6,12 +6,14 @@
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 rng('default'); %
 
 %% Unidentified System parameters
 order = 3; 
 M = 256; %% hammerstein filters lens
+level = 1;                     % Levels of Wavelet decomposition
+filters = 'db2';               % Set wavelet type
 % gains = rand(1,order)-0.5;
 gains = ones(1,order);
 
@@ -27,10 +29,9 @@ iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
-leak = [0 0];
-mu_p = [0.3 ];
-mu_w = [0.7 ];
-alpha = 10.^[0];
+mu_p = [0.01 0.1 0.3 0.5];
+mu_w = [0.05 0.1 0.5 0.7];
+alpha = 10.^[0 -2];
 
 
 % Create combination
@@ -50,7 +51,7 @@ lin_sys = b;
 MSEfig = figure('Name', 'MSE');
 
 %% HAMMERSTERIN
-fprintf('HAMMERSTEIN\n');
+fprintf('WAVPACK-HAMMERSTEIN\n');
 fprintf('Order = %d, sys_len = %d \n', order, M);
 for i = 1:runs
     fprintf('-------------------------------------------------------------\n');
@@ -62,9 +63,9 @@ for i = 1:runs
 %     [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
-    S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
+    S = Wammerstein_init(M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,level, filters, order, alpha(par_comb(3,i))); 
 
-    [en, S] = Hammerstein_NLMS_adapt(un, dn, S);  
+    [en, S] = Wammerstein_adapt(un, dn, S);  
 
     err_sqr = en.^2;
 
@@ -77,7 +78,7 @@ for i = 1:runs
                                                             ['\mu_p:', num2str(mu_p(par_comb(1,i))),...
                                                              ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
                                                              ' \alpha:', num2str(alpha(par_comb(3,i)))]);    
-    axis([0 length(MSE_full)/1024 -inf 10]);
+    axis([0 length(MSE_full)/1024 -50 10]);
     xlabel('Number of iterations (\times 1024 input samples)'); 
     ylabel('Mean-square error (with delay)'); grid on; hold on;
     legend('show');
