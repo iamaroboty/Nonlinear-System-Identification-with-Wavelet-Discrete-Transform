@@ -9,58 +9,66 @@ clear all;
 close all;
 
 %% Unidentified System parameters
-
-
 order = 3; 
 M = 256; %% hammerstein filters lens
+gains = ones(1,order);
+
+iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
-mu = [0.1 0.1]; %ap aw
+% p , w
 leak = [0 0];
+mu_p = [0.3 0.5 0.7];
+mu_w = [0.3 0.5 0.7];
+alpha = 10.^[0 -1 -2];
 
-gains = [1, 1, 1];
+% Create combination
+runs = length(mu_p)*length(mu_w)*length(alpha);
+par_comb = combvec(1:length(mu_p), 1:length(mu_w),1:length(alpha));
 
-%% Random Vector 
+% Random Vector 
 rng('default'); %
+lin_sys = rand(M,1);
 
-lin_system = zeros(M,1);%load('h1.dat');
-lin_system(1) = 1; 
-%lin_system = lin_system(1:M); 
+% figures handlers
+MSEfig = figure('Name', 'MSE');
 
-%% Fullband Volterra NLMS
-fprintf('-------------------------------------------------------------\n');
-fprintf('FULLBAND VOLTERRA NLMS\n');
+%% HAMMERSTERIN
+fprintf('HAMMERSTEIN\n');
+fprintf('Order = %d, sys_len = %d \n', order, M);
+for i = 1:runs
+    fprintf('-------------------------------------------------------------\n');
+    fprintf('Running iter (%d) of (%d)\n', i, runs);           
+    fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-% Run parameters
-iter = 1.0*80000;   % Number of iterations
+    [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys ,gains, order,sum(100*clock),1,40);
 
-%[un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_system,sum(100*clock),1 ,40 , 'tanh'); %iter, b, seed, ARtype, SNR
+    tic;
+    S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
 
-[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_system ,gains, order,sum(100*clock),1,40);
+    [en, S] = Hammerstein_NLMS_adapt(un, dn, S);  
 
-%[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
+    err_sqr = en.^2;
 
-tic;
-Sfull = Hammerstein_NLMS_init(order, M, mu, leak); 
-only_lin = 1; 
-[en, Sfull] = Hammerstein_NLMS_adapt(un, dn, Sfull, only_lin);     
-only_lin = 0; 
-[en, Sfull] = Hammerstein_NLMS_adapt(un, dn, Sfull, only_lin);  
+    fprintf('Run time = %.2f s \n',toc);
 
+    % Plot MSE
+    figure(MSEfig);
+    q = 0.99; MSE_full = filter((1-q),[1 -q],err_sqr);
+    plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', ...
+                                                            ['\mu_p:', num2str(mu_p(par_comb(1,i))),...
+                                                             ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
+                                                             ' \alpha:', num2str(alpha(par_comb(3,i)))]);    
+    axis([0 length(MSE_full)/1024 -inf 10]);
+    xlabel('Number of iterations (\times 1024 input samples)'); 
+    ylabel('Mean-square error (with delay)'); grid on; hold on;
+    legend('show');
 
-err_sqr_full = en.^2;
+    NMSE(i) = 10*log10(sum(err_sqr)/sum(dn.^2));
+    fprintf('NMSE = %.2f dB\n', NMSE(i));
+end
     
-fprintf('Total time = %.3f mins \n',toc/60);
-
-% Plot MSE
-figure;
-q = 0.99; MSE_full = filter((1-q),[1 -q],err_sqr_full);
-plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', 'FB NLMS');
-axis([0 length(MSE_full)/1024 -inf 10]);
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Mean-square error (with delay)'); grid on;
-legend('show');
-
-fprintf('NMSE = %.2f dB\n', 10*log10(sum(err_sqr_full)/sum(dn.^2)));
+[~, i] = min(NMSE);
+fprintf('Hyperpar best sys: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)));
 
 fprintf('\n');  % Empty line in logfile

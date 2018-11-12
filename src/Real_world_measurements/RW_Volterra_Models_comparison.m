@@ -48,6 +48,7 @@ mu = [0.02, 0.02];            %Step sizes for different kernels
 
 % Run parameters
 iter = 2*80000;            % Number of iterations
+iter = max_iter; 
 
 if iter > max_iter
    
@@ -63,7 +64,7 @@ dn = dn(1,1:iter);
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
 level = 3;                  % Levels of Wavelet decomposition for different kernels
 
-filters = 'db1';            % Set wavelet type for different kernels
+filters = 'db8';            % Set wavelet type for different kernels
 
 
 %%

@@ -1,4 +1,4 @@
-function [un,dn,vn] = GenerateResponses_nonlinear_hammerstein(iter,kernels,seed,ARtype,SNR, non_lin)
+function [un,dn,vn] = GenerateResponses_nonlinear(iter,kernels,seed,ARtype,SNR, non_lin)
 
 % GenerateResponses     Generate Input and Desired Responses
 %
@@ -8,10 +8,6 @@ function [un,dn,vn] = GenerateResponses_nonlinear_hammerstein(iter,kernels,seed,
 % seed                  Seed for generating random numbers
 % ARtype                Set ARtype = 1 for generating white noise
 % SNR                   Set SNR = inf for noiseless signal
-%
-% by Lee, Gan, and Kuo, 2008
-% Subband Adaptive Filtering: Theory and Implementation
-% Publisher: John Wiley and Sons, Ltd
 
 if nargin < 3
     seed = sum(100*clock);
@@ -40,23 +36,24 @@ M2 = size(kernels{2}, 1);
 
 un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
-dn_lin = filter(kernels{1},1,un) ;
-
 non_linearity = str2func(non_lin); 
 
-dn_non_lin = filter(kernels{2},1,non_linearity(un));
+dn = filter(kernels{1},1,non_linearity(un));
 
-dn_lin = dn_lin(max([M1, M2])+1:end);   % Adjusting starting index of signals
-dn_non_lin = dn_non_lin(max([M1, M2])+1:end); 
-dn = dn_lin + dn_non_lin; 
+% dn_lin = filter(kernels{1},1,un);
+% non_lin_un = non_linearity(un);
+% dn_non_lin = filter(kernels{2},1,non_lin_un);
+% dn = dn_lin + dn_non_lin;
+
+% Adjusting starting index of signals
 un = un(max([M1 M2])+1:end);
+dn = dn(max([M1 M2])+1:end);
 
 % Normalization of u(n) and d(n)
 un = un/std(dn);
 dn = dn/std(dn);
 
 % Add white noise with given SNR
-
 rand('state',sum(100*clock));                        % Generate additive noise
 vn = (rand(1,length(dn))-0.5)*sqrt(12*10^(-SNR/10)); % SNR in dB
 dn = dn + vn;                                        % Mix signal with noise

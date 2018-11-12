@@ -41,7 +41,7 @@ plot(delta);
 subplot(3,1,2); 
 plot(ir_res(1:size(delta,1)));
 subplot(3,1,3); 
-plot(acorr); 
+plot(lag, acorr); 
 
 
 

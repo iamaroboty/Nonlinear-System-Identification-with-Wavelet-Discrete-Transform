@@ -27,7 +27,7 @@ dn = dn.dn;
 
 [corr, lag]= xcorr(un,dn); 
 [~, ind]= max(abs(corr)); 
-latency = abs(lag(ind))-50; 
+latency = abs(lag(ind)); 
 
 %latency = 3120; 
  
@@ -47,9 +47,9 @@ dn= dn/ a;
  
 max_iter = size(un,2); 
 
-%% Fullband Volterra NLMS
+%% Hammerstein
 fprintf('-------------------------------------------------------------\n');
-fprintf('FULLBAND VOLTERRA NLMS\n');
+fprintf('HAMMERSTEIN\n');
 
 % Run parameters
 iter = 2.0*80000;   % Number of iterations
