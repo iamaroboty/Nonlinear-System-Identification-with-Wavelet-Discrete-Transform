@@ -1,4 +1,4 @@
-function [un,dn,vn] = GenerateResponses_nonlinear(iter,kernels,seed,ARtype,SNR, non_lin)
+function [un,dn,vn] = GenerateResponses_nonlinear(iter,kernels,seed,ARtype,SNR, non_linearity)
 
 % GenerateResponses     Generate Input and Desired Responses
 %
@@ -35,8 +35,6 @@ M1 = size(kernels{1}, 1);
 M2 = size(kernels{2}, 1);
 
 un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
-
-non_linearity = str2func(non_lin); 
 
 dn = filter(kernels{1},1,non_linearity(un));
 

@@ -24,10 +24,12 @@ rand('seed', 32);
 % %% Simulated Kernel - random
  ker1 = rand(NL_system.M(1),1)-rand(1);
  ker2 = ker1; 
- non_linearity = 'pow'; %pow %tanh %relu %logsig
- power = 2; 
-
-
+ 
+ pow = @(x) x.^2;
+ 
+ 
+ non_linearity = pow; %pow %tanh %relu %logsig
+ %power = 2; 
 
 % 
 % % Non-linear System 

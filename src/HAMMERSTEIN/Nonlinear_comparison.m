@@ -48,6 +48,7 @@ gains = ones(order,1);
 leak = [0 0];
 muh = [0.1, 0.1]; 
 Mh = M1;
+alpha = 0.1; 
 
 
 % Create combination for Wavterra searchgrid
@@ -72,8 +73,11 @@ b = b(1:M1);
 % b = rand(M1,1)-0.5;
 ker1 = b;
 ker2 = 1;
-non_linearity = 'pow'; %pow %tanh %relu %logsig
-fprintf('Non Linearity = %s \n', non_linearity);
+
+pow = @(x) x.^2; 
+
+non_linearity = pow; %pow %tanh %relu %logsig
+fprintf('Non Linearity = %s \n', func2str(non_linearity));
 
 NL_system.M = [M1, M2];
 NL_system.Responses = {k_gains(1).*ker1, k_gains(2).*ker2};
@@ -249,7 +253,7 @@ fprintf('--------------------------------------------------------------------\n'
 fprintf('Order = %d \n', order);
 
 tic;
-SH = Hammerstein_NLMS_init(order, Mh, muh, leak); 
+SH = Hammerstein_NLMS_init(order, Mh, muh, leak, alpha); 
 [en, SH] = Hammerstein_NLMS_adapt(un, dn, SH);     
 
 err_sqr = en.^2;
