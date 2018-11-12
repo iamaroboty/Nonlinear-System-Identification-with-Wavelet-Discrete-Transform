@@ -40,8 +40,6 @@ un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 
 
 dn = 0; 
-
-
 for i = 1:order    
     dn = dn + gains(i).*un.^i; 
 end

@@ -7,19 +7,22 @@ fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
 close all;
+rng('default'); %
 
 %% Unidentified System parameters
 order = 3; 
 M = 256; %% hammerstein filters lens
-gains = ones(1,order);
+gains = rand(1,order)-0.5;
+% gains = ones(1,order);
 
 iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
 leak = [0 0];
-mu_p = [0.3 0.5 0.7];
-mu_w = [0.3 0.5 0.7];
+
+mu_p = [0.3 0.1];
+mu_w = [1 0.7 0.5 0.3];
 alpha = 10.^[0 -1 -2];
 
 % Create combination
@@ -27,8 +30,13 @@ runs = length(mu_p)*length(mu_w)*length(alpha);
 par_comb = combvec(1:length(mu_p), 1:length(mu_w),1:length(alpha));
 
 % Random Vector 
-rng('default'); %
-lin_sys = rand(M,1);
+b = load("h1.dat");
+b = b(1:M);
+% lin_sys = rand(M,1);
+lin_sys = b;
+
+% non_linearity = 'tanh'; %pow %tanh %relu %logsig
+% fprintf('Non Linearity = %s \n', non_linearity);
 
 % figures handlers
 MSEfig = figure('Name', 'MSE');
@@ -41,8 +49,10 @@ for i = 1:runs
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-    [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys ,gains, order,sum(100*clock),1,40);
+    [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys ,order, gains, sum(100*clock),1,40);
+%     [un,dn,vn] = GenerateResponses_nonlinear(iter,{lin_sys, 1} ,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
+    
     tic;
     S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
 

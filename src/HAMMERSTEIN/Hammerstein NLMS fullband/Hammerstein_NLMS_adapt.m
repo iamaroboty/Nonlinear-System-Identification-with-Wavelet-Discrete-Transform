@@ -17,9 +17,8 @@ leak = S.leaks;                 % Leaky factor
 
 xp = zeros(order, 1);  
 w = zeros(M,1);
-w(1) = sqrt(order);
 p = zeros(order, 1); % non linearity coeffs vector 
-p(1) = sqrt(order); 
+p(1) = 1; 
 X = zeros(M, order); 
 
 ITER = length(un);              % Length of input sequence
