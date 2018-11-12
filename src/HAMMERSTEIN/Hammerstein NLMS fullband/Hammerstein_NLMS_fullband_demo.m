@@ -13,6 +13,10 @@ order = 3;
 M = 256; %% hammerstein filters lens
 gains = ones(1,order);
 
+tube = @(x) tube(x,10); 
+non_linearity = tube; 
+
+
 iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
@@ -41,8 +45,12 @@ for i = 1:runs
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-    [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys ,gains, order,sum(100*clock),1,40);
+    %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys ,gains, order,sum(100*clock),1,40);
+    
+    [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
+    
+    
     tic;
     S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
 

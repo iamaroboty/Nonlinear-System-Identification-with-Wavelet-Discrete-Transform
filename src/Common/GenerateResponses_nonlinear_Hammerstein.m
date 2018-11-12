@@ -40,8 +40,6 @@ un = filter(1,ARcoeffs(ARtype).a,un);                % Generate AR signal
 maxsize = max(size(b)); 
 
 
-non_lin = str2func(non_lin);
-
 tmp = non_lin(un); 
 
 dn  = filter(b,1, tmp); 
