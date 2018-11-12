@@ -9,22 +9,24 @@ clear all;
 close all;
 
 %% Unidentified System parameters
-order = 3; 
+order = 1; 
 M = 256; %% hammerstein filters lens
 gains = ones(1,order);
 
 tube = @(x) tube(x,10); 
-non_linearity = tube; 
-
+gdist = @(x) gdist(0.7,x); 
+tanh = @(x) tanh(x); 
+non_linearity = tanh; 
+plot_nonlinearity = 1; 
 
 iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
 leak = [0 0];
-mu_p = [0.3 0.5 0.7];
-mu_w = [0.3 0.5 0.7];
-alpha = 10.^[0 -1 -2];
+mu_p = [0.3];
+mu_w = [0.7];
+alpha = 10.^[0];
 
 % Create combination
 runs = length(mu_p)*length(mu_w)*length(alpha);
@@ -45,7 +47,7 @@ for i = 1:runs
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-    %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys ,gains, order,sum(100*clock),1,40);
+    %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),1,40);
     
     [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
@@ -80,3 +82,16 @@ end
 fprintf('Hyperpar best sys: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)));
 
 fprintf('\n');  % Empty line in logfile
+
+if plot_nonlinearity ==1 
+figure;
+
+range = linspace(-10,10,1000); 
+plot(range,non_linearity(range)); 
+hold on; 
+poly = [0, S.coeffs{1,2}']; 
+ev = polyval(flip(poly), range); 
+plot(range, ev); 
+axis([min(range) max(range), -2, 2]); 
+
+end
