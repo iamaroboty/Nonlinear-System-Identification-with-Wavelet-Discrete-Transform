@@ -2,8 +2,9 @@ clear all;
 close all;
 %%
 load speech_harvard_f;
+
+filename = 'ref_m_opt.wav';
 un = un./max(un);
-filename = 'ref_f_opt.wav';
 audiowrite(filename, un, 8000);
 
 
@@ -13,7 +14,7 @@ seed = sum(100*clock);
 randn('state',seed); 
 fs = 8000;
 iter = fs*10;
-AR = 1;
+AR = 2;
 
 un = randn(1,iter);                                  % Gaussian distribution random signal
 
@@ -30,7 +31,7 @@ ARcoeffs(5).a = [1.0000; -1.3193;  0.8610; -0.4541;...
 ARcoeffs(6).a = [1; -0.9]; 
 
 un = filter(1,ARcoeffs(AR).a,un);                % Generate AR signal
-un = un./max(un);
-filename = 'ref_white_opt.wav';
+
+filename = 'ref_AR2_opt.wav';
 audiowrite(filename, un, fs);
 

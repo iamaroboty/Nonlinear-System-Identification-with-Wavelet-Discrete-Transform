@@ -11,7 +11,7 @@ rng('default'); %
 
 %% Unidentified System parameters
 order = 3; 
-M = 256; %% hammerstein filters lens
+M = 1024; %% hammerstein filters lens
 gains = rand(1,order)-0.5;
 % gains = ones(1,order);
 
@@ -30,9 +30,9 @@ iter = 0.5*80000;   % Number of iterations
 %algorithm parameters
 % p , w
 leak = [0 0];
-mu_p = [0.2 0.3 0.5];
-mu_w = [0.3 0.5 0.7 ];
-alpha = 10.^[1];
+mu_p = [0.5];
+mu_w = [0.7];
+alpha = 10.^[2];
 
 
 % Create combination
@@ -50,6 +50,34 @@ lin_sys = b;
 
 % figures handlers
 MSEfig = figure('Name', 'MSE');
+NMSE_fig = figure('Name', 'NMSE');
+nmse_n_points = 1000; 
+
+%% RW data
+filename = 'behr_ref_speech_m.wav'; %behr_ref_white  behr_ref_color  behr_ref_speech_f  behr_ref_speech_m
+[dn, fs] = audioread(filename);
+dn = dn(:,1)';
+
+% import un variable
+load opt_M.mat      %opt_white  opt_color  opt_M  opt_F
+un = un';
+
+% Resample the data to new fsn
+% fs_new = 8000;
+% [P, Q] = rat(fs_new/fs);
+% dn = resample(dn, P, Q);
+% un = resample(un, P, Q);
+
+% % Normalization of u(n) and d(n)
+% un = un/std(dn);
+% dn = dn/std(dn);
+
+% Normalization of speech signal
+a = abs(max(dn))/sqrt(2);
+un = un/a; dn = dn/a;
+
+iter = length(un);
+
 
 %% HAMMERSTERIN
 fprintf('HAMMERSTEIN\n');
@@ -59,9 +87,8 @@ for i = 1:runs
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-%     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),4,40);
-    
-    [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
+%     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),4,40);    
+%     [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
     S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
@@ -86,6 +113,18 @@ for i = 1:runs
 
     NMSE(i) = 10*log10(sum(err_sqr)/sum(dn.^2));
     fprintf('NMSE = %.2f dB\n', NMSE(i));
+    
+    figure(NMSE_fig);  
+    [NMSE_plot, indx] = NMSE_compute(dn, en, nmse_n_points);
+    hold on; grid on;
+    plot(indx, NMSE_plot,      	  'DisplayName', ...
+                    ['\mu_p:', num2str(mu_p(par_comb(1,i))),...
+                     ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
+                     ' \alpha:', num2str(alpha(par_comb(3,i)))]);  
+    axis([indx(1) indx(end) -15 5]);
+    xlabel('Iteration number'); 
+    ylabel('Cumulative Normalized Mean-square error'); 
+    legend('show');
 end
     
 [~, i] = min(NMSE);
