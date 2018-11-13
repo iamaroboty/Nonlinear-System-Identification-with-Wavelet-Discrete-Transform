@@ -10,7 +10,7 @@ clear all;
 rng('default'); %
 
 %% Unidentified System parameters
-order = 3; 
+order = 10; 
 M = 256; %% hammerstein filters lens
 level = 3;                     % Levels of Wavelet decomposition
 filters = 'db4';               % Set wavelet type
@@ -19,21 +19,21 @@ gains = rand(1,order)-0.5;
 
 tube = @(x) tube(x,10); 
 gdist = @(x) gdist(0.7,x); 
-tanh = @(x) tanh(x); 
+tanh = @(x) tanh(x)/2;  %from -0.5 to 0.5
 pow = @(x) x.^3;
 p = rand(1,order+1);
 polynom = @(x) polyval(flip(p),x);
 
-non_linearity = polynom; 
+non_linearity = tube; 
 plot_nonlinearity = 1; 
 
 iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
-mu_p = [0.3 0.5 0.8 ];
-mu_w = [0.3 0.7 1 ];
-alpha = 10.^[0 1];
+mu_p = [0.3];
+mu_w = [0.7];
+alpha = 10.^[0];
 
 
 % Create combination
@@ -60,9 +60,9 @@ for i = 1:runs
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-%     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),2,40);
+     %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),2,40);
     
-    [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
+    %[un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
     S = Wammerstein_init(M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,level, filters, order, alpha(par_comb(3,i))); 
