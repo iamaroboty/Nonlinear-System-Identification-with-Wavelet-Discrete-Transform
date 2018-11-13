@@ -12,15 +12,17 @@ rng('default'); %
 %% Unidentified System parameters
 order = 3; 
 M = 256; %% hammerstein filters lens
-% gains = rand(1,order)-0.5;
-gains = ones(1,order);
+gains = rand(1,order)-0.5;
+% gains = ones(1,order);
 
 tube = @(x) tube(x,10); 
 gdist = @(x) gdist(0.7,x); 
 tanh = @(x) tanh(x); 
 pow = @(x) x.^3;
+p = rand(1,order+1);
+polynom = @(x) polyval(flip(p),x);
 
-non_linearity = pow; 
+non_linearity = polynom; 
 plot_nonlinearity = 0; 
 
 iter = 0.5*80000;   % Number of iterations
@@ -28,9 +30,9 @@ iter = 0.5*80000;   % Number of iterations
 %algorithm parameters
 % p , w
 leak = [0 0];
-mu_p = [0.3 ];
-mu_w = [0.7 ];
-alpha = 10.^[0];
+mu_p = [0.2 0.3 0.5];
+mu_w = [0.3 0.5 0.7 ];
+alpha = 10.^[1];
 
 
 % Create combination
@@ -57,9 +59,9 @@ for i = 1:runs
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-    [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),1,40);
+%     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),4,40);
     
-%     [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
+    [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
     S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 

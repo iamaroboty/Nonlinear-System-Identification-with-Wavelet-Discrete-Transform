@@ -30,9 +30,11 @@ p = zeros(order, 1); % non linearity coeffs vector
 p(1) = 1; 
 X = zeros(M, order); 
 
-U = zeros(M,2^level);                      % Adaptive filtering
+C = zeros(M,2^level,order);    
+% C1 = zeros(2^level,2^level,order);                  
 a = zeros(len,1); d = zeros(len,1); A = zeros(len,2^level);    % Analysis filtering
 z = zeros(len,1);
+tot_delay = (2^level - 1) * (len - 1);
 
 ITER = length(un);
 en = zeros(1,ITER);               % Initialize error sequence to zero
@@ -40,29 +42,39 @@ en = zeros(1,ITER);               % Initialize error sequence to zero
 	
 for n = 1:ITER
     
-    for i = 1:order % build the coeff vector (taylor expansion)        
-         xp = [xp(2:end); un(n)^i];                   
-    end     
-    X = cat(1, xp', X(1:end-1,:)); 
-    x_nl = X*p;    
-    
     d = [dn(n); d(1:end-1)];                       % Update tapped-delay line of d(n)
-    A = [x_nl(1:len), A(:,1:end-1)];                         % Update buffer
+    a = [un(n); a(1:end-1)];                       % Update tapped-delay line of u(n)
+    A = [a, A(:,1:end-1)];                         % Update buffer    
     
-    if n >= AdaptStart
-        p = p + (mu(1)*en(n)*X'*w)/((X'*w)'*(X'*w) + alpha);    
-    end
-    
-    if (mod(n,2^level)==0)                               % Tap-weight adaptation at decimated rate
-        U1 = (H'*A)';                              % Partitioning u(n) 
-        U2 = U(1:end-2^level,:);
-        U = [U1', U2']';                           % Subband data matrix
+    if (mod(n,2^level)==0)                         % Tap-weight adaptation at decimated rate
+        
+        for i = 1:order
+            C1 = (H'*A.^i)';
+            C2 = C(1:end-2^level,:,i);
+%             C = cat(1,C1,C2);
+            C(:,:,i) = [C1', C2']';               % Taylor series expansion
+            D(:,:,i) = C(:,:,i).*p(i);            % FIR filtering with p
+        end
+        
+        U = sum(D,3);                             % FIR filtering with p
+        
         dD = H'*d;                                 % Partitioning d(n) 
         eD = dD - U'*w;                            % Error estimation
+        
         if n >= AdaptStart
-            w = w + U*(eD./(sum(U.*U)+alpha)')*mu(2); % Tap-weight adaptation
-%             S.iter = S.iter + 1;
+            Ctmp = permute(C, [2 1 3]);         % generalization of traspose [C] = [M x 2^level x order]
+            norm = 0;
+            for i = 1:order
+                tmp(i,:) = eD'*Ctmp(:,:,i);
+                norm = norm + Ctmp(:,:,i).*Ctmp(:,:,i); %NOT SURE
+            end
+            
+            p = p + (mu(1)*tmp*w)/((norm*w)'*(norm*w) + alpha); %NOT SURE
+            w = w + U*(eD./(sum(U.*U)+alpha)')*mu(2); 
+            
+            S.iter = S.iter + 1;
         end
+        
         z = F*eD + z;                                       
 %         en(n-2^level+1:n) = z(1:2^level); 
 %         z = [z(2^level+1:end); zeros(2^level,1)]; 
