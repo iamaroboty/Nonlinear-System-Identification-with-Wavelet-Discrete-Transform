@@ -10,6 +10,7 @@ clear all;
 %% Unidentified System parameters
 order = 2; 
 M1 = 512; % length of first order volterra kernel
+<<<<<<< HEAD
 M2 = 64; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
@@ -17,6 +18,15 @@ NL_system.M = [M1, M2];
 un = load('xperia_ref_speech_m'); 
 un = un.un;
 dn = load('xperia_resp_speech_m'); 
+=======
+M2 = 32; % length of second order volterra kernel
+
+NL_system.M = [M1, M2];
+
+un = load('behr_ref_color'); 
+un = un.un;
+dn = load('behr_resp_color'); 
+>>>>>>> b44d083b7d321a907fdc6207271d94403ef357eb
 dn = dn.dn;
 
 [P,Q] = rat(8192/44100);
