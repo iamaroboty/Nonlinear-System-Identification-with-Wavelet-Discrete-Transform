@@ -10,28 +10,28 @@ clear all;
 rng('default'); %
 
 %% Unidentified System parameters
-order = 3; 
+order = 6; 
 M = 256; %% hammerstein filters lens
 gains = rand(1,order)-0.5;
 % gains = ones(1,order);
 
 tube = @(x) tube(x,10); 
-gdist = @(x) gdist(0.7,x); 
+gdist = @(x) gdist(0.5,x); 
 tanh = @(x) tanh(x); 
 pow = @(x) x.^3;
 p = rand(1,order+1);
 polynom = @(x) polyval(flip(p),x);
 
-non_linearity = polynom; 
-plot_nonlinearity = 0; 
+non_linearity = tube; 
+plot_nonlinearity = 1; 
 
 iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
 leak = [0 0];
-mu_p = [0.2 0.3 0.5];
-mu_w = [0.3 0.5 0.7 ];
+mu_p = [0.2];
+mu_w = [0.5];
 alpha = 10.^[1];
 
 
@@ -95,7 +95,7 @@ fprintf('\n');  % Empty line in logfile
 
 if plot_nonlinearity ==1 
     figure;
-    range = linspace(-10,10,1000); 
+    range = linspace(-5,5,100); 
     plot(range,non_linearity(range)); 
     hold on; 
     poly = [0, S.coeffs{1,2}']; 

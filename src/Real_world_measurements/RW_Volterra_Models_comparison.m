@@ -9,15 +9,21 @@ clear all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 256; % length of first order volterra kernel
-M2 = 32; % length of second order volterra kernel
+M1 = 512; % length of first order volterra kernel
+M2 = 64; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
-un = load('xperia_ref_speech_f'); 
+un = load('xperia_ref_speech_m'); 
 un = un.un;
-dn = load('xperia_resp_speech_f'); 
+dn = load('xperia_resp_speech_m'); 
 dn = dn.dn;
+
+[P,Q] = rat(8192/44100);
+
+un = resample(un,P,Q); 
+dn = resample(dn,P,Q); 
+
 
 %estimate latency with xcorr
 [corr, lag]= xcorr(un,dn); 
@@ -44,7 +50,7 @@ max_iter = size(un,2);
 
 % GENERAL FOR ALL MODELS: 
 
-mu = [0.02, 0.02];            %Step sizes for different kernels 
+mu = [0.1, 0.1];            %Step sizes for different kernels 
 
 % Run parameters
 iter = 2*80000;            % Number of iterations

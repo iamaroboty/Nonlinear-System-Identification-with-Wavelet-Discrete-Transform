@@ -11,25 +11,32 @@ clear all;
 
 %% Unidentified System parameters
 
-order = 4; 
-M = 256; %% hammerstein filters lens
+order = 1; 
+M = 128; %% hammerstein filters lens
 gains = ones(2,1);
 
 %algorithm parameters
-mu = [0.02 0.02]; %ap aw
+mu = [0.3 0.7]; %ap aw
 leak = [0 0]; 
+alpha = 1;
 
 
-un = load('xperia_ref_speech_f'); 
+un = load('guitar_in'); 
 un = un.un;
-dn = load('xperia_resp_speech_f'); 
+dn = load('engl_1'); 
 dn = dn.dn;
+
+
+[P,Q] = rat(8192/44100);
+
+un = resample(un,P,Q); 
+dn = resample(dn,P,Q); 
 
 [corr, lag]= xcorr(un,dn); 
 [~, ind]= max(abs(corr)); 
 latency = abs(lag(ind)); 
 
-%latency = 3120; 
+%latency = 3958-50; 
  
 dn = dn(latency:end); 
 un = un(1:end-latency); 
@@ -39,11 +46,11 @@ un = un(1:end-latency);
 % un = un/std(dn);
 % dn = dn/std(dn);
 
-%normalization speech 
+% %normalization speech 
 a = abs(max(dn))/sqrt(2); 
 un = un/a; 
 dn= dn/ a; 
-%  
+% %  
  
 max_iter = size(un,2); 
 
@@ -72,7 +79,7 @@ dn = dn(1,1:iter);
 % [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
 
 tic;
-Sfull = Hammerstein_NLMS_init(order, M, mu, leak); 
+Sfull = Hammerstein_NLMS_init(order, M, mu, leak, alpha); 
 [en, Sfull] = Hammerstein_NLMS_adapt(un, dn, Sfull);     
 
 err_sqr_full = en.^2;

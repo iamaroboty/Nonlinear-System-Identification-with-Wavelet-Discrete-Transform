@@ -10,8 +10,8 @@ clear all;
 rng('default'); %
 
 %% Unidentified System parameters
-order = 3; 
-M = 512; %% hammerstein filters lens
+order = 10; 
+M = 256; %% hammerstein filters lens
 level = 3;                     % Levels of Wavelet decomposition
 filters = 'db4';               % Set wavelet type
 gains = rand(1,order)-0.5;
@@ -22,15 +22,20 @@ iter = 2*80000;   % Number of iterations
 
 %% dn signal
 
-un = load('behr_ref_color'); 
+un = load('guitar_in'); 
 un = un.un;
-dn = load('behr_resp_color'); 
+dn = load('engl_1'); 
 dn = dn.dn;
+
+[P,Q] = rat(8192/44100);
+
+un = resample(un,P,Q); 
+dn = resample(dn,P,Q); 
 
 %estimate latency with xcorr
 [corr, lag]= xcorr(un,dn); 
 [~, ind]= max(abs(corr)); 
-latency = abs(lag(ind))-50; 
+latency = abs(lag(ind)); 
 
 % latency = 3130; %horn 2800 behr 3130 xperia 
 dn = dn(latency:end); 

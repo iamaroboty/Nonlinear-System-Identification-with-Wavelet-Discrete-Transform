@@ -31,7 +31,34 @@ for n = 1:ITER
          xp = [xp(2:end); un(n)^i];                   
     end 
     
-    X = cat(1, xp', X(1:end-1,:));      
+    X = cat(1, xp', X(1:end-1,:));    
+    
+    
+    % plot 
+    
+%     N = size(X,1);
+%     n = (0:N-1)';
+% 
+% 
+% 
+% 
+%     stem3(n,1:size(X,2),X','filled')
+%     ax = gca;
+%     ax.YTick = 1:3;
+%     view(37.5,30)
+% 
+% [cr,lgs] = xcorr(X,'coeff');
+%     
+%     
+% for row = 1:size(X,2)
+%     for col = 1:size(X,2)
+%         nm = size(X,2)*(row-1)+col;
+%         subplot(size(X,2),size(X,2),nm)
+%         stem(lgs,cr(:,nm),'.')
+%         title(sprintf('c_{%d%d}',row,col))
+%         ylim([0 1])
+%     end
+% end
     
       
     en(n) = dn(n) - w'*X*p;    

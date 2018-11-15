@@ -10,30 +10,30 @@ clear all;
 rng('default'); %
 
 %% Unidentified System parameters
-order = 10; 
+order = 5; 
 M = 256; %% hammerstein filters lens
 level = 3;                     % Levels of Wavelet decomposition
 filters = 'db4';               % Set wavelet type
 gains = rand(1,order)-0.5;
 % gains = ones(1,order);
 
-tube = @(x) tube(x,10); 
-gdist = @(x) gdist(0.7,x); 
+tube = @(x) tube(x,1); 
+gdist = @(x) gdist(0.5,x); 
 tanh = @(x) tanh(x)/2;  %from -0.5 to 0.5
 pow = @(x) x.^3;
 p = rand(1,order+1);
 polynom = @(x) polyval(flip(p),x);
 
-non_linearity = tube; 
+non_linearity = gdist; 
 plot_nonlinearity = 1; 
 
 iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
-mu_p = [0.3];
-mu_w = [0.7];
-alpha = 10.^[0];
+mu_p = [0.5];
+mu_w = [0.8];
+alpha = 10.^[1];
 
 
 % Create combination
@@ -62,7 +62,7 @@ for i = 1:runs
 
      %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),2,40);
     
-    %[un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
+    [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
     S = Wammerstein_init(M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,level, filters, order, alpha(par_comb(3,i))); 
