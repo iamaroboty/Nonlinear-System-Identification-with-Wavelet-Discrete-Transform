@@ -47,7 +47,7 @@ tic;
 % Adaptation process
 fprintf('DDDWAF \n');
 fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 % S = QMFInit(M,mu,level,filters);
  S = SWAFinit(M,mu,level,filters);
 S.unknownsys = b; 
