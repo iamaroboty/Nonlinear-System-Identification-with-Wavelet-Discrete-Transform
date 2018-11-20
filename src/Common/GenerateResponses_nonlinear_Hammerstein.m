@@ -48,8 +48,6 @@ dn = dn(maxsize+1:end);   % Adjusting starting index of signals
 un = un(maxsize+1:end);
 
 % Normalization of u(n) and d(n)
-
-
 un = un/std(dn);
 dn = dn/std(dn);
 

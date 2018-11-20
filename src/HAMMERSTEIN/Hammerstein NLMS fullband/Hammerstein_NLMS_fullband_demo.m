@@ -6,28 +6,23 @@
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 rng('default'); %
 
 %% Unidentified System parameters
-<<<<<<< HEAD
-order = 6; 
+order = 4; 
 M = 256; %% hammerstein filters lens
-=======
-order = 3; 
-M = 1024; %% hammerstein filters lens
->>>>>>> b44d083b7d321a907fdc6207271d94403ef357eb
-gains = rand(1,order)-0.5;
+% gains = rand(1,order)-0.5;
 % gains = ones(1,order);
 
 tube = @(x) tube(x,10); 
 gdist = @(x) gdist(0.5,x); 
 tanh = @(x) tanh(x); 
 pow = @(x) x.^3;
-p = rand(1,order+1);
-polynom = @(x) polyval(flip(p),x);
+p = [rand(1,order)-0.5, 0];
+polynom = @(x) polyval(p,x);
 
-non_linearity = tube; 
+non_linearity = polynom; 
 plot_nonlinearity = 1; 
 
 iter = 0.5*80000;   % Number of iterations
@@ -35,16 +30,9 @@ iter = 0.5*80000;   % Number of iterations
 %algorithm parameters
 % p , w
 leak = [0 0];
-<<<<<<< HEAD
 mu_p = [0.2];
-mu_w = [0.5];
-alpha = 10.^[1];
-=======
-mu_p = [0.5];
-mu_w = [0.7];
-alpha = 10.^[2];
->>>>>>> b44d083b7d321a907fdc6207271d94403ef357eb
-
+mu_w = [0.4];
+alpha = 10.^[0];
 
 % Create combination
 runs = length(mu_p)*length(mu_w)*length(alpha);
@@ -65,29 +53,29 @@ NMSE_fig = figure('Name', 'NMSE');
 nmse_n_points = 1000; 
 
 %% RW data
-filename = 'behr_ref_speech_m.wav'; %behr_ref_white  behr_ref_color  behr_ref_speech_f  behr_ref_speech_m
-[dn, fs] = audioread(filename);
-dn = dn(:,1)';
-
-% import un variable
-load opt_M.mat      %opt_white  opt_color  opt_M  opt_F
-un = un';
-
-% Resample the data to new fsn
-% fs_new = 8000;
-% [P, Q] = rat(fs_new/fs);
-% dn = resample(dn, P, Q);
-% un = resample(un, P, Q);
-
-% % Normalization of u(n) and d(n)
-% un = un/std(dn);
-% dn = dn/std(dn);
-
-% Normalization of speech signal
-a = abs(max(dn))/sqrt(2);
-un = un/a; dn = dn/a;
-
-iter = length(un);
+% filename = 'behr_ref_speech_m.wav'; %behr_ref_white  behr_ref_color  behr_ref_speech_f  behr_ref_speech_m
+% [dn, fs] = audioread(filename);
+% dn = dn(:,1)';
+% 
+% % import un variable
+% load opt_M.mat      %opt_white  opt_color  opt_M  opt_F
+% un = un';
+% 
+% % Resample the data to new fsn
+% % fs_new = 8000;
+% % [P, Q] = rat(fs_new/fs);
+% % dn = resample(dn, P, Q);
+% % un = resample(un, P, Q);
+% 
+% % % Normalization of u(n) and d(n)
+% % un = un/std(dn);
+% % dn = dn/std(dn);
+% 
+% % Normalization of speech signal
+% a = abs(max(dn))/sqrt(2);
+% un = un/a; dn = dn/a;
+% 
+% iter = length(un);
 
 
 %% HAMMERSTERIN
@@ -98,8 +86,8 @@ for i = 1:runs
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
-%     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),4,40);    
-%     [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),4,40, non_linearity); %iter, b, seed, ARtype, SNR
+%     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),1,40);    
+    [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
     S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
@@ -145,7 +133,7 @@ fprintf('\n');  % Empty line in logfile
 
 if plot_nonlinearity ==1 
     figure;
-    range = linspace(-5,5,100); 
+    range = linspace(-3,3,100); 
     plot(range,non_linearity(range)); 
     hold on; 
     poly = [0, S.coeffs{1,2}']; 

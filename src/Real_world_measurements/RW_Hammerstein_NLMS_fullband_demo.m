@@ -7,12 +7,12 @@ diary log_VNLMS.txt
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
-%close all;
+close all;
 
 %% Unidentified System parameters
 
-order = 1; 
-M = 128; %% hammerstein filters lens
+order = 4; 
+M = 1024; %% hammerstein filters lens
 gains = ones(2,1);
 
 %algorithm parameters
@@ -23,7 +23,7 @@ alpha = 1;
 
 un = load('guitar_in'); 
 un = un.un;
-dn = load('engl_1'); 
+dn = load('engl_5'); 
 dn = dn.dn;
 
 
@@ -59,7 +59,7 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('HAMMERSTEIN\n');
 
 % Run parameters
-iter = 2.0*80000;   % Number of iterations
+iter = 2*80000;   % Number of iterations
 
 if iter > max_iter
    
@@ -81,6 +81,7 @@ dn = dn(1,1:iter);
 tic;
 Sfull = Hammerstein_NLMS_init(order, M, mu, leak, alpha); 
 [en, Sfull] = Hammerstein_NLMS_adapt(un, dn, Sfull);     
+dn_est = Hammerstein_NLMS_test(un,Sfull);
 
 err_sqr_full = en.^2;
     

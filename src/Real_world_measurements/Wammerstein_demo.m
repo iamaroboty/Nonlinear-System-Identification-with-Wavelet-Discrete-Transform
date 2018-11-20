@@ -24,7 +24,7 @@ iter = 2*80000;   % Number of iterations
 
 un = load('guitar_in'); 
 un = un.un;
-dn = load('engl_1'); 
+dn = load('engl_5'); 
 dn = dn.dn;
 
 [P,Q] = rat(8192/44100);
@@ -68,7 +68,7 @@ dn = dn(1,1:iter);
 % p , w
 mu_p = [0.3];
 mu_w = [0.7];
-alpha = 10.^[0];
+alpha = 10.^[1];
 
 
 % Create combination

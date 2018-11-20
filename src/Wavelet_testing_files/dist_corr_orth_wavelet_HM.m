@@ -1,9 +1,9 @@
 % whitening and orthogonalization property of wavelet trasform 
-close all; 
+% close all; 
 clear all; 
 
 len = 1024; 
-un = rand(len,1); 
+un = randn(len,1); 
 
  
 
@@ -46,10 +46,7 @@ bcR_mat = zeros(size(X,2),size(X,2));
 
 for row = 1:size(X,2)
     for col = 1:size(X,2)
-        [bcR_mat(row,col), p, T, df] = bcdistcorr(X(:,row), X(:,col));
-        
- 
-       
+        bcR_mat(row,col) = bcdistcorr(X(:,row), X(:,col));                
     end
 end
 
@@ -57,13 +54,10 @@ end
 surf(bcR_mat)
 ax = gca;
 ax.YTick = 1:3;
-
-
-
 title('bias-corrected distance correlation between powers')
 
 
-polinomial = rand(5,1); 
+polinomial = rand(order,1); 
 
 for i=1:order
    
