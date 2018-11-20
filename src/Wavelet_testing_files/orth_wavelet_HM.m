@@ -2,7 +2,7 @@
 close all; 
 clear all; 
 
-len = 1024; 
+len = 256; 
 un = rand(len,1); 
 
  
@@ -54,22 +54,11 @@ for row = 1:size(X,2)
     end
 end
 
-polinomial = rand(5,1); 
-
-for i=1:order
-   
-    X(:,i) = polinomial(i).*X(:,i); 
-end
-
-un = sum(X,2); 
-
-figure; 
-[cr,lgs] = crosscorr(un, un );
-stem(lgs,cr);
 
 
-wtype = {'db1','db4', 'db8'}; 
-level = [3]; 
+
+wtype = {'db1'}; 
+level = [2]; 
 
 runs = length(wtype)*length(level);
 par_comb = combvec(1:length(wtype), 1:length(level));
@@ -80,13 +69,35 @@ for i = 1:runs
     fprintf('Run (%d) of (%d)\n', i, runs);           
     
     
-      c_level = level(par_comb(2,i));
+    c_level = level(par_comb(2,i));
     c_wtype = wtype{par_comb(1,i)};
     
     
     fprintf('Run hyperpar: wtype = %s, level = %.d \n', c_wtype, c_level);
+    
+    
+  
+%     for j = 1:len
+% 
+%        T = wpdec(X(j,:) , c_level, c_wtype );  % wavelet decomposition 
+%        
+%        if j==1
+%        
+%             term_nodes_mat = zeros(size(wpcoef(T,2^c_level-1),2),2.^c_level, len);
+%        
+%        end
+%     
+%        for k = 1:2^c_level
+%          
+%            term_nodes_mat(:,k,j) = wpcoef(T,2^c_level-2+k);
+%        end   
+%     
+%     end
+    
+    
 
-    T = wpdec(un , c_level, c_wtype ); % wavelet decomposition 
+    T = wpdec2(X , c_level, c_wtype );
+    
     
     term_nodes_mat = zeros(size(wpcoef(T,2^c_level-1),1),2.^c_level);
     
@@ -138,8 +149,6 @@ end
 
 fprintf('norm of crosscorr: %.5f \n',normval ); 
 
-
-    
     
 end
 

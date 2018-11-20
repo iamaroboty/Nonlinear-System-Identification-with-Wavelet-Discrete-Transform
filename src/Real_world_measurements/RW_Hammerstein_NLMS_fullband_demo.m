@@ -12,7 +12,7 @@ clear all;
 %% Unidentified System parameters
 
 order = 1; 
-M = 128; %% hammerstein filters lens
+M = 256; %% hammerstein filters lens
 gains = ones(2,1);
 
 %algorithm parameters
@@ -21,20 +21,20 @@ leak = [0 0];
 alpha = 1;
 
 
-un = load('guitar_in'); 
+un = load('ref_color'); 
 un = un.un;
-dn = load('engl_1'); 
+dn = load('univpm_color_5p'); 
 dn = dn.dn;
-
-
-[P,Q] = rat(8192/44100);
-
-un = resample(un,P,Q); 
-dn = resample(dn,P,Q); 
+% 
+% 
+% [P,Q] = rat(8192/44100);
+% 
+% un = resample(un,P,Q); 
+% dn = resample(dn,P,Q); 
 
 [corr, lag]= xcorr(un,dn); 
 [~, ind]= max(abs(corr)); 
-latency = abs(lag(ind)); 
+latency = 1024+100; 
 
 %latency = 3958-50; 
  
