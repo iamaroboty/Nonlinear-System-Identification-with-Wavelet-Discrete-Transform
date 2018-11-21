@@ -15,7 +15,7 @@ M1 = 512;
 M2 = 32;
 
 % Universal stepsize
-mu = [0.3 0.3];
+mu = [0.01 0.01];
 mu_small = 0.003;
 
 % For Wavelet Transform
