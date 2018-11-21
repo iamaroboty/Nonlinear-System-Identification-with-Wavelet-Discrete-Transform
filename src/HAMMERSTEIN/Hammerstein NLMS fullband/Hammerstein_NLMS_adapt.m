@@ -25,8 +25,8 @@ T = S.T;
 ITER = length(un);              % Length of input sequence
 en = zeros(1,ITER);             % Initialize error sequence to zero
 
-fig = figure('Name', 'wut');
-xcorrfig = figure('Name', 'xcorr');
+% fig = figure('Name', 'wut');
+% xcorrfig = figure('Name', 'xcorr');
 	
 for n = 1:ITER
     

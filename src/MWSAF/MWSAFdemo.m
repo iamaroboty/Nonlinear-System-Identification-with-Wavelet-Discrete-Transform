@@ -4,13 +4,13 @@
 
 addpath '../../Common';             % Functions in Common folder
 clear all;  
-% close all;
+close all;
 
 % Adaptive filter parameters
 mu = 0.3;                      % Step size
-M = 256;                       % Length of unknown system response
-level = 4;                     % Levels of Wavelet decomposition
-filters = 'db16';               % Set wavelet type
+M = 512;                       % Length of unknown system response
+level = 2;                     % Levels of Wavelet decomposition
+filters = 'db4';               % Set wavelet type
 Q =1;   %useless
 DWT_flag = 0;
 
@@ -45,15 +45,43 @@ b = b(1:M);                      % Truncate to length M
 %  b = yr(500:500-1+M,1);
 
 %%
-tic;
-% Adaptation process
-fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
-[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),2,40); %iter, b, seed, ARtype, SNR
+% Anecoic measurment
+load('ref_white.mat')
+un = un(:)';    % Make it row vector
+load('univpm_white_5p.mat')
+dn = dn(:)';    % Make it row vector
+
+delay = 1024 + 100;
+dn = dn(delay:end-iter); 
+un = un(1:end-delay-iter+1); 
+
+fs = 44100;
+
+% % Resample the data to new fsn
+% fs_new = 16000;
+% [P, Q] = rat(fs_new/fs);
+% dn = resample(dn, P, Q);
+% un = resample(un, P, Q);
+
+% Normalization of u(n) and d(n)
+un = un/std(dn);
+dn = dn/std(dn);
+
+% % Normalization of speech signal
+% a = abs(max(dn))/sqrt(2);
+% un = un/a; dn = dn/a;
+%%
+% [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
 
+%%
+% Adaptation process
+fprintf('Wavelet type: %s, levels: %d, step size = %f \n', filters, level, mu);
+
+tic;
 S = SWAFinit(M, mu, level, filters); 
 % S = MWSAFinit(M,mu,level,filters,Q);
-S.unknownsys = b; 
+% S.unknownsys = b; 
 
 if DWT_flag == 1
     [en, S] = MWSAFadapt_DWT(un, dn, S); 
