@@ -20,8 +20,8 @@ f = f(1:d)';
 
 % f = chirp((0:0.001:2),0,1,250);
 % f = f(1:d);
-wtype = 'db2';
-level = 2;
+wtype = 'db4';
+level = 3;
 wdt_mod = 'zpd';
 U = 1;
 

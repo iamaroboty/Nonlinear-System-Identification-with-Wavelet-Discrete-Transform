@@ -8,37 +8,31 @@ clear all;
 %close all;
 
 %% Unidentified System parameters
-order = 2; 
-M1 = 512; % length of first order volterra kernel
-<<<<<<< HEAD
-M2 = 64; % length of second order volterra kernel
+order = 1; 
+M1 = 128; % length of first order volterra kernel
 
-NL_system.M = [M1, M2];
 
-un = load('xperia_ref_speech_m'); 
+un = load('ref_f'); 
 un = un.un;
-dn = load('xperia_resp_speech_m'); 
-=======
-M2 = 32; % length of second order volterra kernel
-
-NL_system.M = [M1, M2];
-
-un = load('behr_ref_color'); 
-un = un.un;
-dn = load('behr_resp_color'); 
->>>>>>> b44d083b7d321a907fdc6207271d94403ef357eb
+dn = load('univpm_f_5p'); 
 dn = dn.dn;
 
-[P,Q] = rat(8192/44100);
+M2 = 16; % length of second order volterra kernel
 
-un = resample(un,P,Q); 
-dn = resample(dn,P,Q); 
+NL_system.M = [M1, M2];
+
+
+% 
+% [P,Q] = rat(8192/44100);
+% 
+% un = resample(un,P,Q); 
+% dn = resample(dn,P,Q); 
 
 
 %estimate latency with xcorr
 [corr, lag]= xcorr(un,dn); 
 [~, ind]= max(abs(corr)); 
-latency = abs(lag(ind))-50; 
+latency = abs(lag(ind))-40; 
 
 % latency = 3130; %horn 2800 behr 3130 xperia 
 dn = dn(latency:end); 
@@ -63,7 +57,7 @@ max_iter = size(un,2);
 mu = [0.1, 0.1];            %Step sizes for different kernels 
 
 % Run parameters
-iter = 2*80000;            % Number of iterations
+iter = 1*80000;            % Number of iterations
 iter = max_iter; 
 
 if iter > max_iter

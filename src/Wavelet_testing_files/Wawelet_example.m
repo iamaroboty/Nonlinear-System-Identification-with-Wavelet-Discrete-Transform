@@ -1,12 +1,20 @@
 %clear all;
 
-f=audioread('data_test.wav');
-f=f(1:512);
+% f=audioread('data_test.wav');
+% f=f(1:512);
 %load noisysig.mat
 % load leleccum;
 % f = leleccum;
+n = randn(512,1);
+order = 3;
 
-%dwtmode('per','nodisplay');
+f = zeros(512,1);
+for i= 1:order
+    f = f + n.^i;
+end;
+
+
+dwtmode('per','nodisplay');
 
 level = 5;
 wname = 'db1';

@@ -20,10 +20,13 @@ w = zeros(M,1);
 p = zeros(order, 1); % non linearity coeffs vector 
 p(1) = 1; 
 X = zeros(M, order); 
+T = S.T;
 
 ITER = length(un);              % Length of input sequence
 en = zeros(1,ITER);             % Initialize error sequence to zero
 
+% fig = figure('Name', 'wut');
+% xcorrfig = figure('Name', 'xcorr');
 	
 for n = 1:ITER
     
@@ -31,34 +34,32 @@ for n = 1:ITER
          xp = [xp(2:end); un(n)^i];                   
     end 
     
-    X = cat(1, xp', X(1:end-1,:));    
+    X = cat(1, xp', X(1:end-1,:));   
+%     X = (X'*T)';
     
-    
-    % plot 
-    
-%     N = size(X,1);
-%     n = (0:N-1)';
+%     if n == ITER/2
+%         figure(fig);
+%         N = size(X,1);
+%         nn = (0:N-1)';
 % 
+%         stem3(nn,1:size(X,2),X','filled', 'LineWidth', 0.3)
+%         ax = gca;
+%         ax.YTick = 1:order;
+%         view(37.5,30)
 % 
+%         [cr,lgs] = xcorr(X,'coeff');
 % 
-% 
-%     stem3(n,1:size(X,2),X','filled')
-%     ax = gca;
-%     ax.YTick = 1:3;
-%     view(37.5,30)
-% 
-% [cr,lgs] = xcorr(X,'coeff');
-%     
-%     
-% for row = 1:size(X,2)
-%     for col = 1:size(X,2)
-%         nm = size(X,2)*(row-1)+col;
-%         subplot(size(X,2),size(X,2),nm)
-%         stem(lgs,cr(:,nm),'.')
-%         title(sprintf('c_{%d%d}',row,col))
-%         ylim([0 1])
+%         figure(xcorrfig);
+%         for row = 1:size(X,2)
+%             for col = 1:size(X,2)
+%                 nm = size(X,2)*(row-1)+col;
+%                 subplot(size(X,2),size(X,2),nm)
+%                 stem(lgs,cr(:,nm),'.')
+%                 title(sprintf('c_{%d%d}',row,col))
+%                 ylim([0 1])
+%             end
+%         end
 %     end
-% end
     
       
     en(n) = dn(n) - w'*X*p;    

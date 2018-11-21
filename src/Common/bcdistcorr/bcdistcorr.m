@@ -33,8 +33,8 @@ T = sqrt(M-1) * bcR / sqrt(1-bcR^2);
 df = M-1;
 p = 1 - tcdf(T, df);
 
-fprintf('bias-corrected R = %.3f, p-value=%.3f, T(%d)=%.4f\n',...
-    bcR, p, df, T);
+% fprintf('bias-corrected R = %.3f, p-value=%.3f, T(%d)=%.4f\n',...
+%     bcR, p, df, T);
 
 end
 

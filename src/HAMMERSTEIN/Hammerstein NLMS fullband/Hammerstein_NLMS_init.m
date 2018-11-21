@@ -19,4 +19,11 @@ S.iter          = 0;
 S.AdaptStart    = M;
 S.order         = order; 
 
+for j=1:M,                    % DCT-transform matrix
+   S.T(1,j)=1/sqrt(M);
+   for i=2:M,
+     S.T(i,j)=sqrt(2/M)*cos(pi*(i-1)*(2*j-1)/2/M);
+   end
+end	
+
 end
