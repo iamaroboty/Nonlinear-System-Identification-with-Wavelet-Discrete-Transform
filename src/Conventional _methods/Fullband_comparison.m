@@ -6,7 +6,7 @@ close all;
 
 %% Generate Response
 M = 256;
-mu = 0.001;
+mu = 0.1;
 AR = 1;
 SNR = 40;
 iter = 1.0*80000;
@@ -31,7 +31,6 @@ fprintf('WAF \n');
 fprintf('--------------------------------------------------------------------\n');
 level = 3;                       % Levels of Wavelet decomposition
 wtype = 'db4';                   % Mother Wavelet type
-mu = 0.001;
 fprintf('Wavelet type: %s, levels: %d, step size = %.3f \n', wtype, level, mu);
 
 S = WAFinit(zeros(M,1), mu, level, wtype);     % Initialization
@@ -60,8 +59,7 @@ fprintf('\n');
 %% SOAF-DCT
 fprintf('SOAF-DCT \n');
 fprintf('--------------------------------------------------------------------\n');
-mu = 0.001;
-fprintf('Step size: %.3f \n', mu);
+printf('Step size: %.3f \n', mu);
 
 S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
 S.unknownsys = b; 
@@ -190,7 +188,7 @@ tic;
 
 fprintf('Total time = %.2f s \n',toc);
 
-EML = S.eml.^2;                  % System error norm (normalized)
+% EML = S.eml.^2;                  % System error norm (normalized)
 err_sqr = en.^2;
    
 

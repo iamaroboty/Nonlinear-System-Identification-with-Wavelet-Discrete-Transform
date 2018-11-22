@@ -41,7 +41,7 @@ for n = 1:ITER
     u = [un(n); u(1:end-1)];        % Input signal vector contains [u(n),u(n-1),...,u(n-M+1)]'
     U = T*u;                        % Transformed input vector
     yn(n) = w'*U;                   % Output signal
-    power_vec= (1-S.beta)*power_vec+S.beta*(U.*U);	
+    power_vec= (S.beta)*power_vec+(1-S.beta)*(U.*U);	
                                     % Estimated power
     inv_sqrt_power = 1./(sqrt(power_vec+(0.00001.*ones(M,1))));
     en(n) = dn(n) - yn(n);          % Estimation error
