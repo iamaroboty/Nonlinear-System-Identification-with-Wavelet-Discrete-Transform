@@ -7,7 +7,7 @@ addpath '../Common';             % Functions in Common folder
 
 clear all;  
 close all;
-rng('default');
+% rng('default');
 
 %% Structure Hyperparameters
 % Filters length
@@ -16,7 +16,7 @@ M2 = 32;
 
 % Universal stepsize
 mu = [0.01 0.01];
-mu_small = 0.003;
+mu_small = 0.001;
 
 % For Wavelet Transform
 level = 3;
@@ -25,11 +25,11 @@ filters = 'db8';
 % Hammerstein and Wammerstein
 % p , w
 leak = [0 0];
-order = 5;
+order = 7;
 M_hamm = M1 + M2;
-mu_p = 0.3;
-mu_w = 0.5;
-alpha = 10.^0;
+mu_p = 0.03;
+mu_w = 0.05;
+alpha = 10.^0.5;
 
 % For MSAF and SAF
 N = 2^level;                % Number of subbands                     
@@ -37,16 +37,16 @@ D = N/2;                    % Decimation factor for 2x oversampling
 L = 8*N;                    % Length of analysis filters, M=2KN
 
 % Iter count
-iter = 1.0*80000;
+iter = 1.7*80000;
 
 %input data 
-infile = 'f'; %white, color, f, m
+infile = 'color'; %white, color, f, m
 gain = '5p';  %5, 0, 5p
 
 
 %% Input Data
 % Anecoic measurment
-load(['ref_', infile, '.mat'])
+load(['univpm_ref_', infile, '.mat'])
 un = un(:)';    % Make it row vector
 load(['univpm_', infile, '_', gain,'.mat'])
 dn = dn(:)';    % Make it row vector
@@ -67,12 +67,12 @@ fs = 44100;
 % un = resample(un, P, Q);
 
 % Normalization of u(n) and d(n)
-un = un/std(dn);
-dn = dn/std(dn);
+% un = un/std(dn);
+% dn = dn/std(dn);
 
 % % Normalization of speech signal
-% a = abs(max(dn))/sqrt(2);
-% un = un/a; dn = dn/a;
+a = abs(max(dn))/sqrt(2);
+un = un/a; dn = dn/a;
 
 %%
 % [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
@@ -97,6 +97,7 @@ fprintf('step size = %s \n', sprintf('%.2f ', mu));
 tic;
 S = Volterra_Init([M1, M2], mu, level, filters); 
 [en, S] = Volterra_2ord_adapt_v3(un, dn, S);
+coeffs.wavterra = S.coeffs;
 
 err_sqr = en.^2;
 
@@ -203,7 +204,8 @@ fprintf('-------------------------------------------------------------\n');
 S = Volterra_NLMS_init([M1 M2], mu); 
 
 tic;
-[en, S] = Volterra_NLMS_adapt(un, dn, S);     
+[en, S] = Volterra_NLMS_adapt(un, dn, S);   
+coeffs.volterra = S.coeffs;
 
 err_sqr = en.^2;
     
@@ -241,6 +243,7 @@ fprintf('Wavelet type: %s, levels: %d, step size = %.2f, filter length = %d\n', 
 tic;
 S = SWAFinit(M1, mu(1), level, filters); 
 [en, S] = MWSAFadapt(un, dn, S ); 
+coeffs.wmsaf = S.coeffs;
 
 err_sqr = en.^2;
 
@@ -277,8 +280,8 @@ fprintf('mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p, mu_w,alpha)
 
 tic;
 S = Wammerstein_init(M_hamm, [mu_p mu_w] ,level, filters, order, alpha); 
-
 [en, S] = Wammerstein_adapt(un, dn, S);  
+coeffs.wammer = S.coeffs;
 
 err_sqr = en.^2;
 
@@ -315,8 +318,8 @@ fprintf('mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p, mu_w,alpha)
 
 tic;
 S = Hammerstein_NLMS_init(order, M_hamm, [mu_p mu_w] ,leak, alpha); 
-
 [en, S] = Hammerstein_NLMS_adapt(un, dn, S);  
+coeffs.hammer = S.coeffs;
 
 err_sqr = en.^2;
 
@@ -347,7 +350,7 @@ fprintf('\n');
 
 
 %% fix plots
-if infile == 'm' || infile == 'f'
+if (infile == 'm') | (infile == 'f')
     figure(MSEfig);
     axis([0 iter/1024 -80 25]);
     

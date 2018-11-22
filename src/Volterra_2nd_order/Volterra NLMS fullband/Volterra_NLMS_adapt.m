@@ -49,7 +49,7 @@ for n = 1:ITER
     end
 end
 
-S.coeffs = [w1; w2];                     % Coefficient values at final iteration                 
+S.coeffs = {w1, w2};                     % Coefficient values at final iteration                 
 end
 
 

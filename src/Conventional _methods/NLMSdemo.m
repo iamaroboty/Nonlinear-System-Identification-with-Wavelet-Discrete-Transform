@@ -6,11 +6,12 @@
 
 addpath '..\Common';                % Functions in Common folder
 clear all;
+close all;
 
 % Adaptive filter parameters
 
-mu = 0.1;                           % Default step size (0<mu<2)
-M = 256;                            % Length of adaptive weight vector
+mu = 0.001;                           % Default step size (0<mu<2)
+M = 512;                            % Length of adaptive weight vector
 
 % Run parameters
 
@@ -23,9 +24,9 @@ b = b(1:M);                         % Truncate to length M
 
 disp(sprintf('NLMS, step size = %.2f',mu));
 
-%[un,dn,vn] = GenerateResponses(iter,b);
+[un,dn,vn] = GenerateResponses(iter,b);
 
-[un,dn,vn] = GenerateResponses_speech(b, 'SpeechSample.mat');
+% [un,dn,vn] = GenerateResponses_speech(b, 'SpeechSample.mat');
 tic;
 S = NLMSinit(zeros(M,1),mu);        % Initialization
 S.unknownsys = b;
@@ -36,8 +37,12 @@ err_sqr = en.^2;
     
 disp(sprintf('Total time = %.3f mins',toc/60));
 
+NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
+fprintf('NMSE = %.2f dB\n', NMSE);
+
+
 figure;
-q = 0.9999; MSE = filter((1-q),[1 -q],err_sqr);
+q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE));
 axis([0 iter/1024 -80 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 
@@ -45,10 +50,10 @@ ylabel('Mean-square error (dB)');
 title('NLMSdemo');
 grid on;
 
-figure;
-hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
-xlabel('Number of iterations (\times 1024 input samples)'); 
-ylabel('Misalignment (dB)');
-title('NLMSdemo');
-grid on;
+% figure;
+% hold on; plot((0:length(EML)-1)/1024,10*log10(EML));
+% xlabel('Number of iterations (\times 1024 input samples)'); 
+% ylabel('Misalignment (dB)');
+% title('NLMSdemo');
+% grid on;
 
