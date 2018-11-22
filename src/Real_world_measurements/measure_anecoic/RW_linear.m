@@ -13,19 +13,19 @@ close all;
 M = 512;
 
 % Universal stepsize
-mu = 0.3;
-mu_small = 0.001;
+mu = 0.05;
+mu_small = 0.0001;
 
 % For Wavelet Transform
 level = 3;
-filters = 'db8';
+filters = 'db4';
 
 % Hammerstein Full Band
 % p , w
 order = 1;
-mu_p = 0.3;
+mu_p = 0.1;
 mu_w = 0.5;
-alpha = 10.^0;
+alpha = 10.^1;
 
 % For MSAF and SAF
 N = 2^level;                % Number of subbands                     
@@ -36,9 +36,10 @@ L = 8*N;                    % Length of analysis filters, M=2KN
 % Iter count
 iter = 1.0*80000;
 
-input_type = {'f', 'm'};
+input_type = {'m', 'f'};
 input_gain = {'0'};
 
+fprintf('mu FB: %.2f, mu SB: %.4f, mu HAMM/WAMM: [%.1f %.1f] \n', mu, mu_small, mu_p, mu_w);
 n = 0;
 for i= 1:numel(input_type)
     for j= 1:numel(input_gain)
@@ -61,10 +62,12 @@ for i= 1:numel(input_type)
         fs = 44100;
 
         % % Resample the data to new fsn
-        % fs_new = 8000;
-        % [P, Q] = rat(fs_new/fs);
-        % dn = resample(dn, P, Q);
-        % un = resample(un, P, Q);
+%         fs_new = 8000;
+%         [P, Q] = rat(fs_new/fs);
+%         dn = resample(dn, P, Q);
+%         un = resample(un, P, Q);
+%         iter = length(un);
+        
 
 %         Normalization of u(n) and d(n)
 %         un = un/std(dn);
@@ -95,9 +98,10 @@ for i= 1:numel(input_type)
         %% NLMS
         fprintf('NLMS \n');
         fprintf('--------------------------------------------------------------------\n');
-        fprintf('Step size: %.3f \n', mu_small);
+        fprintf('Step size: %.4f \n', mu_small);
 
         S = NLMSinit(zeros(M,1),mu_small);        % Initialization
+        S.beta = 0;
         tic;
         [yn,en,S] = NLMSadapt(un,dn,S);     % Perform NLMS algorithm
 
@@ -218,14 +222,14 @@ for i= 1:numel(input_type)
         figure(fig);
         q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
         subplot(211);
-        hold on; plot((0:iter-1)/1024,10*log10(MSE), 'DisplayName', 'SAF');
+        hold on; plot((0:iter-1)/1024,10*log10(MSE), '--', 'DisplayName', 'SAF');
 
         NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
         fprintf('NMSE = %.2f dB\n', NMSE);
 
         % Plot NMSE
         subplot(212);
-        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['SAF: ', num2str(num2str(NMSE, '%0.2f'))] );
+        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), '--','DisplayName', ['SAF: ', num2str(num2str(NMSE, '%0.2f'))] );
 
         fprintf('\n');
 
@@ -244,14 +248,14 @@ for i= 1:numel(input_type)
         figure(fig);
         q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
         subplot(211);
-        hold on; plot((0:iter-1)/1024,10*log10(MSE), 'DisplayName', 'MSAF');
+        hold on; plot((0:iter-1)/1024,10*log10(MSE), '--', 'DisplayName', 'MSAF');
 
         NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
         fprintf('NMSE = %.2f dB\n', NMSE);
 
         % Plot NMSE
         subplot(212);
-        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['MSAF: ', num2str(num2str(NMSE, '%0.2f'))] );
+        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))),'--', 'DisplayName', ['MSAF: ', num2str(num2str(NMSE, '%0.2f'))] );
 
         fprintf('\n');
 
@@ -270,34 +274,35 @@ for i= 1:numel(input_type)
         figure(fig);
         q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
         subplot(211);
-        hold on; plot((0:iter-1)/1024,10*log10(MSE), 'DisplayName', 'SOAF');
+        hold on; plot((0:iter-1)/1024,10*log10(MSE), ':','DisplayName', 'SOAF');
 
         NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
         fprintf('NMSE = %.2f dB\n', NMSE);
 
         % Plot NMSE
         subplot(212);
-        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['SOAF: ', num2str(num2str(NMSE, '%0.2f'))] );
+        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))),':', 'DisplayName', ['SOAF: ', num2str(num2str(NMSE, '%0.2f'))] );
 
         fprintf('\n');
 
 
         %% Adding title and labels to plots
+        gainz = {'0 dB'};
         figure(fig);
         subplot(211);
-        title(['MSE (', input_type{i}, ' ', input_gain{j}, ')']);
-        ylabel('MSE'); grid on;
+        title(['MSE (input type: ', input_type{i}, ', gain: ', gainz{j}, ')']);
+        ylabel('MSE dB'); grid on;
         legend('show');
-        axis([0 iter/1024 -80 25]);
+        axis([0 iter/1024 -80 15]);
 
         subplot(212);
-        title(['NMSE (', input_type{i}, ' ', input_gain{j}, ')']);
+        title(['NMSE dB']);
         axis([0 iter/1024 -40 10]);
         xlabel('Number of iterations (\times 1024 input samples)'); 
         ylabel('Cumulative NMSE'); grid on;
         legend('show');
         
-%         savefig(fig,['figures/lin_',input_type{i},'_',input_gain{j},'.fig'])
+        savefig(fig,['figures/lin_',input_type{i},'_',input_gain{j},'.fig'])
 
     end
 end

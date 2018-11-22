@@ -33,6 +33,8 @@ else
         k(d(:,:)==1) = quad(st:en);  
     end    
     
+end
+
 k = (k+k') - eye(M2).*diag(k); 
 
 kernel_plot({lin, k})
