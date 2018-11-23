@@ -5,19 +5,19 @@
 addpath '../Common';             % Functions in Common folder
 
 clear all;  
-%close all;
+close all;
 
 %% Unidentified System parameters
-order = 1; 
-M1 = 128; % length of first order volterra kernel
+order = 2; 
+M1 = 1024; % length of first order volterra kernel
 
 
-un = load('ref_f'); 
+un = load('white_noise'); 
 un = un.un;
-dn = load('univpm_f_5p'); 
+dn = load('horn2_resp_white_noise'); 
 dn = dn.dn;
 
-M2 = 16; % length of second order volterra kernel
+M2 = 8; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
@@ -30,9 +30,9 @@ NL_system.M = [M1, M2];
 
 
 %estimate latency with xcorr
-[corr, lag]= xcorr(un,dn); 
-[~, ind]= max(abs(corr)); 
-latency = abs(lag(ind))-40; 
+% [corr, lag]= xcorr(un,dn); 
+% [~, ind]= max(abs(corr)); 
+latency = 920; 
 
 % latency = 3130; %horn 2800 behr 3130 xperia 
 dn = dn(latency:end); 
@@ -40,13 +40,13 @@ un = un(1:end-latency);
 
 % normalization 
 
-% un = un/std(dn);
-% dn = dn/std(dn);
+un = un/std(dn);
+dn = dn/std(dn);
 
 %normalization speech 
-a = abs(max(dn))/sqrt(2); 
-un = un/a; 
-dn= dn/ a; 
+% a = abs(max(dn))/sqrt(2); 
+% un = un/a; 
+% dn= dn/ a; 
 
 max_iter = size(un,2); 
 
@@ -74,7 +74,7 @@ dn = dn(1,1:iter);
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
 level = 3;                  % Levels of Wavelet decomposition for different kernels
 
-filters = 'db8';            % Set wavelet type for different kernels
+filters = 'db4';            % Set wavelet type for different kernels
 
 
 %%

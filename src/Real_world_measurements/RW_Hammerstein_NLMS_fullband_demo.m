@@ -11,19 +11,19 @@ close all;
 
 %% Unidentified System parameters
 
-order = 1;
-M = 256; %% hammerstein filters lens
+order = 3;
+M = 1024; %% hammerstein filters lens
 gains = ones(2,1);
 
 %algorithm parameters
-mu = [0.3 0.7]; %ap aw
+mu = [0.2 0.5]; %ap aw
 leak = [0 0];
-alpha = 1;
+alpha = 10;
 
 
-un = load('ref_color');
+un = load('ar10_noise');
 un = un.un;
-dn = load('univpm_color_5p');
+dn = load('horn_resp_ar10_noise');
 dn = dn.dn;
 %
 %
@@ -31,10 +31,10 @@ dn = dn.dn;
 %
 % un = resample(un,P,Q);
 % dn = resample(dn,P,Q);
-
-[corr, lag]= xcorr(un,dn);
-[~, ind]= max(abs(corr));
-latency = 1024+100;
+% 
+% [corr, lag]= xcorr(un,dn);
+% [~, ind]= max(abs(corr));
+latency = 920;
 
 %latency = 3958-50;
 
@@ -43,14 +43,14 @@ un = un(1:end-latency);
 
  % normalization
 
-% un = un/std(dn);
-% dn = dn/std(dn);
+un = un/std(dn);
+dn = dn/std(dn);
 
 % %normalization speech
-a = abs(max(dn))/sqrt(2);
-un = un/a;
-dn= dn/ a;
-% %
+% a = abs(max(dn))/sqrt(2);
+% un = un/a;
+% dn= dn/ a;
+% % %
 
 max_iter = size(un,2);
 
