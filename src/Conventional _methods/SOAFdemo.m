@@ -33,7 +33,7 @@ disp(sprintf('SOAF, step size = %.5f',mu));
 tic;
 S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
 S.unknownsys = b;
-[yn,en,S] = SOAFadapt(un,dn,S);     % Perform algorithm
+[yn,en,S] = SOAFadapt_DFT(un,dn,S);     % Perform algorithm
 
 EML = S.eml.^2;                     % System error norm (normalized)
 err_sqr = en.^2;
