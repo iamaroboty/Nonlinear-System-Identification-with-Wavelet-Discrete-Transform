@@ -16,8 +16,8 @@ close all;
 %% Hyperparameters
 % Kernel Hyperpar
 order = 2;                      % Order of volterra filter (just 2 atm)
-M1 = 128;                       % length of first order volterra kernel
-M2 = 16;                        % length of second order volterra kernel
+M1 = 256;                       % length of first order volterra kernel
+M2 = 32;                        % length of second order volterra kernel
 M = [M1, M2];
 gains = [1 1];                  % Kernel gains
 
@@ -56,7 +56,7 @@ par_comb = combvec(1:length(par_level), 1:length(par_filters));
 
 %% Create and plot kernel
 % Create Kernel mode
-kermode = 'random';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
+kermode = 'simulated';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
 
 % Create Kernel parameters
 deltapos = [5, 3];

@@ -11,25 +11,25 @@ close all;
 
 %% Structure Hyperparameters
 % Filters length
-M1 = 512;
+M1 = 256;
 M2 = 32;
 
 % Universal stepsize
-mu = [0.01 0.05]./2;
-mu_fb = [0.01 0.05]./2;
+mu = [0.1 0.1];
+mu_fb = [0.1 0.5];
 
 % For Wavelet Transform
 level = 3;
-filters = 'db4';
+filters = 'db16';
 
 % Hammerstein and Wammerstein
 % p , w
 leak = [0 0];
-order = 5;
+order = 2;
 M_hamm = M1 + M2;
-mu_p = 0.1;
-mu_w = 0.5;
-alpha = 10.^1;
+mu_p = 0.3;
+mu_w = 0.07;
+alpha = 10.^-1;
 
 % For MSAF and SAF
 N = 2^level;                % Number of subbands                     
@@ -37,9 +37,9 @@ D = N/2;                    % Decimation factor for 2x oversampling
 L = 8*N;                    % Length of analysis filters, M=2KN
 
 % Iter count
-iter = 2*80000;
+iter = 0.5*80000;
 
-input_type = {'m', 'f'};
+input_type = {'simulated'};
 input_gain = {'0'};
 
 n = 0;
@@ -48,38 +48,59 @@ for i= 1:numel(input_type)
         n = n+1;
         fprintf('STARTING RUN (%d)/(%d), file: %s \n', n , numel(input_type)*numel(input_gain), [input_type{i}, '_', input_gain{j}]);
         %% Input Data
-        % Anecoic measurment
-        load(['univpm_ref_', input_type{i}, '.mat'])
-        un = un(:)';    % Make it row vector
-        load(['univpm_', input_type{i}, '_', input_gain{j},'.mat'])
-        dn = dn(:)';    % Make it row vector
+%         % Anecoic measurment
+%         load(['univpm_ref_', input_type{i}, '.mat'])
+%         un = un(:)';    % Make it row vector
+%         load(['univpm_', input_type{i}, '_', input_gain{j},'.mat'])
+%         dn = dn(:)';    % Make it row vector
+% 
+%         delay = 1024 + 100;
+%         dn = dn(delay:end); 
+%         un = un(1:end-delay+1); 
+% 
+%         dn = dn(1:iter);
+%         un = un(1:iter);
+% 
+%         fs = 44100;
+% 
+%         % % Resample the data to new fsn
+% %         fs_new = 8000;
+% %         [P, Q] = rat(fs_new/fs);
+% %         dn = resample(dn, P, Q);
+% %         un = resample(un, P, Q);
+% %         iter = length(un);
+%         
+% 
+% %         Normalization of u(n) and d(n)
+% %         un = un/std(dn);
+% %         dn = dn/std(dn);
+% 
+% %         Normalization of speech signal
+%         a = abs(max(dn))/sqrt(2);
+%         un = un/a; dn = dn/a;
 
-        delay = 1024 + 100;
-        dn = dn(delay:end); 
-        un = un(1:end-delay+1); 
+        %% Create and plot kernel simulated
+        % Create Kernel mode
+        kermode = 'simulated';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
 
-        dn = dn(1:iter);
-        un = un(1:iter);
+        % Create Kernel parameters
+        deltapos = [5, 3];
+        Ndiag = 1;
+        normfreq = [0.6, 0.2];
+        h1h2 = ["h1.dat", "h2.dat"];
+        param = {deltapos, Ndiag, normfreq, h1h2};
 
-        fs = 44100;
+        [ker1, ker2] = create_kernel(M1, M2, kermode, param);
 
-        % % Resample the data to new fsn
-%         fs_new = 8000;
-%         [P, Q] = rat(fs_new/fs);
-%         dn = resample(dn, P, Q);
-%         un = resample(un, P, Q);
-%         iter = length(un);
-        
+        NL_system.M = [M1, M2];
+        gains = [1 0.1]; 
+        NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
 
-%         Normalization of u(n) and d(n)
-%         un = un/std(dn);
-%         dn = dn/std(dn);
-
-%         Normalization of speech signal
-        a = abs(max(dn))/sqrt(2);
-        un = un/a; dn = dn/a;
-
-        %%
+        % Plotting kernel
+        figure('Name', 'Simulated Kernel');
+        kernel_plot(NL_system.Responses);
+        [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
+        iter = length(un);
         % b = load('h1.dat');
         % b = b(1:M);
         % [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
@@ -111,7 +132,7 @@ fprintf('\n');
         coeffs.wavterra = S.coeffs;
         figure('Name', ['Estimated kernel Wavterra ', input_type{i}, ' ', input_gain{j}]);
         visualize_est_ker(coeffs.wavterra);
-        savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
+%         savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
 
         
         err_sqr = en.^2;
@@ -221,7 +242,7 @@ fprintf('\n');
         coeffs.volterra = S.coeffs;
         figure('Name', ['Estimated kernel Volterra ', input_type{i}, ' ', input_gain{j}]);
         visualize_est_ker(coeffs.volterra);
-        savefig(['figures/Ker_Volterra_',input_type{i},'_',input_gain{j},'.fig'])
+%         savefig(['figures/Ker_Volterra_',input_type{i},'_',input_gain{j},'.fig'])
 
         
         err_sqr = en.^2;
@@ -370,7 +391,7 @@ fprintf('\n');
         ylabel('Cumulative NMSE'); grid on;
         legend('show');
         
-         savefig(fig,['figures/nonlin_',input_type{i},'_',input_gain{j},'.fig'])
+%          savefig(fig,['figures/nonlin_',input_type{i},'_',input_gain{j},'.fig'])
         
     end
 end

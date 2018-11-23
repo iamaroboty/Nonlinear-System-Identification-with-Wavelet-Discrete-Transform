@@ -19,18 +19,18 @@ else
     M2 = (sqrt(8*numel(quad)+1) - 1)  / 2;
     k = zeros(M2,M2);
     
-    for i = 0:M2-1
-        d = diag(ones(M2-i,1),i);
+    for i = 1:M2
+        d = [zeros(1,i-1),ones(1,M2-i+1)];
         
-        if i==0
+        if i==1
             st = 1;
             en = M2;
         else
             st = en+1;
-            en = st+M2-i-1;
+            en = st+M2-i;
         end
             
-        k(d(:,:)==1) = quad(st:en);  
+        k(d==1,i) = quad(st:en);  
     end    
     
 end

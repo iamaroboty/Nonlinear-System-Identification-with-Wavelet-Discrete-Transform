@@ -29,14 +29,15 @@ iter = 0.5*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
+ord = [1 2 3];
 leak = [0 0];
 mu_p = [0.1 ];
 mu_w = [ 0.5];
-alpha = 10.^[ 1];
+alpha = 10.^[ 0];
 
 % Create combination
-runs = length(mu_p)*length(mu_w)*length(alpha);
-par_comb = combvec(1:length(mu_p), 1:length(mu_w),1:length(alpha));
+runs = length(mu_p)*length(mu_w)*length(alpha)*length(ord);
+par_comb = combvec(1:length(mu_p), 1:length(mu_w), 1:length(alpha), 1:length(ord));
 
 % Random Vector 
 b = load("h1.dat");
@@ -115,17 +116,17 @@ dn = dn/std(dn);
 
 %% HAMMERSTERIN
 fprintf('HAMMERSTEIN\n');
-fprintf('Order = %d, sys_len = %d \n', order, M);
 for i = 1:runs
     fprintf('-------------------------------------------------------------\n');
-    fprintf('Running iter (%d) of (%d)\n', i, runs);           
-    fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
+    fprintf('Running iter (%d) of (%d)\n', i, runs);               
+    fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)));
+    fprintf('Order = %d, sys_len = %d \n', ord(par_comb(4,i)), M);
 
 %     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),1,40);    
 %     [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
-    S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
+    S = Hammerstein_NLMS_init(ord(par_comb(4,i)), M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
 
     [en, S] = Hammerstein_NLMS_adapt(un, dn, S);  
 
@@ -137,10 +138,11 @@ for i = 1:runs
     figure(MSEfig);
     q = 0.99; MSE_full = filter((1-q),[1 -q],err_sqr);
     plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', ...
-                                                            ['\mu_p:', num2str(mu_p(par_comb(1,i))),...
+                                                            ['Ord.', num2str(ord(par_comb(4,i))),...
+                                                             '\mu_p:', num2str(mu_p(par_comb(1,i))),...
                                                              ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
                                                              ' \alpha:', num2str(alpha(par_comb(3,i)))]);    
-    axis([0 length(MSE_full)/1024 -inf 10]);
+    axis([0 length(MSE_full)/1024 -40 5]);
     xlabel('Number of iterations (\times 1024 input samples)'); 
     ylabel('Mean-square error (with delay)'); grid on; hold on;
     legend('show');
@@ -152,10 +154,11 @@ for i = 1:runs
     [NMSE_plot, indx] = NMSE_compute(dn, en, nmse_n_points);
     hold on; grid on;
     plot(indx, NMSE_plot,      	  'DisplayName', ...
-                    ['\mu_p:', num2str(mu_p(par_comb(1,i))),...
+                    ['Ord.', num2str(ord(par_comb(4,i))),...
+                     '\mu_p:', num2str(mu_p(par_comb(1,i))),...
                      ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
                      ' \alpha:', num2str(alpha(par_comb(3,i)))]);  
-    axis([indx(1) indx(end) -15 5]);
+    axis([indx(1) indx(end) -30 5]);
     xlabel('Iteration number'); 
     ylabel('Cumulative Normalized Mean-square error'); 
     legend('show');
