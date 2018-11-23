@@ -10,7 +10,7 @@ close all;
 rng('default'); %
 
 %% Unidentified System parameters
-order = 4; 
+order = 5; 
 M = 256; %% hammerstein filters lens
 % gains = rand(1,order)-0.5;
 % gains = ones(1,order);
@@ -30,9 +30,9 @@ iter = 0.5*80000;   % Number of iterations
 %algorithm parameters
 % p , w
 leak = [0 0];
-mu_p = [0.2];
-mu_w = [0.4];
-alpha = 10.^[0];
+mu_p = [0.1 ];
+mu_w = [ 0.5];
+alpha = 10.^[ 1];
 
 % Create combination
 runs = length(mu_p)*length(mu_w)*length(alpha);
@@ -77,6 +77,41 @@ nmse_n_points = 1000;
 % 
 % iter = length(un);
 
+%% Anecoic data
+% Anecoic measurment
+infile = 'color'; %white, color, f, m
+gain = '5p';  %5, 0, 5p
+
+load(['univpm_ref_', infile, '.mat'])
+un = un(:)';    % Make it row vector
+load(['univpm_', infile, '_', gain,'.mat'])
+dn = dn(:)';    % Make it row vector
+
+delay = 1024 + 100;
+dn = dn(delay:end); 
+un = un(1:end-delay+1); 
+
+fs = 44100;
+
+% Resample the data to new fsn
+fs_new = 16000;
+[P, Q] = rat(fs_new/fs);
+dn = resample(dn, P, Q);
+un = resample(un, P, Q);
+iter = length(dn);
+
+% stop signal at iter
+% dn = dn(1:iter);
+% un = un(1:iter);
+
+% Normalization of u(n) and d(n)
+un = un/std(dn);
+dn = dn/std(dn);
+
+% % Normalization of speech signal
+% a = abs(max(dn))/sqrt(2);
+% un = un/a; dn = dn/a;
+
 
 %% HAMMERSTERIN
 fprintf('HAMMERSTEIN\n');
@@ -87,7 +122,7 @@ for i = 1:runs
     fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
 
 %     [un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),1,40);    
-    [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
+%     [un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,lin_sys,sum(100*clock),1,40, non_linearity); %iter, b, seed, ARtype, SNR
 
     tic;
     S = Hammerstein_NLMS_init(order, M, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] ,leak, alpha(par_comb(3,i))); 
