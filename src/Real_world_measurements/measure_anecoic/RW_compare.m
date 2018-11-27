@@ -11,12 +11,12 @@ close all;
 
 %% Structure Hyperparameters
 % Filters length
-M1 = 256;
-M2 = 32;
+M1 = 512;
+M2 = 64;
 
 % Universal stepsize
-mu = [0.1 0.1];
-mu_fb = [0.1 0.5];
+mu = [0.1 0.3];
+mu_fb = [0.1 0.3];
 
 % For Wavelet Transform
 level = 3;
@@ -25,11 +25,11 @@ filters = 'db16';
 % Hammerstein and Wammerstein
 % p , w
 leak = [0 0];
-order = 2;
+order = 5;
 M_hamm = M1 + M2;
-mu_p = 0.3;
-mu_w = 0.07;
-alpha = 10.^-1;
+mu_p = 0.1;
+mu_w = 0.5;
+alpha = 10.^0;
 
 % For MSAF and SAF
 N = 2^level;                % Number of subbands                     
@@ -39,8 +39,8 @@ L = 8*N;                    % Length of analysis filters, M=2KN
 % Iter count
 iter = 0.5*80000;
 
-input_type = {'simulated'};
-input_gain = {'0'};
+input_type = {'white'};
+input_gain = {'5p'};
 
 n = 0;
 for i= 1:numel(input_type)
@@ -48,63 +48,69 @@ for i= 1:numel(input_type)
         n = n+1;
         fprintf('STARTING RUN (%d)/(%d), file: %s \n', n , numel(input_type)*numel(input_gain), [input_type{i}, '_', input_gain{j}]);
         %% Input Data
-%         % Anecoic measurment
+        % Anecoic measurment
 %         load(['univpm_ref_', input_type{i}, '.mat'])
 %         un = un(:)';    % Make it row vector
 %         load(['univpm_', input_type{i}, '_', input_gain{j},'.mat'])
 %         dn = dn(:)';    % Make it row vector
-% 
-%         delay = 1024 + 100;
-%         dn = dn(delay:end); 
-%         un = un(1:end-delay+1); 
-% 
-%         dn = dn(1:iter);
-%         un = un(1:iter);
-% 
-%         fs = 44100;
-% 
-%         % % Resample the data to new fsn
-% %         fs_new = 8000;
-% %         [P, Q] = rat(fs_new/fs);
-% %         dn = resample(dn, P, Q);
-% %         un = resample(un, P, Q);
-% %         iter = length(un);
-%         
-% 
-% %         Normalization of u(n) and d(n)
-% %         un = un/std(dn);
-% %         dn = dn/std(dn);
-% 
-% %         Normalization of speech signal
+          
+%         %Other data measuee
+%         load('pink_noise.mat')
+%         un = un(:)';    % Make it row vector
+%         load('horn3_resp_pink_noise.mat')
+%         dn = dn(:)';    % Make it row vector
+
+        delay = 800 + 100;
+        dn = dn(delay:end); 
+        un = un(1:end-delay+1); 
+
+        dn = dn(1:iter);
+        un = un(1:iter);
+ 
+        fs = 44100;
+
+        % % Resample the data to new fsn
+%         fs_new = 8000;
+%         [P, Q] = rat(fs_new/fs);
+%         dn = resample(dn, P, Q);
+%         un = resample(un, P, Q);
+%         iter = length(un);
+        
+
+%         Normalization of u(n) and d(n)
+        un = un/std(dn);
+        dn = dn/std(dn);
+
+%         Normalization of speech signal
 %         a = abs(max(dn))/sqrt(2);
 %         un = un/a; dn = dn/a;
 
         %% Create and plot kernel simulated
-        % Create Kernel mode
-        kermode = 'simulated';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
-
-        % Create Kernel parameters
-        deltapos = [5, 3];
-        Ndiag = 1;
-        normfreq = [0.6, 0.2];
-        h1h2 = ["h1.dat", "h2.dat"];
-        param = {deltapos, Ndiag, normfreq, h1h2};
-
-        [ker1, ker2] = create_kernel(M1, M2, kermode, param);
-
-        NL_system.M = [M1, M2];
-        gains = [1 0.1]; 
-        NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
-
-        % Plotting kernel
-        figure('Name', 'Simulated Kernel');
-        kernel_plot(NL_system.Responses);
-        [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
-        iter = length(un);
-        % b = load('h1.dat');
-        % b = b(1:M);
-        % [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
-        % [un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
+%         % Create Kernel mode
+%         kermode = 'simulated';              %modes: "delta", "randomdiag", "random", "lowpass", "simulated"
+% 
+%         % Create Kernel parameters
+%         deltapos = [5, 3];
+%         Ndiag = 1;
+%         normfreq = [0.6, 0.2];
+%         h1h2 = ["h1.dat", "h2.dat"];
+%         param = {deltapos, Ndiag, normfreq, h1h2};
+% 
+%         [ker1, ker2] = create_kernel(M1, M2, kermode, param);
+% 
+%         NL_system.M = [M1, M2];
+%         gains = [1 0.1]; 
+%         NL_system.Responses = {gains(1).*ker1, gains(2).*ker2};
+% 
+%         % Plotting kernel
+%         figure('Name', 'Simulated Kernel');
+%         kernel_plot(NL_system.Responses);
+%         [un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
+%         iter = length(un);
+%         % b = load('h1.dat');
+%         % b = b(1:M);
+%         % [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),1,40); %iter, b, seed, ARtype, SNR
+%         % [un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
         
         %%
 
@@ -120,44 +126,44 @@ for i= 1:numel(input_type)
 fprintf('\n');
 
         %% WAVTERRA
-        fprintf('WAVTERRA\n');
-        fprintf('--------------------------------------------------------------------\n'); 
-        fprintf('level = %d , wtype = %s\n', level, filters);           
-        fprintf('step size = %s \n', sprintf('%.2f ', mu));
-        
-        tic;
-        S = Volterra_Init([M1, M2], mu, level, filters); 
-        [en, S] = Volterra_2ord_adapt_v3(un, dn, S);
-        
-        coeffs.wavterra = S.coeffs;
-        figure('Name', ['Estimated kernel Wavterra ', input_type{i}, ' ', input_gain{j}]);
-        visualize_est_ker(coeffs.wavterra);
-%         savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
-
-        
-        err_sqr = en.^2;
-        
-        fprintf('Total time = %.2f s \n',toc);
-        
-        % Plot MSE       
-        figure(fig);
-        subplot(211);
-        q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-        hold on; grid on;
-        plot((1:iter)/1024,10*log10(MSE), 'DisplayName', 'WAVTERRA');
-        axis([0 iter/1024 -40 5]);
-        legend('show');
-        
-        NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
-        fprintf('NMSE = %.2f dB\n', NMSE);
-        
-        % Plot NMSE
-        subplot(212);
-        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['WAVTERRA: ', num2str(num2str(NMSE, '%0.2f'))] );
-        axis([0 iter/1024 -20 10]);
-        legend('show');
-        
-        fprintf('\n');
+%         fprintf('WAVTERRA\n');
+%         fprintf('--------------------------------------------------------------------\n'); 
+%         fprintf('level = %d , wtype = %s\n', level, filters);           
+%         fprintf('step size = %s \n', sprintf('%.2f ', mu));
+%         
+%         tic;
+%         S = Volterra_Init([M1, M2], mu, level, filters); 
+%         [en, S] = Volterra_2ord_adapt_v3(un, dn, S);
+%         
+%         coeffs.wavterra = S.coeffs;
+%         figure('Name', ['Estimated kernel Wavterra ', input_type{i}, ' ', input_gain{j}]);
+%         visualize_est_ker(coeffs.wavterra);
+% %         savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
+% 
+%         
+%         err_sqr = en.^2;
+%         
+%         fprintf('Total time = %.2f s \n',toc);
+%         
+%         % Plot MSE       
+%         figure(fig);
+%         subplot(211);
+%         q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+%         hold on; grid on;
+%         plot((1:iter)/1024,10*log10(MSE), 'DisplayName', 'WAVTERRA');
+%         axis([0 iter/1024 -40 5]);
+%         legend('show');
+%         
+%         NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
+%         fprintf('NMSE = %.2f dB\n', NMSE);
+%         
+%         % Plot NMSE
+%         subplot(212);
+%         hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['WAVTERRA: ', num2str(num2str(NMSE, '%0.2f'))] );
+%         axis([0 iter/1024 -20 10]);
+%         legend('show');
+%         
+%         fprintf('\n');
 
         %% MSAFTERRA
         % fprintf('MSAFTERRA\n');
