@@ -7,11 +7,11 @@ fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
 close all;
-rng('default'); %
+% rng('default'); %
 
 %% Unidentified System parameters
 order = 5; 
-M = 256; %% hammerstein filters lens
+M = 256+128; %% hammerstein filters lens
 % gains = rand(1,order)-0.5;
 % gains = ones(1,order);
 
@@ -23,16 +23,16 @@ p = [rand(1,order)-0.5, 0];
 polynom = @(x) polyval(p,x);
 
 non_linearity = polynom; 
-plot_nonlinearity = 1; 
+plot_nonlinearity = 0; 
 
-iter = 0.5*80000;   % Number of iterations
+iter = 3*80000;   % Number of iterations
 
 %algorithm parameters
 % p , w
-ord = [1 2 3];
+ord = [1];
 leak = [0 0];
-mu_p = [0.1 ];
-mu_w = [ 0.5];
+mu_p = [0.3 ];
+mu_w = [ 0.7];
 alpha = 10.^[ 0];
 
 % Create combination
@@ -80,34 +80,42 @@ nmse_n_points = 1000;
 
 %% Anecoic data
 % Anecoic measurment
-infile = 'color'; %white, color, f, m
-gain = '5p';  %5, 0, 5p
+% infile = 'color'; %white, color, f, m
+% gain = '5p';  %5, 0, 5p
+% 
+% load(['univpm_ref_', infile, '.mat'])
+% un = un(:)';    % Make it row vector
+% load(['univpm_', infile, '_', gain,'.mat'])
+% dn = dn(:)';    % Make it row vector
+un = audioread('speech_me.wav');
+un = un(:)';
+dn = audioread('univpm2_me_75.wav'); 
+dn = dn(:)';
 
-load(['univpm_ref_', infile, '.mat'])
-un = un(:)';    % Make it row vector
-load(['univpm_', infile, '_', gain,'.mat'])
-dn = dn(:)';    % Make it row vector
-
-delay = 1024 + 100;
+delay = 1024;
 dn = dn(delay:end); 
 un = un(1:end-delay+1); 
+% dn = dn(1:iter);
+% un = un(1:iter);
 
 fs = 44100;
 
 % Resample the data to new fsn
-fs_new = 16000;
+fs_new = 8000;
 [P, Q] = rat(fs_new/fs);
 dn = resample(dn, P, Q);
 un = resample(un, P, Q);
-iter = length(dn);
+iter = length(un);
 
 % stop signal at iter
-% dn = dn(1:iter);
-% un = un(1:iter);
+dn = dn(1:iter);
+un = un(1:iter);
 
 % Normalization of u(n) and d(n)
-un = un/std(dn);
-dn = dn/std(dn);
+% un = un/std(dn);
+% dn = dn/std(dn);
+un = un/(abs(max(un)));
+dn = dn/(abs(max(dn)));
 
 % % Normalization of speech signal
 % a = abs(max(dn))/sqrt(2);
@@ -142,7 +150,7 @@ for i = 1:runs
                                                              '\mu_p:', num2str(mu_p(par_comb(1,i))),...
                                                              ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
                                                              ' \alpha:', num2str(alpha(par_comb(3,i)))]);    
-    axis([0 length(MSE_full)/1024 -40 5]);
+    axis([0 length(MSE_full)/1024 -60 10]);
     xlabel('Number of iterations (\times 1024 input samples)'); 
     ylabel('Mean-square error (with delay)'); grid on; hold on;
     legend('show');
@@ -151,14 +159,14 @@ for i = 1:runs
     fprintf('NMSE = %.2f dB\n', NMSE(i));
     
     figure(NMSE_fig);  
-    [NMSE_plot, indx] = NMSE_compute(dn, en, nmse_n_points);
+%     [NMSE_plot, indx] = NMSE_compute(dn, en, nmse_n_points);
     hold on; grid on;
-    plot(indx, NMSE_plot,      	  'DisplayName', ...
+    plot((0:length(MSE_full)-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ...
                     ['Ord.', num2str(ord(par_comb(4,i))),...
                      '\mu_p:', num2str(mu_p(par_comb(1,i))),...
                      ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
                      ' \alpha:', num2str(alpha(par_comb(3,i)))]);  
-    axis([indx(1) indx(end) -30 5]);
+    axis([0 length(MSE_full)/1024 -20 10]);
     xlabel('Iteration number'); 
     ylabel('Cumulative Normalized Mean-square error'); 
     legend('show');

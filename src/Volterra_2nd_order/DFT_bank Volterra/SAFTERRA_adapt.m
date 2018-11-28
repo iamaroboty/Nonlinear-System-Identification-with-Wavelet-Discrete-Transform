@@ -1,4 +1,4 @@
-  function [en,S] = SAFTERRA_adapt(un,dn,S)
+  function [en,S] = SAFTERRA_adapt(un,dn,S, C)
 
 % SAFadapt          Subband Adaptive Filter
 %
@@ -27,7 +27,11 @@ w1 = zeros(size(W{1}));
 
 U = zeros(size(w1));           % Tapped-delay lines of adaptive subfilters
 
-for i = 1:size(S.coeffs{2},1)
+if nargin == 3
+    C = size(S.coeffs{2},1);                 % Number of nonlinear channel
+end
+
+for i = 1:C
     u2{i} = zeros(size(W{2},1),1);   % Nonlinear input delay line
     
     U2{i} = zeros(size(W{2},1), size(W{2},2));     
@@ -48,7 +52,7 @@ for n = 1:ITER
     x = [un(n); x(1:end-1)];  % Fullband input vector for band partitioning
     y = [dn(n); y(1:end-1)];  % Fullband desired response vector for band partitioning
     
-    for i = 1:size(S.coeffs{2},1)
+    for i = 1:C
         u2{i} = [un(n)*x(i); u2{i}(1:end-1)]; %input vectors for second order term 
     end
     
@@ -58,7 +62,7 @@ for n = 1:ITER
         
         ker2 = 0; 
         norm = 0; 
-        for i = 1:size(S.coeffs{2},1)
+        for i = 1:C
             U2{i} = [u2{i}(1:L)'*H; U2{i}(1:end-1,:)];  
             ker2 = ker2 + sum(U2{i}(1:size(w2{i},1),:).*w2{i});
             norm = norm + sum(U2{i}(1:size(w2{i},1),:).*conj(U2{i}(1:size(w2{i},1),:)));
@@ -69,7 +73,7 @@ for n = 1:ITER
         if n >= AdaptStart
             w1 = w1 + conj(U)*diag(eD./(sum(U.*conj(U))+alpha))*mu(1);
             
-            for i= 1:size(S.coeffs{2},1)
+            for i= 1:C
                 w2{i} = w2{i} + conj(U2{i}(1:size(w2{i},1),:))*diag(eD./(norm +alpha))*mu(2);
              
             end
