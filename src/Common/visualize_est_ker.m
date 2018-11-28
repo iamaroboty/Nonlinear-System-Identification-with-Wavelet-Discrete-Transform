@@ -7,12 +7,15 @@ if iscell(quad)
     % wavterra
     [M1,~] = size(lin);
     [~,M2] = size(quad);
+    [kerlen, ~] = size(quad{1});
 
-    k = zeros(M2,M2);
+    k = zeros(kerlen,kerlen);
     for i = 0:M2-1
-        d = diag(ones(M2-i,1),i);
+        d = diag(ones(kerlen-i,1),i);
         k(d(:,:)==1) = quad{i+1};        
     end    
+    
+    M2 = kerlen;
     
 else
     % volterra fb

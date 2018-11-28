@@ -28,6 +28,8 @@ S.synthesis_bank = F;
 if nargin == 3
     C = K(2);                 % Number of nonlinear channel
     SB = 1:2^level;
+elseif nargin == 4
+    SB = 1:2^level;
 end
 
 taplen = max(C,len);
