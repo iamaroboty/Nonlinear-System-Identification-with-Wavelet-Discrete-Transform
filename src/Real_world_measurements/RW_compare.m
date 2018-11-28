@@ -20,7 +20,7 @@ mu_fb = [0.1 0.3];
 
 % For Wavelet Transform
 level = 3;
-filters = 'db16';
+filters = 'db8';
 
 % Hammerstein and Wammerstein
 % p , w

@@ -27,6 +27,7 @@ utmp = zeros(K(2)^2-K(2)+1,1);  % Temporal Delay line for second order input - m
 u2 = zeros(M(2),1);             % Delay line for second order input
 
 index = [];                     % Indexing for correct second order input
+
 for i=0:K(2)-1
     index = cat(2,index, K(2)*i+1:K(2)*(i+1)-i);
 end

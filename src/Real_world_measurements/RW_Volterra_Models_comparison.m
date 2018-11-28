@@ -9,20 +9,22 @@ close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 1024; % length of first order volterra kernel
+M1 = 64; % length of first order volterra kernel
 
 
-un = load('white_noise'); 
-un = un.un;
-dn = load('horn2_resp_white_noise'); 
-dn = dn.dn;
+% un = load('xperia_ref_speech_m'); 
+% un = un.un;
+% dn = load('xperia_resp_speech_m'); 
+% dn = dn.dn;
+un = audioread('speech_me.wav')';
+dn = audioread('univpm2_me_75.wav')';
+dn = dn(1:size(un,2)); 
 
-M2 = 8; % length of second order volterra kernel
+
+M2 = 64; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
-
-% 
 % [P,Q] = rat(8192/44100);
 % 
 % un = resample(un,P,Q); 
@@ -32,7 +34,7 @@ NL_system.M = [M1, M2];
 %estimate latency with xcorr
 % [corr, lag]= xcorr(un,dn); 
 % [~, ind]= max(abs(corr)); 
-latency = 920; 
+latency = 1024+70; 
 
 % latency = 3130; %horn 2800 behr 3130 xperia 
 dn = dn(latency:end); 
@@ -40,8 +42,8 @@ un = un(1:end-latency);
 
 % normalization 
 
-un = un/std(dn);
-dn = dn/std(dn);
+% un = un/std(dn);
+% dn = dn/std(dn);
 
 %normalization speech 
 % a = abs(max(dn))/sqrt(2); 
@@ -58,7 +60,6 @@ mu = [0.1, 0.1];            %Step sizes for different kernels
 
 % Run parameters
 iter = 1*80000;            % Number of iterations
-iter = max_iter; 
 
 if iter > max_iter
    
@@ -72,9 +73,9 @@ dn = dn(1,1:iter);
 
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
-level = 3;                  % Levels of Wavelet decomposition for different kernels
+level = 1;                  % Levels of Wavelet decomposition for different kernels
 
-filters = 'db4';            % Set wavelet type for different kernels
+filters = 'db1';            % Set wavelet type for different kernels
 
 
 %%
@@ -88,7 +89,7 @@ else
 end
                       
 D = N/2;                    % Decimation factor for 2x oversampling
-L = 8*N;                    % Length of analysis filters, M=2KN, 
+L = 2*N;                    % Length of analysis filters, M=2KN, 
 
 %% plot parameters
 nmse_n_points = 1000; 
@@ -98,9 +99,6 @@ nmse_n_points = 1000;
 
 disp('Real-world desired and input signals. . .');
 fprintf('Prior assumed Kernel Lengths: [%d, %d], iter= %d\n', M1, M2, iter);
-
-
-
 
 
 %% WAVTERRA
@@ -117,7 +115,7 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
 
 
-[en, S] = Volterra_2ord_adapt_v3(un, dn, S);
+[en, S] = Volterra_2ord_adapt_v3(un, dn, S, 1, level);
 fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
     
@@ -151,15 +149,15 @@ ylabel('NMSE'); grid on;
 fprintf('NMSE = %.2f dB\n', NMSE(end))
 
 
-%% MSAFTERRA
-% Nonlinear model fehprintf('--------------------------------------------------------------------\n');
+% MSAFTERRA
+%Nonlinear model 
+fprintf('--------------------------------------------------------------------\n');
 fprintf('MSAFTERRA\n');
-
 disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
 
 S = MSAFTERRA_Init(M,mu,N,L);
 tic;
-[en,S] = MSAFTERRA_adapt(un,dn,S);
+[en,S] = MSAFTERRA_adapt(un,dn,S,1);
 disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
@@ -193,7 +191,7 @@ disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
 
 S = SAFTERRA_Init(M,mu,N,D,L);
 tic;
-[en,S] = SAFTERRA_adapt(un,dn,S);
+[en,S] = SAFTERRA_adapt(un,dn,S, 1);
 disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
@@ -221,14 +219,14 @@ xlabel('Iteration number');
 ylabel('NMSE'); grid on;
 fprintf('NMSE = %.2f dB\n', NMSE(end))
 
-
+% 
 %% Fullband Volterra NLMS
 fprintf('--------------------------------------------------------------------\n');
 fprintf('FULLBAND NLMS\n');
 
 tic;
-Sfull = Volterra_NLMS_init(NL_system.M, mu); 
-[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
+Sfull = Volterra_NLMS_init(NL_system.M, mu, 0, 1); 
+[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull, 1);
 fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
 

@@ -7,24 +7,29 @@ diary log_VNLMS.txt
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;
-close all;
+%close all;
 
 %% Unidentified System parameters
 
-order = 3;
-M = 1024; %% hammerstein filters lens
+order = 2;
+M = 256; %% hammerstein filters lens
 gains = ones(2,1);
+
 
 %algorithm parameters
 mu = [0.2 0.5]; %ap aw
 leak = [0 0];
-alpha = 10;
+alpha = 100;
 
 
-un = load('ar10_noise');
-un = un.un;
-dn = load('horn_resp_ar10_noise');
-dn = dn.dn;
+% un = load('_noise');
+% un = un.un;
+% dn = load('horn_resp_ar10_noise');
+% dn = dn.dn;
+
+un = audioread('speech_me.wav')';
+dn = audioread('univpm2_me_50.wav')';
+dn = dn(1:size(un,2)); 
 %
 %
 % [P,Q] = rat(8192/44100);
@@ -34,7 +39,7 @@ dn = dn.dn;
 % 
 % [corr, lag]= xcorr(un,dn);
 % [~, ind]= max(abs(corr));
-latency = 920;
+latency = 1024;
 
 %latency = 3958-50;
 
@@ -42,14 +47,14 @@ dn = dn(latency:end);
 un = un(1:end-latency);
 
  % normalization
-
-un = un/std(dn);
-dn = dn/std(dn);
+% 
+% un = un/std(dn);
+% dn = dn/std(dn);
 
 % %normalization speech
-% a = abs(max(dn))/sqrt(2);
-% un = un/a;
-% dn= dn/ a;
+a = abs(max(dn))/sqrt(2);
+un = un/a;
+dn= dn/ a;
 % % %
 
 max_iter = size(un,2);
@@ -59,7 +64,7 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('HAMMERSTEIN\n');
 
 % Run parameters
-iter = 2*80000;   % Number of iterations
+iter = 4*80000;   % Number of iterations
 
 if iter > max_iter
 
