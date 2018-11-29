@@ -22,7 +22,7 @@ level = 3;
 filters = 'db16';
 
 % For Waveterra
-C = 5;
+C = 10;
 SB = 1:2^level;
 
 % Hammerstein and Wammerstein
@@ -40,10 +40,10 @@ D = N/2;                    % Decimation factor for 2x oversampling
 L = 8*N;                    % Length of analysis filters, M=2KN
 
 % Iter count
-iter = 0.5*80000;
+iter = 2*80000;
 
-input_type = {'white'};
-input_gain = {'0', '75'};
+input_type = {'f'};
+input_gain = {'75'};
 
 n = 0;
 for i= 1:numel(input_type)
@@ -52,8 +52,8 @@ for i= 1:numel(input_type)
         fprintf('STARTING RUN (%d)/(%d), file: %s \n', n , numel(input_type)*numel(input_gain), [input_type{i}, '_', input_gain{j}]);
         %% Input Data
         fs = 44100;
-        un = audioread([input_type{i},'_noise.wav']);
-%         un = audioread('white_noise.wav');
+%         un = audioread([input_type{i},'_noise.wav']);
+        un = audioread('speech_f1_44100.wav');
         un = un(:)';
         dn = audioread(['univpm2_',input_type{i},'_',input_gain{j},'.wav']);
 %         dn = audioread(['univpm2_',input_type{i},'_',input_gain{j},'.wav']); 
@@ -135,7 +135,7 @@ for i= 1:numel(input_type)
         coeffs.wavterra = S.coeffs;
         figure('Name', ['Estimated kernel Wavterra ', input_type{i}, ' ', input_gain{j}]);
         visualize_est_ker(coeffs.wavterra);
-        savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
+%         savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
 
         
         err_sqr = en.^2;
@@ -189,7 +189,7 @@ for i= 1:numel(input_type)
         
         % Plot NMSE
         subplot(212);
-        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['WAVTERRA: ', num2str(num2str(NMSE, '%0.2f'))] );
+        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['MSAFTERRA: ', num2str(num2str(NMSE, '%0.2f'))] );
         axis([0 iter/1024 -20 10]);
         legend('show');
         
@@ -240,7 +240,7 @@ for i= 1:numel(input_type)
         coeffs.volterra = S.coeffs;
         figure('Name', ['Estimated kernel Volterra ', input_type{i}, ' ', input_gain{j}]);
         visualize_est_ker(coeffs.volterra);
-        savefig(['figures/Ker_Volterra_',input_type{i},'_',input_gain{j},'.fig'])
+%         savefig(['figures/Ker_Volterra_',input_type{i},'_',input_gain{j},'.fig'])
         
         err_sqr = en.^2;
 
@@ -383,12 +383,12 @@ for i= 1:numel(input_type)
 
         subplot(212);
         title(['NMSE dB']);
-        axis([0 iter/1024 -25 10]);
+        axis([0 iter/1024 -30 10]);
         xlabel('Number of iterations (\times 1024 input samples)'); 
         ylabel('Cumulative NMSE'); grid on;
         legend('show');
         
-%          savefig(fig,['figures/nonlin_',input_type{i},'_',input_gain{j},'.fig'])
+%          savefig(fig,['figures/new_',input_type{i},'_',input_gain{j},'.fig'])
         
     end
 end

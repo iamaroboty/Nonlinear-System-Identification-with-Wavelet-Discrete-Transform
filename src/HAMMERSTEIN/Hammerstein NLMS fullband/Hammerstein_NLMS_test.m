@@ -1,4 +1,4 @@
-function [out] = Hammerstein_NLMS_test(un,S)            
+function [out] = Hammerstein_NLMS_test(un,coeffs)            
 % 
 % Arguments:
 % un                Input signal
@@ -6,17 +6,12 @@ function [out] = Hammerstein_NLMS_test(un,S)
 % S                 Adptive filter parameters 
 % en                History of error signal
 
-order = S.order; 
-M = S.filters_lengths;              % kernel memory lengths 
-mu = S.step;                      % Step Size here is an array 
-AdaptStart = S.AdaptStart;        % Transient
-alpha = S.alpha;                  % Small constant 
-leak = S.leaks;                 % Leaky factor 
-
+order = numel(coeffs{2}); 
+M = numel(coeffs{1}); 
 
 xp = zeros(order, 1);  
-w = S.coeffs{1};
-p = S.coeffs{2};
+w = coeffs{1};
+p = coeffs{2};
 
 X = zeros(M, order); 
 
