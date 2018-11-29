@@ -9,13 +9,13 @@ close all;
 % Adaptive filter parameters
 mu = 0.3;                      % Step size
 M = 512;                       % Length of unknown system response
-level = 2;                     % Levels of Wavelet decomposition
-filters = 'db4';               % Set wavelet type
+level = 3;                     % Levels of Wavelet decomposition
+filters = 'db8';               % Set wavelet type
 Q =1;   %useless
 DWT_flag = 0;
 
 % Run parameters
-iter = 1.0*80000;                % Number of iterations
+iter = 0.5*80000;                % Number of iterations
 b = load('h1.dat');              % Unknown system (select h1 or h2)
 b = b(1:M);                      % Truncate to length M
 
@@ -45,33 +45,39 @@ b = b(1:M);                      % Truncate to length M
 %  b = yr(500:500-1+M,1);
 
 %%
-% Anecoic measurment
-load('ref_white.mat')
-un = un(:)';    % Make it row vector
-load('univpm_white_5p.mat')
-dn = dn(:)';    % Make it row vector
+% % Anecoic measurment
+% load('univpm_ref_color.mat')
+% un = un(:)';    % Make it row vector
+% load('univpm_color_5p.mat')
+% dn = dn(:)';    % Make it row vector
+% un = audioread('ar10_noise.wav');
+% un = un(:)';
+% dn = audioread('univpm2_ar10_75.wav'); 
+% dn = dn(:)';
+% 
+% delay = 1024;
+% dn = dn(delay:end-iter); 
+% un = un(1:end-delay-iter+1); 
+% 
+% fs = 44100;
+% 
+% % % Resample the data to new fsn
+% % fs_new = 16000;
+% % [P, Q] = rat(fs_new/fs);
+% % dn = resample(dn, P, Q);
+% % un = resample(un, P, Q);
+% % 
+% % % Normalization of u(n) and d(n)
+% % un = un/std(dn);
+% % dn = dn/std(dn);
+% un = un/(abs(max(un)));
+% dn = dn/(abs(max(dn)));
 
-delay = 1024 + 100;
-dn = dn(delay:end-iter); 
-un = un(1:end-delay-iter+1); 
-
-fs = 44100;
-
-% % Resample the data to new fsn
-% fs_new = 16000;
-% [P, Q] = rat(fs_new/fs);
-% dn = resample(dn, P, Q);
-% un = resample(un, P, Q);
-
-% Normalization of u(n) and d(n)
-un = un/std(dn);
-dn = dn/std(dn);
-
-% % Normalization of speech signal
+% Normalization of speech signal
 % a = abs(max(dn))/sqrt(2);
 % un = un/a; dn = dn/a;
 %%
-% [un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses(iter,b,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 % [un,dn,vn] = GenerateResponses_speech(b,'SpeechSample.mat');
 
 %%
@@ -83,13 +89,13 @@ S = SWAFinit(M, mu, level, filters);
 % S = MWSAFinit(M,mu,level,filters,Q);
 % S.unknownsys = b; 
 
-if DWT_flag == 1
-    [en, S] = MWSAFadapt_DWT(un, dn, S); 
-else
+
+    [en_dwt, S_dwt] = MWSAFadapt_DWT(un, dn, S); 
+
     [en, Snormal] = MWSAFadapt(un, dn, S);    
-    [en_cllp, S_cllp] = MWSAFadapt_cllp(un, dn, S);  
-    [en_oplp, S_oplp] = MWSAFadapt_oplp(un, dn, S);  
-end
+%     [en_cllp, S_cllp] = MWSAFadapt_cllp(un, dn, S);  
+%     [en_oplp, S_oplp] = MWSAFadapt_oplp(un, dn, S);  
+
     
 %EML = S.eml.^2;                  % System error norm (normalized)
 err_sqr = en.^2;
@@ -100,11 +106,14 @@ MSEfig = figure('Name', 'MSE');         % Plot MSE
 q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
 hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF');
 
-q = 0.99; MSE = filter((1-q),[1 -q],en_cllp.^2);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF_ cllp');
+q = 0.99; MSE = filter((1-q),[1 -q],en_dwt.^2);
+hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'DWT-MWSAF');
 
-q = 0.99; MSE = filter((1-q),[1 -q],en_oplp.^2);
-hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF_ oplp');
+% q = 0.99; MSE = filter((1-q),[1 -q],en_cllp.^2);
+% hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF_ cllp');
+% 
+% q = 0.99; MSE = filter((1-q),[1 -q],en_oplp.^2);
+% hold on; plot((0:length(MSE)-1)/1024,10*log10(MSE), 'DisplayName', 'MWSAF_ oplp');
 
 axis([0 iter/1024 -60 10]);
 xlabel('Number of iterations (\times 1024 input samples)'); 

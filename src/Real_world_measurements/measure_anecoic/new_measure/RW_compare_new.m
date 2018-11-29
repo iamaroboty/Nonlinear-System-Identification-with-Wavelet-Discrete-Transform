@@ -40,10 +40,10 @@ D = N/2;                    % Decimation factor for 2x oversampling
 L = 8*N;                    % Length of analysis filters, M=2KN
 
 % Iter count
-iter = 3*80000;
+iter = 0.5*80000;
 
-input_type = {'m'};
-input_gain = {'75'};
+input_type = {'white'};
+input_gain = {'0', '75'};
 
 n = 0;
 for i= 1:numel(input_type)
@@ -52,11 +52,11 @@ for i= 1:numel(input_type)
         fprintf('STARTING RUN (%d)/(%d), file: %s \n', n , numel(input_type)*numel(input_gain), [input_type{i}, '_', input_gain{j}]);
         %% Input Data
         fs = 44100;
-%         un = audioread([input_type{i},'_noise.wav']);
-        un = audioread('speech_me.wav');
+        un = audioread([input_type{i},'_noise.wav']);
+%         un = audioread('white_noise.wav');
         un = un(:)';
-%         dn = audioread(['univpm2_',input_type{i},'_',input_gain{j},'.wav']);
-        dn = audioread(['univpm2_',input_type{i},'_',input_gain{j},'.wav']); 
+        dn = audioread(['univpm2_',input_type{i},'_',input_gain{j},'.wav']);
+%         dn = audioread(['univpm2_',input_type{i},'_',input_gain{j},'.wav']); 
         dn = dn(:)';
         
         delay = 1024;
@@ -133,9 +133,9 @@ for i= 1:numel(input_type)
         [en, S] = Volterra_2ord_adapt_v3(un, dn, S, C, SB);
         
         coeffs.wavterra = S.coeffs;
-%         figure('Name', ['Estimated kernel Wavterra ', input_type{i}, ' ', input_gain{j}]);
-%         visualize_est_ker(coeffs.wavterra);
-%         savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
+        figure('Name', ['Estimated kernel Wavterra ', input_type{i}, ' ', input_gain{j}]);
+        visualize_est_ker(coeffs.wavterra);
+        savefig(['figures/Ker_WAVTERRA_',input_type{i},'_',input_gain{j},'.fig'])
 
         
         err_sqr = en.^2;
@@ -163,37 +163,37 @@ for i= 1:numel(input_type)
         fprintf('\n');
 
         %% MSAFTERRA
-%         fprintf('MSAFTERRA\n');
-%         fprintf('--------------------------------------------------------------------\n');
-%         fprintf('Number of subbands, N = %d, step size = %s \n', N, sprintf('%.2f ', mu));
-%         
-%         S = MSAFTERRA_Init([M1 M2],mu,N,L);
-%         tic;
-%         [en,S] = MSAFTERRA_adapt(un,dn,S, C);
-%         coeffs.msafterra = S.coeffs;
-%         err_sqr = en.^2;
-%         
-%         fprintf('Total time = %.2f s \n',toc);
-%         
-%         % Plot MSE       
-%         figure(fig);
-%         subplot(211);
-%         q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
-%         hold on; grid on;
-%         plot((1:iter)/1024,10*log10(MSE), 'DisplayName', 'MSAFTERRA');
-%         axis([0 iter/1024 -40 5]);
-%         legend('show');
-%         
-%         NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
-%         fprintf('NMSE = %.2f dB\n', NMSE);
-%         
-%         % Plot NMSE
-%         subplot(212);
-%         hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['WAVTERRA: ', num2str(num2str(NMSE, '%0.2f'))] );
-%         axis([0 iter/1024 -20 10]);
-%         legend('show');
-%         
-%         fprintf('\n');
+        fprintf('MSAFTERRA\n');
+        fprintf('--------------------------------------------------------------------\n');
+        fprintf('Number of subbands, N = %d, step size = %s \n', N, sprintf('%.2f ', mu));
+        
+        S = MSAFTERRA_Init([M1 M2],mu,N,L);
+        tic;
+        [en,S] = MSAFTERRA_adapt(un,dn,S, C);
+        coeffs.msafterra = S.coeffs;
+        err_sqr = en.^2;
+        
+        fprintf('Total time = %.2f s \n',toc);
+        
+        % Plot MSE       
+        figure(fig);
+        subplot(211);
+        q = 0.99; MSE = filter((1-q),[1 -q],err_sqr);
+        hold on; grid on;
+        plot((1:iter)/1024,10*log10(MSE), 'DisplayName', 'MSAFTERRA');
+        axis([0 iter/1024 -40 5]);
+        legend('show');
+        
+        NMSE = 10*log10(sum(err_sqr)/sum(dn.^2));
+        fprintf('NMSE = %.2f dB\n', NMSE);
+        
+        % Plot NMSE
+        subplot(212);
+        hold on; plot((0:iter-1)/1024, 10*log10(cumsum(err_sqr)./(cumsum(dn.^2))), 'DisplayName', ['WAVTERRA: ', num2str(num2str(NMSE, '%0.2f'))] );
+        axis([0 iter/1024 -20 10]);
+        legend('show');
+        
+        fprintf('\n');
 
         %% SAFTERRA
 %         fprintf('SAFTERRA\n');
@@ -238,9 +238,9 @@ for i= 1:numel(input_type)
         [en, S] = Volterra_NLMS_adapt(un, dn, S);  
         
         coeffs.volterra = S.coeffs;
-%         figure('Name', ['Estimated kernel Volterra ', input_type{i}, ' ', input_gain{j}]);
-%         visualize_est_ker(coeffs.volterra);
-%         savefig(['figures/Ker_Volterra_',input_type{i},'_',input_gain{j},'.fig'])
+        figure('Name', ['Estimated kernel Volterra ', input_type{i}, ' ', input_gain{j}]);
+        visualize_est_ker(coeffs.volterra);
+        savefig(['figures/Ker_Volterra_',input_type{i},'_',input_gain{j},'.fig'])
         
         err_sqr = en.^2;
 
@@ -376,7 +376,7 @@ for i= 1:numel(input_type)
         gainz = input_gain;
         figure(fig);
         subplot(211);
-        title(['MSE (input type: ', input_type{i}, ', gain: ', gainz{j}, ')']);
+        title(['MSE (input type: ', input_type{i}, ', gain: ', gainz{j}, '%)']);
         ylabel('MSE dB'); grid on;
         legend('show');
         axis([0 iter/1024 -100 25]);

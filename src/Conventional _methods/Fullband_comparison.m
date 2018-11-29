@@ -6,8 +6,8 @@ close all;
 
 %% Generate Response
 M = 256;
-mu = 0.1;
-AR = 1;
+mu = 0.001;
+AR = 4;
 SNR = 40;
 iter = 1.0*80000;
 b = load('h1.dat');              % Unknown system (select h1 or h2)
@@ -59,7 +59,7 @@ fprintf('\n');
 %% SOAF-DCT
 fprintf('SOAF-DCT \n');
 fprintf('--------------------------------------------------------------------\n');
-printf('Step size: %.3f \n', mu);
+fprintf('Step size: %.3f \n', mu);
 
 S = SOAFinit(zeros(M,1),mu,iter);   % Initialization
 S.unknownsys = b; 

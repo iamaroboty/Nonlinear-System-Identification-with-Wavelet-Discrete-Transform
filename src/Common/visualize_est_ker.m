@@ -1,4 +1,4 @@
-function visualize_est_ker(ker)
+function [out] = visualize_est_ker(ker)
 
 lin = ker{1};
 quad = ker{2};
@@ -41,5 +41,9 @@ end
 k = (k+k') - eye(M2).*diag(k); 
 
 kernel_plot({lin, k})
+
+if nargout > 0
+    out = k;
+end
 
 end
