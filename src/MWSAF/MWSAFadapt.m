@@ -20,7 +20,7 @@ F = flip(H);
 S.analysis_bank = H;
 S.synthesis_bank = F;
 
-[len, ~] = size(H);               % Wavelet filter length
+[len, ~] = size(H);          % Wavelet filter length
 L = S.L;                     % Wavelet decomposition Length, sufilter length [cAn cDn cDn-1 ... cD1 M]
 
 U = zeros(M,2^level);                      % Adaptive filtering

@@ -11,13 +11,13 @@ clear all;
 
 %% Unidentified System parameters
 
-order = 2;
-M = 256; %% hammerstein filters lens
+order = 1;
+M = 2048; %% hammerstein filters lens
 gains = ones(2,1);
 
 
 %algorithm parameters
-mu = [0.2 0.5]; %ap aw
+mu = [0.3 0.7]; %ap aw
 leak = [0 0];
 alpha = 100;
 
@@ -27,19 +27,20 @@ alpha = 100;
 % dn = load('horn_resp_ar10_noise');
 % dn = dn.dn;
 
-un = audioread('speech_me.wav')';
-dn = audioread('univpm2_me_50.wav')';
+un = audioread('white_noise.wav')';
+dn = audioread('boss_white_1.wav')';
 dn = dn(1:size(un,2)); 
-%
-%
-% [P,Q] = rat(8192/44100);
-%
+
+
+% [P,Q] = rat(16000/44100);
+% 
 % un = resample(un,P,Q);
 % dn = resample(dn,P,Q);
 % 
 % [corr, lag]= xcorr(un,dn);
 % [~, ind]= max(abs(corr));
-latency = 1024;
+
+latency = 3150+ 2.4167e+03;
 
 %latency = 3958-50;
 
@@ -52,10 +53,10 @@ un = un(1:end-latency);
 % dn = dn/std(dn);
 
 % %normalization speech
-a = abs(max(dn))/sqrt(2);
-un = un/a;
-dn= dn/ a;
-% % %
+% a = abs(max(dn))/sqrt(2);
+% un = un/a;
+% dn= dn/ a;
+% % % %
 
 max_iter = size(un,2);
 
@@ -64,7 +65,7 @@ fprintf('-------------------------------------------------------------\n');
 fprintf('HAMMERSTEIN\n');
 
 % Run parameters
-iter = 4*80000;   % Number of iterations
+iter = 1*80000;   % Number of iterations
 
 if iter > max_iter
 
@@ -76,17 +77,14 @@ end
 un = un(1,1:iter);
 dn = dn(1,1:iter);
 
-
 %[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, 'tanh', 0.2); %iter, b, seed, ARtype, SNR
-
-
 %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_system ,gains, order,sum(100*clock),1,40);
-% [un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
+%[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech.mat');
 
 tic;
 Sfull = Hammerstein_NLMS_init(order, M, mu, leak, alpha);
 [en, Sfull] = Hammerstein_NLMS_adapt(un, dn, Sfull);     
-dn_est = Hammerstein_NLMS_test(un,Sfull);
+%dn_est = Hammerstein_NLMS_test(un,Sfull);
 
 err_sqr_full = en.^2;
 
@@ -103,7 +101,6 @@ ylabel('Mean-square error (with delay)'); grid on;
 legend('show');
 
 fprintf('NMSE = %.2f dB\n', 10*log10(sum(err_sqr_full)/sum(dn.^2)));
-
 fprintf('\n');  % Empty line in logfile
 diary off
 

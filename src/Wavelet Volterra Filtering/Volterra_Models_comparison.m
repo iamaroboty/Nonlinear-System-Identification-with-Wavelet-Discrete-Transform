@@ -8,11 +8,21 @@ close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 256; % length of first order volterra kernel
+M1 = 64; % length of first order volterra kernel
 M2 = 64; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 gains = [1 1];
+
+tube = @(x) tube(x,5); 
+gdist = @(x) gdist(0.5,x); 
+tanh = @(x) tanh(x); 
+pow = @(x) x.^3;
+p = [rand(1,order)-0.5, 0];
+polynom = @(x) polyval(p,x);
+
+non_linearity = tube; 
+
 
 
 %% Random Vector 
@@ -47,7 +57,7 @@ iter = 1*80000;            % Number of iterations
 
 
 % for WAVTERRA (WAVELET VOLTERRA ADAPTIVE FILTER)
-level = 3;                  % Levels of Wavelet decomposition for different kernels
+level = 1;                  % Levels of Wavelet decomposition for different kernels
 
 filters = 'db1';            % Set wavelet type for different kernels
 
@@ -75,8 +85,8 @@ disp('Creating desired and input signals. . .');
 fprintf('Kernel Length: [%d, %d], iter= %d\n', M1, M2, iter);
 
 b=NL_system.Responses{1}; 
-[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,40, 'tanh', 0.2); %iter, b, seed, ARtype, SNR
-
+%[un,dn,vn] = GenerateResponses_nonlinear(iter,b,sum(100*clock),1,10, 'tanh', 0.2); %iter, b, seed, ARtype, SNR
+[un,dn,vn] = GenerateResponses_nonlinear_Hammerstein(iter,ker1,sum(100*clock),4,60, non_linearity);
 
 %[un,dn,vn] = GenerateResponses_Volterra(iter, NL_system ,sum(100*clock),4,40); %iter, b, seed, ARtype, SNR
 %[un,dn,vn] = GenerateResponses_speech_Volterra(NL_system,'speech_harvard_m.mat');
@@ -97,7 +107,7 @@ S = Volterra_Init(NL_system.M, mu, level, filters);
 % [en, S] = Volterra_2ord_adapt_shift(un, dn, S, shift);   
 
 S.true = NL_system.Responses; 
-[en, S] = Volterra_2ord_adapt_v3(un, dn, S);
+[en, S] = Volterra_2ord_adapt_v3(un, dn, S,1 , level);
 fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
     
@@ -139,7 +149,7 @@ disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
 
 S = MSAFTERRA_Init(M,mu,N,L);
 tic;
-[en,S] = MSAFTERRA_adapt(un,dn,S);
+[en,S] = MSAFTERRA_adapt(un,dn,S, 1);
 disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
@@ -173,7 +183,7 @@ disp(sprintf('Number of subbands, N = %d, step size = %.2f',N,mu));
 
 S = SAFTERRA_Init(M,mu,N,D,L);
 tic;
-[en,S] = SAFTERRA_adapt(un,dn,S);
+[en,S] = SAFTERRA_adapt(un,dn,S, 1);
 disp(sprintf('Total time = %.3f mins',toc/60));
 err_sqr = en.^2;
 
@@ -208,7 +218,7 @@ fprintf('FULLBAND NLMS\n');
 
 tic;
 Sfull = Volterra_NLMS_init(NL_system.M, mu); 
-[en, Sfull] = Volterra_NLMS_adapt(un, dn, Sfull);
+[en, Sfull] = Volterra_NLMS_adapt_mfilters(un, dn, Sfull, 1);
 fprintf('Total time = %.3f mins \n',toc/60);
 err_sqr = en.^2;
 

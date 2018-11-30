@@ -9,19 +9,19 @@ close all;
 
 %% Unidentified System parameters
 order = 2; 
-M1 = 64; % length of first order volterra kernel
+M1 = 256; % length of first order volterra kernel
 
 
 % un = load('xperia_ref_speech_m'); 
 % un = un.un;
 % dn = load('xperia_resp_speech_m'); 
 % dn = dn.dn;
-un = audioread('speech_me.wav')';
-dn = audioread('univpm2_me_75.wav')';
+un = audioread('white_noise.wav')';
+dn = audioread('boss_white_1.wav')';
 dn = dn(1:size(un,2)); 
 
 
-M2 = 64; % length of second order volterra kernel
+M2 = 256; % length of second order volterra kernel
 
 NL_system.M = [M1, M2];
 
@@ -34,7 +34,7 @@ NL_system.M = [M1, M2];
 %estimate latency with xcorr
 % [corr, lag]= xcorr(un,dn); 
 % [~, ind]= max(abs(corr)); 
-latency = 1024+70; 
+latency = 3150+ 2.4167e+03; 
 
 % latency = 3130; %horn 2800 behr 3130 xperia 
 dn = dn(latency:end); 
@@ -42,8 +42,8 @@ un = un(1:end-latency);
 
 % normalization 
 
-% un = un/std(dn);
-% dn = dn/std(dn);
+un = un/std(dn);
+dn = dn/std(dn);
 
 %normalization speech 
 % a = abs(max(dn))/sqrt(2); 

@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-  function [en,S] = SAFTERRA_adapt(un,dn,S, C)
-=======
-  function [en,S] = SAFTERRA_adapt(un,dn,S, C )
->>>>>>> ed9214c240f827433ba86a43660b896dfc0d027b
+function [en,S] = SAFTERRA_adapt(un,dn,S, C )
 
 % SAFadapt          Subband Adaptive Filter
 %
@@ -31,21 +27,11 @@ w1 = zeros(size(W{1}));
 
 U = zeros(size(w1));           % Tapped-delay lines of adaptive subfilters
 
-<<<<<<< HEAD
 if nargin == 3
     C = size(S.coeffs{2},1);                 % Number of nonlinear channel
 end
 
-=======
 
-if nargin < 4 
-    
-    C = size(S.coeffs{2},1);
-    
-end
-
-
->>>>>>> ed9214c240f827433ba86a43660b896dfc0d027b
 for i = 1:C
     u2{i} = zeros(size(W{2},1),1);   % Nonlinear input delay line
     
