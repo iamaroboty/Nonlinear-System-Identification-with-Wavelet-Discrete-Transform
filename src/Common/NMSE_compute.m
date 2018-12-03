@@ -3,9 +3,10 @@ function [ NMSE, indx ] = NMSE_compute( dn , en, n_points )
 
 
 lendn = max(size(dn)); 
+lenen = max(size(en)); 
+len = min(lendn, lenen);
 
-
-indx = floor(linspace(1000, lendn, n_points)); 
+indx = floor(linspace(1000, len, n_points)); 
     
 NMSE = zeros(n_points,1);
 for i = 1:n_points

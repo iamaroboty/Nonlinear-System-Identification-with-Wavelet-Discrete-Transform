@@ -1,15 +1,15 @@
-% Hammerstein DCT domain demo       DCT-Domain n-th order Hammerstein adaptive
+% Volterra NLMS fullband demo       Fullband Volterra second order adaptive
 %                                   filtering
 % 
 % by A. Castellani & S. Cornell [Universit� Politecnica delle Marche]
 
 
-%% DCT Domain Hammerstein MSAF 
+%% DFT Domain Hammerstein MSAF 
 
 fprintf('%s \n', datestr(datetime('now')));
 addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
-%close all;
+close all;
 
 %% run parameters 
 rng('default'); % fix random geneerator 
@@ -17,43 +17,38 @@ rng('default'); % fix random geneerator
 
 %% Unidentified System parameters
 
-M = 512; %% linear_part filt len
+M = 64; %% linear_part filt len
 
-
-tube = @(x) tube(x,10); % tube distortion 
+tube = @(x) tube(x,1); % tube distortion 
 gdist = @(x) gdist(0.5,x); % guitar distotion 
 tanh = @(x) tanh(x)/2;  %from -0.5 to 0.5
 pow = @(x) x.^2;
 lin = @(x) x; 
 
 % polinomial rep
-polyorder = 3; 
-p = rand(1,polyorder+1);
+order = 2; 
+p = rand(1,order+1);
 polynom = @(x) polyval(flip(p),x);
 
-
-non_linearity = polynom; 
-plot_nonlinearity = 1; 
+non_linearity = tanh; 
+plot_nonlinearity = 0; 
 
 %% ALGORITHM PARAMETERS
 
-order = 3; 
-
+order = 10; 
+select = 'both'; 
 M_alg = M; 
 
-N = 2;          % Number of Subbands
-D = N;        % Decimation factor for 2x oversampling
-L = 8*N;        % Length of analysis filters, M=2KN, 
 
-%learning rates for 
-% p , w
+%learning rate
 
-mu_p = [0.3,0.1]; % taylor part
-mu_w = [0.7,0.3]; % linear part
+mu = 0.01; 
 
-alpha = 10.^[1,2];
+palpha = 0.5;
+L = 50; 
+alpha = 10^-6; 
 
-iter = 0.5*80000;   % Number of iterations
+iter = 1*80000;   % Number of iterations
 
 
 %% LINEAR PART SYSTEM PARAMETERS
@@ -73,11 +68,11 @@ nmse_n_points = 1000;
 %% RW data (if used set here and comment in the next section generatehammerstein fucntions and similar)
 
 % un = audioread('white_noise.wav')';
-% dn = audioread('boss_white_1.wav')'; 
+% dn = audioread('univpm2_white_75.wav')'; 
 % dn = dn(1:size(un,2)); 
-% latency = 2.4160e+03+3000+200; 
+% latency = 1024; 
 % un = un(1:end-latency); 
-% dn = dn(latency:end-1); 
+% dn = dn(latency:end); 
 
 % Resample the data to new fsn
 
@@ -94,7 +89,7 @@ nmse_n_points = 1000;
 % a = abs(max(dn))/sqrt(2);
 % un = un/a; dn = dn/a;
 % 
-% max_iter = size(un,2); 
+% max_iter = length(un); 
 % 
 % if iter > max_iter
 %    
@@ -104,15 +99,15 @@ nmse_n_points = 1000;
 %% RUN WITH MULTIPLE PARAMETERS
 
 % Create combination
-runs = length(mu_p)*length(mu_w)*length(alpha);
-par_comb = combvec(1:length(mu_p), 1:length(mu_w),1:length(alpha));
+runs = length(mu)*length(alpha);
+par_comb = combvec(1:length(mu),1:length(alpha));
 
 fprintf('WAVPACK-HAMMERSTEIN\n');
 fprintf('Order = %d, sys_len = %d \n', order, M);
 for i = 1:runs
     fprintf('-------------------------------------------------------------\n');
     fprintf('Running iter (%d) of (%d)\n', i, runs);           
-    fprintf('Run hyperpar: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)))
+    fprintf('Run hyperpar: mu = %.5f, alpha = %.2f \n', mu(par_comb(1,i)),alpha(par_comb(2,i)))
     
     
     %[un,dn,vn] = GenerateResponses_Hammerstein(iter, lin_sys , order, gains,sum(100*clock),2,40);
@@ -121,9 +116,9 @@ for i = 1:runs
 
     tic; 
     
-    S = DCThammerstein_init(M_alg, [mu_p(par_comb(1,i)) mu_w(par_comb(2,i))] , order, alpha(par_comb(3,i)), N, L, D); 
+    S = DFThammerstein_init_malik(M, mu(par_comb(1,i)) , palpha, alpha(par_comb(2,i)), order); 
 
-    [en, S] = DCThammerstein_adapt(un, dn, S);  
+    [en, S] = DFThammerstein_adapt_malik(un, dn, S, L, select);  
 
     err_sqr = en.^2;
 
@@ -133,9 +128,8 @@ for i = 1:runs
     figure(MSEfig);
     q = 0.99; MSE_full = filter((1-q),[1 -q],err_sqr);
     plot((0:length(MSE_full)-1)/1024,10*log10(MSE_full), 'DisplayName', ...
-                                                            ['\mu_p:', num2str(mu_p(par_comb(1,i))),...
-                                                             ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
-                                                             ' \alpha:', num2str(alpha(par_comb(3,i)))]);    
+                                                            ['\mu:', num2str(mu(par_comb(1,i))),...                                                        
+                                                             ' \alpha:', num2str(alpha(par_comb(2,i)))]);    
     axis([0 length(MSE_full)/1024 -50 10]);
     xlabel('Number of iterations (\times 1024 input samples)'); 
     ylabel('Mean-square error (with delay)'); grid on; hold on;
@@ -148,9 +142,8 @@ for i = 1:runs
     [NMSE_plot, indx] = NMSE_compute(dn, en, nmse_n_points);
     hold on; grid on;
     plot(indx, NMSE_plot,      	  'DisplayName', ...
-                    ['\mu_p:', num2str(mu_p(par_comb(1,i))),...
-                     ' \mu_w:', num2str(mu_w(par_comb(2,i))),...
-                     ' \alpha:', num2str(alpha(par_comb(3,i)))]);  
+                    ['\mu:', num2str(mu(par_comb(1,i))),...
+                     ' \alpha:', num2str(alpha(par_comb(2,i)))]);  
     axis([indx(1) indx(end) -15 5]);
     xlabel('Iteration number'); 
     ylabel('Cumulative Normalized Mean-square error'); 
@@ -158,11 +151,15 @@ for i = 1:runs
 end
     
 [~, i] = min(NMSE);
-fprintf('Hyperpar best sys: mu_p = %.1f, mu_w = %.1f, alpha = %.2f \n', mu_p(par_comb(1,i)), mu_w(par_comb(2,i)),alpha(par_comb(3,i)));
+fprintf('Hyperpar best sys: mu = %.5f, alpha = %.2f \n', mu(par_comb(1,i)), alpha(par_comb(2,i)));
 
 fprintf('\n');  % Empty line in logfile
 
 if plot_nonlinearity ==1 
+    
+    temp = real(ifft(S.weight));
+    w = temp(1:M);
+    
     figure;
     range = linspace(-10,10,1000); 
     plot(range,non_linearity(range)); 
