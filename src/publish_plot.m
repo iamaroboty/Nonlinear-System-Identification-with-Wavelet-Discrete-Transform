@@ -9,7 +9,7 @@ uiopen('SOAF_comp.fig',1)
 
 % General values
 set(0,'defaulttextinterpreter','latex');
-set(0,'defaultLineLineWidth',0.8);
+set(0,'defaultLineLineWidth',0.5);
 set(0,'defaultLineMarkerSize',5);
 
 % Getting variables to workspace, double click on them and GUI pops up!!
@@ -25,7 +25,7 @@ heigth = 6;
 
 set(h,...    
     'Units', 'centimeters', ...
-    'Position', [1 1 width heigth],...
+    'Position', [3 3 width heigth],...
     'PaperPositionMode', 'auto')
 
 set(gca,...
