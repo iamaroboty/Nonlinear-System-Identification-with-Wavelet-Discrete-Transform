@@ -22,7 +22,7 @@ f = f(1:d)';
 % f = f(1:d);
 wtype = 'db4';
 level = 3;
-wdt_mod = 'zpd';
+wdt_mod = 'per';
 U = 1;
 
 %% Generazione dei coefficienti del filtro
@@ -48,65 +48,65 @@ xrec = idddtree(wt);
 err = max(abs(f-xrec))
 
 %% Decomposizione con Matrice W
-% tic
-% if (wdt_mod == 'per') %padding mode, if per cA and cA has minumum length
-%     Z = W*f;
-%     Zr = W'*Z;  
-%     toc
-%     errZ = max(abs(f-Zr))    
-%     
-%     % Decompose approximation and detail coefficient
-%     for dval=1:level 
-%         zD{dval} = Z((d/(2^(dval)))+1:(d/(2^(dval-1)))); 
-%         if (dval == level) % only last level for cA
-%             zA{dval} = Z(1:(d/(2^(dval)))); 
-%         end   
+tic
+if (wdt_mod == 'per') %padding mode, if per cA and cA has minumum length
+    Z = W*f;
+    Zr = W'*Z;  
+    toc
+    errZ = max(abs(f-Zr))    
+    
+    % Decompose approximation and detail coefficient
+    for dval=1:level 
+        zD{dval} = Z((d/(2^(dval)))+1:(d/(2^(dval-1)))); 
+        if (dval == level) % only last level for cA
+            zA{dval} = Z(1:(d/(2^(dval)))); 
+        end   
+    end
+else
+    % Zeropads the matrix border
+    % PROBLEM: proper filling of the matrix, dont introduce useless delays
+    padsize = len/2-1;
+    W_pad = padarray(W, [padsize padsize], 'both');
+    % W_pad = [zeros(d,1), W, zeros(256,1)];
+    % W_pad = [zeros(d+2,1)'; W_pad];
+    % W_pad = [W_pad(1:d/2,:); zeros(d+2,1)'; W_pad(d/2+1:end,:)]; %this works as matlab function
+    f_pad = padarray(f, padsize, 'both');
+
+    Z = W_pad*f_pad;
+    Zr = W_pad'*Z;
+    toc
+    
+    Zr = Zr(1+padsize:end-padsize);
+    errZ = max(abs(f-Zr))
+    
+    % Decompose approximation and detail coefficient
+    % Works ok for 1 level, for 2 level still have to manage the padding.
+    lf = length(low_d);
+    LL = [d; zeros(level,1)];  %ERROR, cumsum LL instead d. Must be the proper dimension of Z
+    for i= 1:level
+        LL = [floor((LL(1)+lf-1)/2); LL(1:end-1)];
+    end
+    LL = [LL(1); LL]';
+% 
+%     % Z = [cA||cD||...||cD]
+%     zA = Z(1:L(1));
+%     index = cumsum(L(1:end-1));
+%     for i=1:level
+%         zD{i} = Z(index(i)+1:index(i+1));
 %     end
-% else
-%     % Zeropads the matrix border
-%     % PROBLEM: proper filling of the matrix, dont introduce useless delays
-%     padsize = len/2-1;
-%     W_pad = padarray(W, [padsize padsize], 'both');
-%     % W_pad = [zeros(d,1), W, zeros(256,1)];
-%     % W_pad = [zeros(d+2,1)'; W_pad];
-%     % W_pad = [W_pad(1:d/2,:); zeros(d+2,1)'; W_pad(d/2+1:end,:)]; %this works as matlab function
-%     f_pad = padarray(f, padsize, 'both');
-% 
-%     Z = W_pad*f_pad;
-%     Zr = W_pad'*Z;
-%     toc
-%     
-%     Zr = Zr(1+padsize:end-padsize);
-%     errZ = max(abs(f-Zr))
-%     
-%     % Decompose approximation and detail coefficient
-%     % Works ok for 1 level, for 2 level still have to manage the padding.
-%     lf = length(low_d);
-%     LL = [d; zeros(level,1)];  %ERROR, cumsum LL instead d. Must be the proper dimension of Z
-%     for i= 1:level
-%         LL = [floor((LL(1)+lf-1)/2); LL(1:end-1)];
-%     end
-%     LL = [LL(1); LL]';
-% % 
-% %     % Z = [cA||cD||...||cD]
-% %     zA = Z(1:L(1));
-% %     index = cumsum(L(1:end-1));
-% %     for i=1:level
-% %         zD{i} = Z(index(i)+1:index(i+1));
-% %     end
-% end
-% 
-% if length(Z) == length(C)
-%     diff_ZC = max(abs(C-Z)) %diff from C and Z
-% else    
-%     fprintf(['-------------------------------------------\n',...
-%         'WARNING: C and Z have different length \n',...
-%         '-------------------------------------------\n']);
-% end
-% 
-% % %Plotting difference Matlab DWT and W-Matrix DWT
-% % stem([Z, C]); legend('Z','MatLab');
-% % title('Z-C'); grid on;
+end
+
+if length(Z) == length(C)
+    diff_ZC = max(abs(C-Z)) %diff from C and Z
+else    
+    fprintf(['-------------------------------------------\n',...
+        'WARNING: C and Z have different length \n',...
+        '-------------------------------------------\n']);
+end
+
+% %Plotting difference Matlab DWT and W-Matrix DWT
+% stem([Z, C]); legend('Z','MatLab');
+% title('Z-C'); grid on;
 
 %% Decomposizione manuale
 % % Analysis

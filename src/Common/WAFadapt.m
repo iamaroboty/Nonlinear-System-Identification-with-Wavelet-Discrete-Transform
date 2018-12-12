@@ -25,9 +25,14 @@ ITER = length(un);
 yn = zeros(1,ITER);                 % Initialize output sequence to zero
 en = zeros(1,ITER);                 % Initialize error sequence to zero
 
-b = S.unknownsys;
-norm_Wb = norm(W*b);
-eml = zeros(1,ITER);                % System error norm (normalized)
+if isfield(S,'unknownsys')
+    b = S.unknownsys;
+    norm_Wb = norm(W*b);
+    eml = zeros(1,ITER);                % System error norm (normalized)
+    ComputeEML = 1;
+else
+    ComputeEML = 0;
+end
 
 % Len = zeros(L,1);                   % Each subband lenght [cAn cDn cDn-1 ... cD1]
 % for i= 1:L
@@ -41,8 +46,10 @@ for n = 1:ITER
 
     yn(n) = w'*U;                   % Output signal
     en(n) = dn(n) - yn(n);          % Estimation error
-
-    eml(n) = norm(W*b-w)/norm_Wb;   % System error norm (normalized)
+    
+    if ComputeEML == 1
+        eml(n) = norm(W*b-w)/norm_Wb;   % System error norm (normalized)
+    end
     
     power_vec= (1-beta)*power_vec+(beta)*(U.*U);	% Estimated power                                    
     inv_sqrt_power = 1./(sqrt(power_vec+alpha));
@@ -68,7 +75,10 @@ end
 
 en = en(1:ITER);
 S.coeffs = w;
-S.eml = eml;
+if ComputeEML == 1
+    S.eml = eml;
+end
+
 end
 
 

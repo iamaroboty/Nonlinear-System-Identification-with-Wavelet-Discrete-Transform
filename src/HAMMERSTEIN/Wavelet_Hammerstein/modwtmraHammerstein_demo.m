@@ -11,10 +11,6 @@ addpath(genpath('../../Common'));             % Functions in Common folder
 clear all;  
 close all;
 
-%% run parameters 
-rng('default'); % fix random geneerator 
-
-
 %% Unidentified System parameters
 
 M = 128; %% linear_part filt len
@@ -35,18 +31,10 @@ plot_nonlinearity = 0;
 
 %% ALGORITHM PARAMETERS
 
-order = 5; 
-select = 'both'; 
-M_alg = M; 
-
-
-%learning rate
-
 mu = 0.01; 
-
 palpha = 0.3;
-L = 2*M; 
 alpha = 10^-4; 
+wv = 'db4';
 
 iter = 0.5*80000;   % Number of iterations
 
@@ -122,9 +110,9 @@ for i = 1:runs
 
     tic; 
     
-    S = DFThammerstein_init_malik(M, mu(par_comb(1,i)) , palpha, alpha(par_comb(2,i)), order); 
+    S = modwtmraHammerstein_init(M, mu(par_comb(1,i)) , wv, palpha, alpha(par_comb(2,i))); 
 
-    [en, S] = DFThammerstein_adapt_malik(un, dn, S, L, select);  
+    [en, S] = modwtmraHammerstein_adapt(un, dn, S);  
 
     err_sqr = en.^2;
 

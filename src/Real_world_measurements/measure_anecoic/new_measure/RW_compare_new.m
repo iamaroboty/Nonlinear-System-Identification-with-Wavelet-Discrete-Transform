@@ -42,7 +42,7 @@ L = 8*N;                    % Length of analysis filters, M=2KN
 % Iter count
 iter = 2*80000;
 
-input_type = {'f'};
+input_type = {'white'};
 input_gain = {'75'};
 
 n = 0;
