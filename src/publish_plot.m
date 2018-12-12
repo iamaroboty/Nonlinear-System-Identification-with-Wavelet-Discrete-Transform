@@ -1,7 +1,7 @@
 %% FIGURE MODIFY SCRIPT
 % Input MATLAB figure as .fig
 
-clear all;
+close all;
 
 %Insert here figure name
 %or just open and set the figure to be modified as current figure
@@ -34,7 +34,7 @@ set(gca,...
     'FontUnits', 'points',...
     'FontWeight', 'normal',...
     'FontSize', 8,...
-    'FontName', 'Serif')
+    'FontName', 'Times')
 
 %% custom values, depends on the figue
 ylim([-50 10])
